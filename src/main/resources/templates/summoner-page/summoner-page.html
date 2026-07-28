@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <!--    Meta-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Summoner Profile — Draft Predict</title>
+
+    <!--    Image-->
+    <link rel="icon" type="image/x-icon" href="/IMG/logo/riot-logo.png">
+
+    <!--    CSS-->
+    <link rel="stylesheet" href="/CSS/summoner-page/summoner-page.css">>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <div class="nav-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+                <path d="M11 8v6M8 11h6" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <span>Draft Predict</span>
+    </div>
+    <a th:href="@{/draft-predict/search/page}" href="/draft-predict/search/page" class="nav-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        New Search
+    </a>
+</nav>
+
+<main class="main-container">
+    <!-- Profile Header -->
+    <section class="profile-header">
+        <div class="profile-card">
+            <div class="avatar-wrapper">
+                <div class="avatar">
+                    <span class="avatar-placeholder">?</span>
+                </div>
+                <div class="level-badge">42</div>
+            </div>
+
+            <div class="profile-info">
+                <h1 class="summoner-name">Hide on bush</h1>
+                <span class="summoner-tag">#KR1</span>
+                <div class="profile-meta">
+                    <span class="region">Korea</span>
+                    <span class="divider">•</span>
+                    <span class="last-seen">Active now</span>
+                </div>
+            </div>
+
+            <div class="rank-display">
+                <div class="rank-icon">💎</div>
+                <div class="rank-info">
+                    <span class="rank-tier">Diamond II</span>
+                    <span class="rank-lp">68 LP</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Matches</span>
+                <span class="stat-value">1,247</span>
+                <span class="stat-trend">+12 this week</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Win Rate</span>
+                <span class="stat-value win">54.2%</span>
+                <div class="win-bar">
+                    <div class="win-fill" style="width: 54.2%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">KDA</span>
+                <span class="stat-value">4.8</span>
+                <span class="stat-trend">Above average</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Favorite Role</span>
+                <span class="stat-value">Mid</span>
+                <span class="stat-trend">62% pick rate</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Matches -->
+    <section class="matches-section">
+        <h2 class="section-title">Recent Matches</h2>
+        <div class="matches-list">
+            <div class="match-card win">
+                <div class="match-result">
+                    <span class="result-badge victory">Victory</span>
+                    <span class="match-time">2h ago</span>
+                </div>
+                <div class="match-champ">
+                    <div class="champ-icon">⚔️</div>
+                    <div class="champ-info">
+                        <span class="champ-name">Ahri</span>
+                        <span class="champ-role">Mid</span>
+                    </div>
+                </div>
+                <div class="match-kda">
+                    <span class="kda-score">12 / 3 / 8</span>
+                    <span class="kda-ratio">6.7 KDA</span>
+                </div>
+                <div class="match-duration">28:42</div>
+            </div>
+
+            <div class="match-card loss">
+                <div class="match-result">
+                    <span class="result-badge defeat">Defeat</span>
+                    <span class="match-time">4h ago</span>
+                </div>
+                <div class="match-champ">
+                    <div class="champ-icon">🏹</div>
+                    <div class="champ-info">
+                        <span class="champ-name">Jinx</span>
+                        <span class="champ-role">Bot</span>
+                    </div>
+                </div>
+                <div class="match-kda">
+                    <span class="kda-score">5 / 7 / 4</span>
+                    <span class="kda-ratio">1.3 KDA</span>
+                </div>
+                <div class="match-duration">34:15</div>
+            </div>
+
+            <div class="match-card win">
+                <div class="match-result">
+                    <span class="result-badge victory">Victory</span>
+                    <span class="match-time">6h ago</span>
+                </div>
+                <div class="match-champ">
+                    <div class="champ-icon">🛡️</div>
+                    <div class="champ-info">
+                        <span class="champ-name">Azir</span>
+                        <span class="champ-role">Mid</span>
+                    </div>
+                </div>
+                <div class="match-kda">
+                    <span class="kda-score">9 / 1 / 11</span>
+                    <span class="kda-ratio">20.0 KDA</span>
+                </div>
+                <div class="match-duration">31:08</div>
+            </div>
+
+            <div class="match-card win">
+                <div class="match-result">
+                    <span class="result-badge victory">Victory</span>
+                    <span class="match-time">Yesterday</span>
+                </div>
+                <div class="match-champ">
+                    <div class="champ-icon">⚔️</div>
+                    <div class="champ-info">
+                        <span class="champ-name">Ahri</span>
+                        <span class="champ-role">Mid</span>
+                    </div>
+                </div>
+                <div class="match-kda">
+                    <span class="kda-score">7 / 4 / 15</span>
+                    <span class="kda-ratio">5.5 KDA</span>
+                </div>
+                <div class="match-duration">29:55</div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,51 @@
+```gitignore
+# Maven
+target/
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+*.Identifier
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# Spring Boot
+spring.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Generated files
+out/
+
+# Maven Wrapper (оставляем)
+!.mvn/wrapper/maven-wrapper.jar
+```
