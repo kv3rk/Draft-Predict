@@ -2,17 +2,14 @@ package lol.kv3rk.draft_predict.TestApiEndpoints.Service;
 
 import lol.kv3rk.draft_predict.TestApiEndpoints.DTO.FindSummonerDTO;
 import lol.kv3rk.draft_predict.TestApiEndpoints.DTO.RiotDTO.AccountDTO;
-import lol.kv3rk.draft_predict.TestApiEndpoints.DTO.RiotDTO.LeagueEntryDTO;
 import lol.kv3rk.draft_predict.common.WebClient.PlatformRoutingValues;
 import lol.kv3rk.draft_predict.common.WebClient.RegionalRoutingValues;
-import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class EndpointService {
@@ -23,6 +20,7 @@ public class EndpointService {
     @Value("${api.key}")
     private String api_key;
 
+    @Autowired
     public EndpointService(
             RegionalRoutingValues regionalRoutingValues,
             PlatformRoutingValues platformRoutingValues
