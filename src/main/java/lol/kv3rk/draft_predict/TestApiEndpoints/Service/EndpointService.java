@@ -2,28 +2,38 @@ package lol.kv3rk.draft_predict.TestApiEndpoints.Service;
 
 import lol.kv3rk.draft_predict.TestApiEndpoints.DTO.FindSummonerDTO;
 import lol.kv3rk.draft_predict.TestApiEndpoints.DTO.RiotDTO.AccountDTO;
-import lol.kv3rk.draft_predict.common.WebClient.CustomWebClient;
+import lol.kv3rk.draft_predict.TestApiEndpoints.DTO.RiotDTO.LeagueEntryDTO;
+import lol.kv3rk.draft_predict.common.WebClient.PlatformRoutingValues;
+import lol.kv3rk.draft_predict.common.WebClient.RegionalRoutingValues;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 @Service
 public class EndpointService {
 
-    private final CustomWebClient customWebClient;
+    private final RegionalRoutingValues regionalRoutingValues;
+    private final PlatformRoutingValues platformRoutingValues;
 
     @Value("${api.key}")
     private String api_key;
 
     public EndpointService(
-            CustomWebClient customWebClient
+            RegionalRoutingValues regionalRoutingValues,
+            PlatformRoutingValues platformRoutingValues
     ) {
-        this.customWebClient = customWebClient;
+        this.regionalRoutingValues = regionalRoutingValues;
+        this.platformRoutingValues = platformRoutingValues;
     }
 
-    public String definePUUID(FindSummonerDTO findSummonerDTO) {
+    public void definePUUID(FindSummonerDTO findSummonerDTO) {
 
-        AccountDTO response = customWebClient.euWebClient(WebClient.builder())
+        AccountDTO response = regionalRoutingValues.euWebClient(WebClient.builder())
                 .get()
                 .uri("/riot/account/v1/accounts/by-riot-id/" +
                         findSummonerDTO.name() + "/"
@@ -37,11 +47,27 @@ public class EndpointService {
 
         String puuid = response.puuid();
 
-        return puuid;
+        definePlayerStats(puuid);
 
     }
 
+    public void definePlayerStats(String puuid) {
 
+        List response = regionalRoutingValues.euWebClient(WebClient.builder())
+                .get()
+                .uri("/lol/match/v5/matches/by-puuid/"
+                        + puuid +
+                        "/ids?start=0&count=3&api_key="
+                        + api_key)
+                .retrieve()
+                .bodyToMono(List.class)
+                .block();
+
+        System.out.println(response.toString());
+
+        System.out.println(puuid);
+
+    }
 
 
 }
