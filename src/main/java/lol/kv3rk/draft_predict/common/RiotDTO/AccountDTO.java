@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.TestApiEndpoints.DTO.RiotDTO;
+package lol.kv3rk.draft_predict.common.RiotDTO;
 
 public record AccountDTO(
         String puuid,

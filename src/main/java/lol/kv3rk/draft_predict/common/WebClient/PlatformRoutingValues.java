@@ -15,9 +15,9 @@ public class PlatformRoutingValues {
     }
 
     @Bean
-    public WebClient ruWebClient(WebClient.Builder builder){
+    public WebClient naWebClient(WebClient.Builder builder){
         return builder
-                .baseUrl("https://ru.api.riotgames.com")
+                .baseUrl("https://na1.api.riotgames.com")
                 .build();
     }
 
@@ -25,6 +25,13 @@ public class PlatformRoutingValues {
     public WebClient krWebClient(WebClient.Builder builder){
         return builder
                 .baseUrl("https://kr.api.riotgames.com")
+                .build();
+    }
+
+    @Bean
+    public WebClient euneWebClient(WebClient.Builder builder){
+        return builder
+                .baseUrl("https://eun1.api.riotgames.com")
                 .build();
     }
 }

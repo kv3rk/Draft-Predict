@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URISyntaxException;
+
 @Controller
 @RequestMapping("/draft-predict")
 public class EndpointController {
@@ -29,9 +31,9 @@ public class EndpointController {
     }
 
     @PostMapping("/find/summoner")
-    public String findSummoner(@ModelAttribute FindSummonerDTO findSummonerDTO) {
+    public String findSummoner(@ModelAttribute FindSummonerDTO findSummonerDTO) throws URISyntaxException {
 
-        endpointService.definePUUID(findSummonerDTO);
+        endpointService.definePUUID();
 
         return "redirect:/draft-predict/summoner/page";
     }
