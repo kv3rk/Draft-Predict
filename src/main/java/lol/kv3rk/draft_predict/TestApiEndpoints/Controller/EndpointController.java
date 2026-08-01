@@ -31,9 +31,9 @@ public class EndpointController {
     }
 
     @PostMapping("/find/summoner")
-    public String findSummoner(@ModelAttribute FindSummonerDTO findSummonerDTO) throws URISyntaxException {
+    public String findSummoner(@ModelAttribute FindSummonerDTO findSummonerDTO) throws InterruptedException {
 
-        endpointService.definePUUID();
+        endpointService.go();
 
         return "redirect:/draft-predict/summoner/page";
     }

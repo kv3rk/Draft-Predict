@@ -15,3 +15,5 @@ spring:
 
 api:
   key: ${API_KEY}
+  request:
+    delay: ${API_REQUEST_DELAY}

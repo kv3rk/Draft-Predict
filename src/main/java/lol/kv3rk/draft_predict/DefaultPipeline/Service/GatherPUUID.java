@@ -40,7 +40,7 @@ public class GatherPUUID {
     }
 
 
-    public Set<String> getSetOfEUWPlayers() {
+    public Set<String> getSetOfEUWPlayers(){
 
         return formatResponse(euw1WebClient);
 
@@ -66,7 +66,7 @@ public class GatherPUUID {
 //    }
 
 
-    private Set<String> formatResponse(WebClient platformWebClient) {
+    private Set<String> formatResponse(WebClient platformWebClient){
 
         List<String> tierParameters = riotParameters.tierParameters();
         List<String> divisionParameters = riotParameters.divisionParameters();
@@ -79,6 +79,8 @@ public class GatherPUUID {
 
             division:
             for (String division : divisionParameters) {
+
+                System.out.println("New division entry: " + division);
 
                 do {
 
@@ -100,7 +102,8 @@ public class GatherPUUID {
                             .retrieve()
                             .toEntity(new ParameterizedTypeReference<Set<LeagueEntryDTO>>() {
                             })
-                            .block().getBody();
+                            .block()
+                            .getBody();
 
                     if (response.isEmpty()) {
 
@@ -115,6 +118,8 @@ public class GatherPUUID {
                     Set<String> puuids = getPUUIDForPlayers(response);
 
                     allPlayersPuuidFromServer.addAll(puuids);
+
+                    System.out.println(tier + " " + division + " " + finalCountPages + " " + puuids);
 
                 } while (true);
 
