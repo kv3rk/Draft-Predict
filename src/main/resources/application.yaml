@@ -17,3 +17,6 @@ api:
   key: ${API_KEY}
   request:
     delay: ${API_REQUEST_DELAY}
+  queue:
+    id: ${API_QUEUE_ID}
+  patch: ${API_PATCH}

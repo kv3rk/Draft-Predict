@@ -1,7 +1,8 @@
 package lol.kv3rk.draft_predict.DefaultPipeline.Service;
 
 import lol.kv3rk.draft_predict.common.RiotDTO.LeagueEntryDTO;
-import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotParameters;
+import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotRequestParameters;
+import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -20,7 +21,7 @@ public class GatherPUUID {
     private final WebClient naWebClient;
     private final WebClient krWebClient;
     private final WebClient euneWebClient;
-    private final RiotParameters riotParameters;
+    private final RiotRequestParameters riotRequestParameters;
 
     @Value("${api.key}")
     private String api_key;
@@ -30,46 +31,53 @@ public class GatherPUUID {
             @Qualifier("naWebClient") WebClient naWebClient,
             @Qualifier("krWebClient") WebClient krWebClient,
             @Qualifier("euneWebClient") WebClient euneWebClient,
-            RiotParameters riotParameters
+            RiotRequestParameters riotRequestParameters
     ) {
         this.euw1WebClient = euw1WebClient;
         this.naWebClient = naWebClient;
         this.krWebClient = krWebClient;
         this.euneWebClient = euneWebClient;
-        this.riotParameters = riotParameters;
+        this.riotRequestParameters = riotRequestParameters;
     }
 
 
-    public Set<String> getSetOfEUWPlayers(){
+    public Set<String> getSetOfEUWPlayers() {
+
+        System.out.println(RiotServerName.EUW.name() + " server:");
 
         return formatResponse(euw1WebClient);
 
     }
-//
-//
-//    public void getSetOfNAPlayers() {
-//
-//        formatResponse(naWebClient);
-//
-//    }
-//
-//    public void getSetOfKRPlayers() {
-//
-//        formatResponse(krWebClient);
-//
-//    }
-//
-//    public void getSetOfEUNEPlayers() {
-//
-//        formatResponse(euneWebClient);
-//
-//    }
+
+    public Set<String> getSetOfNAPlayers() {
+
+        System.out.println(RiotServerName.NA.name() + " server:");
+
+        return formatResponse(naWebClient);
+
+    }
+
+    public Set<String> getSetOfKRPlayers() {
+
+        System.out.println(RiotServerName.KR.name() + " server:");
+
+        return formatResponse(krWebClient);
+
+    }
+
+    public Set<String> getSetOfEUNEPlayers() {
+
+        System.out.println(RiotServerName.EUNE.name() + " server:");
+
+        return formatResponse(euneWebClient);
+
+    }
 
 
-    private Set<String> formatResponse(WebClient platformWebClient){
+    private Set<String> formatResponse(WebClient platformWebClient) {
 
-        List<String> tierParameters = riotParameters.tierParameters();
-        List<String> divisionParameters = riotParameters.divisionParameters();
+        List<String> tierParameters = riotRequestParameters.tierParameters();
+        List<String> divisionParameters = riotRequestParameters.divisionParameters();
         int countPages = 1;
 
         Set<String> allPlayersPuuidFromServer = new LinkedHashSet<>();

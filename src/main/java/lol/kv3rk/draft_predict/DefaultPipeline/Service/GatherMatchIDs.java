@@ -21,33 +21,91 @@ public class GatherMatchIDs {
     @Value("${api.request.delay}")
     private long request_delay;
 
+    @Value("${api.queue.id}")
+    private int queue_id;
+
     private final WebClient euWebClient;
+    private final WebClient americasWebClient;
+    private final WebClient asiaWebClient;
     private final GatherPUUID gatherPUUID;
     private final CustomLocalDateAndTime customLocalDateAndTime;
 
     public GatherMatchIDs(
             @Qualifier("euWebClient") WebClient euWebClient,
+            @Qualifier("americasWebClient") WebClient americasWebClient,
+            @Qualifier("asiaWebClient") WebClient asiaWebClient,
             GatherPUUID gatherPUUID,
             CustomLocalDateAndTime customLocalDateAndTime
     ) {
         this.euWebClient = euWebClient;
+        this.americasWebClient = americasWebClient;
+        this.asiaWebClient = asiaWebClient;
         this.gatherPUUID = gatherPUUID;
         this.customLocalDateAndTime = customLocalDateAndTime;
     }
 
-    public void getMatchIDs() throws InterruptedException {
+    public Set<String> getSetOfEUWMatchesIDs() throws InterruptedException {
 
-        Set<String> allPlayersPuuidFromServer = gatherPUUID.getSetOfEUWPlayers();
+        List<String> allPlayersPuuidFromServer = List.copyOf(gatherPUUID.getSetOfEUWPlayers());
 
-        Thread.sleep(120000);
+        return getMatchIDs(euWebClient, allPlayersPuuidFromServer);
+
+    }
+
+    public Set<String> getSetOfNAMatchesIDs() throws InterruptedException {
+
+        List<String> allPlayersPuuidFromServer = List.copyOf(gatherPUUID.getSetOfNAPlayers());
+
+        return getMatchIDs(americasWebClient, allPlayersPuuidFromServer);
+
+    }
+
+    public Set<String> getSetOfKRMatchesIDs() throws InterruptedException {
+
+        List<String> allPlayersPuuidFromServer = List.copyOf(gatherPUUID.getSetOfKRPlayers());
+
+        return getMatchIDs(asiaWebClient, allPlayersPuuidFromServer);
+
+    }
+
+    public Set<String> getSetOfEUNEMatchesIDs() throws InterruptedException {
+
+        List<String> allPlayersPuuidFromServer = List.copyOf(gatherPUUID.getSetOfEUNEPlayers());
+
+        return getMatchIDs(euWebClient, allPlayersPuuidFromServer);
+
+    }
+
+
+    private Set<String> getMatchIDs(WebClient webClient,
+                                    List<String> allPlayersPuuidFromServer) throws InterruptedException {
+
+
+//        Thread.sleep(120000);
 
         Set<String> allMatchesIDs = new LinkedHashSet<>();
 
-        allPlayersPuuidFromServer.forEach(puuid -> {
+//        allPlayersPuuidFromServer.forEach(puuid -> {
+//
+//            try {
+//
+//                List<String> matchesIDs = formatResponse(euWebClient, puuid);
+//
+//                allMatchesIDs.addAll(matchesIDs);
+//
+//            } catch (InterruptedException e) {
+//
+//                throw new RuntimeException(e);
+//
+//            }
+//
+//        });
+
+        for (int i = 0; i < 10; i++) {
 
             try {
 
-                List<String> matchesIDs = formatResponse(euWebClient, puuid);
+                List<String> matchesIDs = formatResponse(webClient, allPlayersPuuidFromServer.get(i));
 
                 allMatchesIDs.addAll(matchesIDs);
 
@@ -57,9 +115,9 @@ public class GatherMatchIDs {
 
             }
 
-        });
+        }
 
-        System.out.println(allMatchesIDs.toString());
+        return allMatchesIDs;
 
     }
 
@@ -76,6 +134,8 @@ public class GatherMatchIDs {
                                     .pathSegment("ids")
                                     .queryParam("startTime", customLocalDateAndTime.startTime())
                                     .queryParam("endTime", customLocalDateAndTime.endTime())
+                                    .queryParam("queue", queue_id)
+                                    .queryParam("type", "ranked")
                                     .queryParam("api_key", api_key)
                                     .toUriString()
                             );

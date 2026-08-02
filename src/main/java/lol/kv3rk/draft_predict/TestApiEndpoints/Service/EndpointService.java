@@ -1,24 +1,34 @@
 package lol.kv3rk.draft_predict.TestApiEndpoints.Service;
 
-import lol.kv3rk.draft_predict.DefaultPipeline.Service.GatherMatchIDs;
+import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
+import lol.kv3rk.draft_predict.DefaultPipeline.Service.GatherMatchInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EndpointService {
 
-    private final GatherMatchIDs gatherMatchIDs;
+    private final GatherMatchInfo gatherMatchInfo;
+    private final ChampionIdDB championIdDB;
 
     @Autowired
     public EndpointService(
-            GatherMatchIDs gatherMatchIDs) {
+            GatherMatchInfo gatherMatchInfo,
+            ChampionIdDB championIdDB
+    ) {
 
-        this.gatherMatchIDs = gatherMatchIDs;
+        this.gatherMatchInfo = gatherMatchInfo;
+
+        this.championIdDB = championIdDB;
     }
 
     public void go() throws InterruptedException {
 
-        gatherMatchIDs.getMatchIDs();
+        championIdDB.populateChampionAndIdsDB();
+        gatherMatchInfo.getEUWMatchInfo();
+        gatherMatchInfo.getNAMatchInfo();
+        gatherMatchInfo.getKRMatchInfo();
+        gatherMatchInfo.getEUNEMatchInfo();
 
     }
 
