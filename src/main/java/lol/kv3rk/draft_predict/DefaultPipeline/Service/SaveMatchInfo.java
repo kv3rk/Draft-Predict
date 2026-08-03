@@ -9,10 +9,12 @@ import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesReposito
 import lol.kv3rk.draft_predict.RankedEntities.Participants.Entity.ParticipantsEntity;
 import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
 import lol.kv3rk.draft_predict.common.RiotDTO.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class SaveMatchInfo {
 
@@ -35,11 +37,11 @@ public class SaveMatchInfo {
     @Transactional
     public void saveMatchInfo(MatchDTO matchInfo, String server, String matchID) {
 
-        System.out.println("--------------------------------------");
+        log.info("--------------------------------------");
         double gameVersion = Double.parseDouble(extractGameVersion(matchInfo.info()).substring(0, 5));
-        System.out.println("Game version: " + gameVersion);
-        System.out.println("Match server: " + server);
-        System.out.println("Match id: " + matchID);
+        log.info("Game version: {}", gameVersion);
+        log.info("Match server: {}", server);
+        log.info("Match id: {}", matchID);
 
         MatchesEntity newMatch = MatchesEntity.builder()
                 .matchId(matchID).patch(gameVersion).server(server)
@@ -55,7 +57,7 @@ public class SaveMatchInfo {
                     boolean win = participantDTO.win();
                     int teamId = participantDTO.teamId();
 
-                    System.out.println(championName + " - " + lane + ": " + win + ". Team: " + teamId);
+                    log.info("{} - {}: {}. Team {}", championName, lane, win, teamId);
                     ParticipantsEntity newParticipant = ParticipantsEntity.builder()
                             .matchId(matchesRepository.findByMatchId(matchID))
                             .champion(championName)
@@ -79,7 +81,7 @@ public class SaveMatchInfo {
                                 String championName = championIdDB.mapChampionIdToName(championId);
                                 int teamId = teamDTO.teamId();
 
-                                System.out.print(championName + ". Team: " + teamId);
+                                log.info("{}. Team {}", championName, teamId);
                                 BansEntity newBans = BansEntity.builder()
                                         .matchId(matchesRepository.findByMatchId(matchID))
                                         .champion(championName)
@@ -89,11 +91,10 @@ public class SaveMatchInfo {
                             }
 
                     );
-                    System.out.println();
                 }
 
         );
-        System.out.println("--------------------------------------");
+        log.info("--------------------------------------");
 
     }
 

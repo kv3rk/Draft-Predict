@@ -1,0 +1,63 @@
+<configuration>
+
+    <!--    Dev profile logs-->
+    <springProfile name="dev">
+
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>[%thread] [%-5level] [%logger{0}] - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+    </springProfile>
+
+    <!--    Prod profile logs-->
+    <springProfile name="prod">
+
+        <variable name="LOG_PATH" value="./logs/active"/>
+        <variable name="LOG_PATH_PAST" value="./logs/past"/>
+
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+            <file>${LOG_PATH}/logFile.log</file>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <!-- daily rollover -->
+                <fileNamePattern>${LOG_PATH_PAST}/logFile.%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
+
+
+                <maxFileSize>10MB</maxFileSize>
+                <maxHistory>72</maxHistory>
+                <totalSizeCap>128MB</totalSizeCap>
+
+            </rollingPolicy>
+
+            <encoder>
+
+                <pattern>[%d{yyyy-MM-dd HH-mm}] [%thread] [%-5level] [%logger{0}] - [%msg]%n</pattern>
+
+            </encoder>
+        </appender>
+
+
+        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+            <appender-ref ref="FILE"/>
+        </logger>
+
+        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+            <appender-ref ref="FILE"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+
+    </springProfile>
+
+
+</configuration>

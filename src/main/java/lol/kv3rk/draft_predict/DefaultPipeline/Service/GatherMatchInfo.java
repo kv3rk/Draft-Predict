@@ -10,6 +10,7 @@ import lol.kv3rk.draft_predict.RankedEntities.Participants.Entity.ParticipantsEn
 import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
 import lol.kv3rk.draft_predict.common.RiotDTO.*;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.net.URI;
 import java.util.List;
 
+@Slf4j
 @Service
 public class GatherMatchInfo {
 
@@ -92,8 +94,7 @@ public class GatherMatchInfo {
                               List<String> allMatchesIDsFromServer,
                               String server) throws InterruptedException {
 
-
-        System.out.println(allMatchesIDsFromServer.toString());
+        log.info(allMatchesIDsFromServer.toString());
 
 //        Thread.sleep(120000);
 

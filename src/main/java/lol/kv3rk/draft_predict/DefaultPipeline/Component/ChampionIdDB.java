@@ -1,6 +1,7 @@
 package lol.kv3rk.draft_predict.DefaultPipeline.Component;
 
 import lol.kv3rk.draft_predict.DefaultPipeline.DTO.GameDataDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -10,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class ChampionIdDB {
 
     private final WebClient gameDataWebClient = WebClient
@@ -26,7 +28,7 @@ public class ChampionIdDB {
 
         GameDataDTO gameDataDTO = formatResponse(gameDataWebClient);
 
-        System.out.println(gameDataDTO.version());
+        log.info(gameDataDTO.version());
 
         gameDataDTO.data().forEach((name, championDTO) -> {
 
@@ -35,7 +37,7 @@ public class ChampionIdDB {
                 }
         );
 
-        System.out.println(championAndIdsDB);
+        log.info(championAndIdsDB.toString());
     }
 
     public String mapChampionIdToName(int championId) {

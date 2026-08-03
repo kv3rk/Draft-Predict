@@ -1,6 +1,7 @@
 package lol.kv3rk.draft_predict.DefaultPipeline.Service;
 
 import lol.kv3rk.draft_predict.common.DateAndTime.CustomLocalDateAndTime;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
+@Slf4j
 public class GatherMatchIDs {
 
     @Value("${api.key}")
@@ -148,8 +150,7 @@ public class GatherMatchIDs {
                 .block()
                 .getBody();
 
-
-        System.out.println(puuid + ": " + matchesIDs);
+        log.info("{}: {}", puuid, matchesIDs);
 
         Thread.sleep(request_delay);
 

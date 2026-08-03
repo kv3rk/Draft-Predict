@@ -3,6 +3,7 @@ package lol.kv3rk.draft_predict.DefaultPipeline.Service;
 import lol.kv3rk.draft_predict.common.RiotDTO.LeagueEntryDTO;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotRequestParameters;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -14,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Component
 public class GatherPUUID {
 
@@ -43,7 +45,7 @@ public class GatherPUUID {
 
     public Set<String> getSetOfEUWPlayers() {
 
-        System.out.println(RiotServerName.EUW.name() + " server:");
+        log.info("{} server", RiotServerName.EUW.name());
 
         return formatResponse(euw1WebClient);
 
@@ -51,7 +53,7 @@ public class GatherPUUID {
 
     public Set<String> getSetOfNAPlayers() {
 
-        System.out.println(RiotServerName.NA.name() + " server:");
+        log.info("{} server", RiotServerName.NA.name());
 
         return formatResponse(naWebClient);
 
@@ -59,7 +61,7 @@ public class GatherPUUID {
 
     public Set<String> getSetOfKRPlayers() {
 
-        System.out.println(RiotServerName.KR.name() + " server:");
+        log.info("{} server", RiotServerName.KR.name());
 
         return formatResponse(krWebClient);
 
@@ -67,7 +69,7 @@ public class GatherPUUID {
 
     public Set<String> getSetOfEUNEPlayers() {
 
-        System.out.println(RiotServerName.EUNE.name() + " server:");
+        log.info("{} server", RiotServerName.EUNE.name());
 
         return formatResponse(euneWebClient);
 
@@ -88,7 +90,7 @@ public class GatherPUUID {
             division:
             for (String division : divisionParameters) {
 
-                System.out.println("New division entry: " + division);
+                log.info("New division entry: {}", division);
 
                 do {
 
@@ -127,7 +129,7 @@ public class GatherPUUID {
 
                     allPlayersPuuidFromServer.addAll(puuids);
 
-                    System.out.println(tier + " " + division + " " + finalCountPages + " " + puuids);
+                    log.info("{} {} {} {}", tier, division, finalCountPages, puuids);
 
                 } while (true);
 
