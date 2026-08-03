@@ -4,7 +4,8 @@ public record ParticipantDTO(
 
         String championName,
         String teamPosition,
-        boolean win
+        boolean win,
+        int teamId
 
 ) {
 }

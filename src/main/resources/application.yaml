@@ -1,17 +1,13 @@
 spring:
   application:
     name: draft-predict
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/daily_plan_project
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: java2905
-
-  jpa:
-    hibernate:
-      ddl-auto: none
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  profiles:
+    active: dev
+  main:
+    banner-mode: off
+    allow-circular-references: off
+  flyway:
+    baseline-on-migrate: true
 
 api:
   key: ${API_KEY}

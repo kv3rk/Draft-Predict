@@ -1,6 +1,13 @@
 package lol.kv3rk.draft_predict.DefaultPipeline.Service;
 
+import jakarta.transaction.Transactional;
 import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
+import lol.kv3rk.draft_predict.RankedEntities.Bans.Entity.BansEntity;
+import lol.kv3rk.draft_predict.RankedEntities.Bans.Repository.BansRepository;
+import lol.kv3rk.draft_predict.RankedEntities.Matches.Entity.MatchesEntity;
+import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesRepository;
+import lol.kv3rk.draft_predict.RankedEntities.Participants.Entity.ParticipantsEntity;
+import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
 import lol.kv3rk.draft_predict.common.RiotDTO.*;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,7 +25,7 @@ public class GatherMatchInfo {
     private final WebClient euWebClient;
     private final WebClient americasWebClient;
     private final WebClient asiaWebClient;
-    private final ChampionIdDB championIdDB;
+    private final SaveMatchInfo saveMatchInfo;
 
     @Value("${api.key}")
     private String api_key;
@@ -31,13 +38,13 @@ public class GatherMatchInfo {
             @Qualifier("euWebClient") WebClient euWebClient,
             @Qualifier("americasWebClient") WebClient americasWebClient,
             @Qualifier("asiaWebClient") WebClient asiaWebClient,
-            ChampionIdDB championIdDB
+            SaveMatchInfo saveMatchInfo
     ) {
         this.gatherMatchIDs = gatherMatchIDs;
         this.euWebClient = euWebClient;
         this.americasWebClient = americasWebClient;
         this.asiaWebClient = asiaWebClient;
-        this.championIdDB = championIdDB;
+        this.saveMatchInfo = saveMatchInfo;
     }
 
     public void getEUWMatchInfo() throws InterruptedException {
@@ -99,15 +106,15 @@ public class GatherMatchInfo {
 
         for (int i = 0; i < 5; i++) {
 
-            formatResponse(webClient, allMatchesIDsFromServer.get(i), server);
+            MatchDTO matchInfo = formatResponse(webClient, allMatchesIDsFromServer.get(i));
+            saveMatchInfo.saveMatchInfo(matchInfo, server, allMatchesIDsFromServer.get(i));
 
         }
 
     }
 
-    private void formatResponse(WebClient regionalWebClient,
-                                String matchID,
-                                String server) throws InterruptedException {
+    private MatchDTO formatResponse(WebClient regionalWebClient,
+                                    String matchID) throws InterruptedException {
 
         MatchDTO matchInfo = regionalWebClient
                 .get()
@@ -128,71 +135,11 @@ public class GatherMatchInfo {
                 .block()
                 .getBody();
 
-        System.out.println("--------------------------------------");
-        String gameVersion = extractGameVersion(matchInfo.info());
-        System.out.println("Game version: " + gameVersion.substring(0, 5));
-        System.out.println("Match server: " + server);
-
-        List<ParticipantDTO> participantDTOList = extractParticipantDTOList(matchInfo.info());
-        participantDTOList.forEach(participantDTO -> {
-
-                    String championName = participantDTO.championName();
-                    String lane = participantDTO.teamPosition();
-                    boolean win = participantDTO.win();
-
-                    System.out.println(championName + " - " + lane + ": " + win);
-
-                }
-
-        );
-
-        List<TeamDTO> teamDTOList = extractTeamDTOList(matchInfo.info());
-        teamDTOList.forEach(teamDTO -> {
-
-                    List<BanDTO> banDTOList = extractBanDTOList(teamDTO);
-                    banDTOList.forEach(banDTO -> {
-
-                                int championId = banDTO.championId();
-                                String championName = championIdDB.mapChampionIdToName(championId);
-
-                                System.out.print(championName + " ");
-
-                            }
-
-                    );
-                    System.out.println();
-                }
-
-        );
-        System.out.println("--------------------------------------");
 
         Thread.sleep(request_delay);
 
+        return matchInfo;
 
     }
-
-    private String extractGameVersion(InfoDTO infoDTO) {
-
-        return infoDTO.gameVersion();
-
-    }
-
-    private List<ParticipantDTO> extractParticipantDTOList(InfoDTO infoDTO) {
-
-        return infoDTO.participants();
-
-    }
-
-    private List<TeamDTO> extractTeamDTOList(InfoDTO infoDTO) {
-
-        return infoDTO.teams();
-
-    }
-
-    private List<BanDTO> extractBanDTOList(TeamDTO teamDTO) {
-
-        return teamDTO.bans();
-    }
-
 
 }

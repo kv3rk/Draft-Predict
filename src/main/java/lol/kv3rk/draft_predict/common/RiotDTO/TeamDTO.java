@@ -4,7 +4,8 @@ import java.util.List;
 
 public record TeamDTO(
 
-        List<BanDTO> bans
+        List<BanDTO> bans,
+        int teamId
 
 ) {
 }
