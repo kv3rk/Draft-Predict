@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 
 <head>
 
@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!--    Title-->
-    <title>LoLStats</title>
+    <title>Draft Predict</title>
 
     <!--    CSS-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +20,9 @@
 
     <!--    JS-->
     <script src="/JS/main-page/main-page.js"></script>
+
+    <!--    Logo-->
+    <link rel="icon" href="/IMG/logo/riot-logo.png">
 
 </head>
 <body>
@@ -33,7 +36,7 @@
 <div class="page-wrapper">
     <!-- Header / Logo -->
     <header class="site-header">
-        <a href="/" class="logo" aria-label="Go to homepage">
+        <a th:href="@{/draft-predict/main}" class="logo" aria-label="Go to homepage">
             <div class="logo-mark">
                 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="2"
