@@ -8,27 +8,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EndpointService {
 
-    private final GatherMatchInfo gatherMatchInfo;
-    private final ChampionIdDB championIdDB;
+    public void go(){
 
-    @Autowired
-    public EndpointService(
-            GatherMatchInfo gatherMatchInfo,
-            ChampionIdDB championIdDB
-    ) {
-
-        this.gatherMatchInfo = gatherMatchInfo;
-
-        this.championIdDB = championIdDB;
-    }
-
-    public void go() throws InterruptedException {
-
-        championIdDB.populateChampionAndIdsDB();
-        gatherMatchInfo.getEUWMatchInfo();
-        gatherMatchInfo.getNAMatchInfo();
-        gatherMatchInfo.getKRMatchInfo();
-        gatherMatchInfo.getEUNEMatchInfo();
 
     }
 
