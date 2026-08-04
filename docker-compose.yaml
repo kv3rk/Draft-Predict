@@ -32,7 +32,7 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       DB_URL: ${DB_URL}
       DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASS}
+      DB_PASS: ${DB_PASS}
       API_KEY: ${API_KEY}
       API_REQUEST_DELAY: ${API_REQUEST_DELAY}
       API_QUEUE_ID: ${API_QUEUE_ID}
