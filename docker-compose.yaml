@@ -40,4 +40,4 @@ services:
 
 
 volumes:
-  draft-predict-db-pgdata:
+  draft-predict-pgdata:
