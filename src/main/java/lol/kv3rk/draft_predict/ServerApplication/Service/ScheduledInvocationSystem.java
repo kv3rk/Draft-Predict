@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.AppLogic.Service;
+package lol.kv3rk.draft_predict.ServerApplication.Service;
 
 import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
 import lol.kv3rk.draft_predict.DefaultPipeline.Service.GatherMatchInfo;

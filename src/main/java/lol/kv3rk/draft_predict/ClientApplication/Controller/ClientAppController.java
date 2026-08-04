@@ -22,9 +22,13 @@ public class ClientAppController {
     }
 
     @GetMapping("/main")
-    public String getMainPage(Model model){
+    public String getMainPage(Model model) {
 
         log.info("Entered [/draft-predict/main] endpoint");
+
+        model.addAttribute("amountOfMatches", clientAppService.countMatches());
+        model.addAttribute("actualPatch", clientAppService.actualPatch());
+        model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions());
 
         return "main-page/main-page";
     }
