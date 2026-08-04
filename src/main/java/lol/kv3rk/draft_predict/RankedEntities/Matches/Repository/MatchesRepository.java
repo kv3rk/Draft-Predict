@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Locale;
+import java.util.Optional;
+
 @Repository
 public interface MatchesRepository extends JpaRepository<MatchesEntity, String> {
 
@@ -14,11 +17,11 @@ public interface MatchesRepository extends JpaRepository<MatchesEntity, String> 
             nativeQuery = true,
             value = "select COUNT(m.match_id) from matches as m"
     )
-    long countMatches();
+    Optional<Long> countMatches();
 
     @Query(
             nativeQuery = true,
             value = "select m.patch from matches as m group by m.patch order by m.patch desc"
     )
-    double actualPatch();
+    Optional<Double> actualPatch();
 }
