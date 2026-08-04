@@ -29,6 +29,7 @@ public class ClientAppController {
         model.addAttribute("amountOfMatches", clientAppService.countMatches());
         model.addAttribute("actualPatch", clientAppService.actualPatch());
         model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions());
+        model.addAttribute("mostBannedChampions", clientAppService.getMostBannedChampions());
 
         return "main-page/main-page";
     }

@@ -117,11 +117,21 @@
                             <th class="col-rank">#</th>
                             <th class="col-champ">Champion</th>
                             <th class="col-rate">Ban Rate</th>
-                            <th class="col-bar">Trend</th>
                         </tr>
                         </thead>
                         <tbody id="banBody">
-                        <!-- Filled by JS -->
+                        <tr th:each="champ, iter : ${mostBannedChampions}">
+                            <td class="col-rank" th:text="${iter.count}">1</td>
+                            <td class="col-champ">
+                                <div class="champ-cell">
+                                    <div class="champ-avatar" th:text="${#strings.substring(champ.champion, 0, 1)}">Y</div>
+                                    <span class="champ-name" th:text="${champ.champion}">Yasuo</span>
+                                </div>
+                            </td>
+                            <td class="col-rate">
+                                <span class="rate-badge ban" th:text="${champ.banRate} + '%'">38%</span>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
