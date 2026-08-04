@@ -1,0 +1,43 @@
+services:
+
+  db:
+    image: postgres:16
+
+    container_name: draft-predict-db
+
+    restart: "no"
+
+    environment:
+      POSTGRES_DB: draft_predict
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+
+    volumes:
+      - draft-predict-pgdata:/var/lib/postgresql/data
+
+  app:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: draft-predict-app
+
+    restart: "no"
+
+    ports:
+      - "8083:8080"
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASS}
+      API_KEY: ${API_KEY}
+      API_REQUEST_DELAY: ${API_REQUEST_DELAY}
+      API_QUEUE_ID: ${API_QUEUE_ID}
+      API_PATCH: ${API_PATCH}
+
+
+volumes:
+  draft-predict-db-pgdata:

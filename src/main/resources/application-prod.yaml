@@ -1,12 +1,19 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/draft_predict
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: java2905
 
   jpa:
     hibernate:
       ddl-auto: none
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
+
+server:
+  servlet:
+    session:
+      cookie:
+        name: DRAFT_PREDICT_SESSION
+      timeout: 20m

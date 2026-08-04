@@ -4,8 +4,10 @@ import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
 import lol.kv3rk.draft_predict.DefaultPipeline.Service.GatherMatchInfo;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 @EnableScheduling
+@Component
 public class ScheduledInvocationSystem {
 
     private final GatherMatchInfo gatherMatchInfo;
@@ -17,7 +19,7 @@ public class ScheduledInvocationSystem {
         this.championIdDB = championIdDB;
     }
 
-    @Scheduled(cron = "0 1 0 1/1 * *", zone = "Europe/London")
+    @Scheduled(cron = "0 9 19 1/1 * *", zone = "Europe/Moscow")
     public void everyDayRoutine() throws InterruptedException {
 
         championIdDB.populateChampionAndIdsDB();

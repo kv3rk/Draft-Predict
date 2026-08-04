@@ -75,6 +75,3 @@ public class ChampionIdDB {
 
     }
 }
-
-
-/// cdn/16.15.1/data/en_US/champion.json

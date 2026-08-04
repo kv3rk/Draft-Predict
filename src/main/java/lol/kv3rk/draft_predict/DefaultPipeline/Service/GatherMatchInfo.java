@@ -13,6 +13,7 @@ import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -96,28 +97,33 @@ public class GatherMatchInfo {
 
         log.info(allMatchesIDsFromServer.toString());
 
-//        Thread.sleep(120000);
+        Thread.sleep(10000);
 
-//        allMatchesIDsFromServer.forEach(matchID -> {
-//
-//                    formatResponse(euWebClient, matchID);
-//
-//                }
-//        );
+        allMatchesIDsFromServer.forEach(matchID -> {
 
-        for (int i = 0; i < 5; i++) {
+                    try {
 
-            MatchDTO matchInfo = formatResponse(webClient, allMatchesIDsFromServer.get(i));
-            saveMatchInfo.saveMatchInfo(matchInfo, server, allMatchesIDsFromServer.get(i));
+                        MatchDTO matchInfo = formatResponse(webClient, matchID);
+                        if (!matchInfo.info().gameVersion().isEmpty()) {
 
-        }
+                            saveMatchInfo.saveMatchInfo(matchInfo, server, matchID);
+                        }
+
+                    } catch (InterruptedException e) {
+
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+
+                }
+        );
 
     }
 
     private MatchDTO formatResponse(WebClient regionalWebClient,
                                     String matchID) throws InterruptedException {
 
-        MatchDTO matchInfo = regionalWebClient
+        ResponseEntity<MatchDTO> response = regionalWebClient
                 .get()
                 .uri(
                         "/lol/match/v5/matches",
@@ -133,9 +139,19 @@ public class GatherMatchInfo {
                 )
                 .retrieve()
                 .toEntity(MatchDTO.class)
-                .block()
-                .getBody();
+                .block();
 
+        if (response == null) {
+
+            return new MatchDTO(new InfoDTO("", List.of(), List.of()));
+        }
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+
+            return new MatchDTO(new InfoDTO("", List.of(), List.of()));
+        }
+
+        MatchDTO matchInfo = response.getBody();
 
         Thread.sleep(request_delay);
 

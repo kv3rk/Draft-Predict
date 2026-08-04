@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -28,6 +29,9 @@ public class GatherPUUID {
     @Value("${api.key}")
     private String api_key;
 
+    @Value("${api.request.delay}")
+    private long request_delay;
+
     public GatherPUUID(
             @Qualifier("euw1WebClient") WebClient euw1WebClient,
             @Qualifier("naWebClient") WebClient naWebClient,
@@ -43,7 +47,7 @@ public class GatherPUUID {
     }
 
 
-    public Set<String> getSetOfEUWPlayers() {
+    public Set<String> getSetOfEUWPlayers() throws InterruptedException {
 
         log.info("{} server", RiotServerName.EUW.name());
 
@@ -51,7 +55,7 @@ public class GatherPUUID {
 
     }
 
-    public Set<String> getSetOfNAPlayers() {
+    public Set<String> getSetOfNAPlayers() throws InterruptedException {
 
         log.info("{} server", RiotServerName.NA.name());
 
@@ -59,7 +63,7 @@ public class GatherPUUID {
 
     }
 
-    public Set<String> getSetOfKRPlayers() {
+    public Set<String> getSetOfKRPlayers() throws InterruptedException {
 
         log.info("{} server", RiotServerName.KR.name());
 
@@ -67,7 +71,7 @@ public class GatherPUUID {
 
     }
 
-    public Set<String> getSetOfEUNEPlayers() {
+    public Set<String> getSetOfEUNEPlayers() throws InterruptedException {
 
         log.info("{} server", RiotServerName.EUNE.name());
 
@@ -76,7 +80,7 @@ public class GatherPUUID {
     }
 
 
-    private Set<String> formatResponse(WebClient platformWebClient) {
+    private Set<String> formatResponse(WebClient platformWebClient) throws InterruptedException {
 
         List<String> tierParameters = riotRequestParameters.tierParameters();
         List<String> divisionParameters = riotRequestParameters.divisionParameters();
@@ -95,7 +99,8 @@ public class GatherPUUID {
                 do {
 
                     int finalCountPages = countPages;
-                    Set<LeagueEntryDTO> response = platformWebClient
+
+                    ResponseEntity<Set<LeagueEntryDTO>> response = platformWebClient
                             .get()
                             .uri(
                                     "/lol/league-exp/v4/entries/RANKED_SOLO_5x5",
@@ -112,24 +117,37 @@ public class GatherPUUID {
                             .retrieve()
                             .toEntity(new ParameterizedTypeReference<Set<LeagueEntryDTO>>() {
                             })
-                            .block()
-                            .getBody();
+                            .block();
 
-                    if (response.isEmpty()) {
+                    if (response == null) {
+
+                        countPages++;
+                        continue;
+                    }
+
+                    if (!response.getStatusCode().is2xxSuccessful()) {
+
+                        countPages++;
+                        continue;
+                    }
+
+                    if (!response.hasBody()) {
 
                         countPages = 1;
-
                         break division;
-
                     }
+
+                    Set<LeagueEntryDTO> setOfPuuid = response.getBody();
 
                     countPages++;
 
-                    Set<String> puuids = getPUUIDForPlayers(response);
+                    Set<String> puuids = getPUUIDForPlayers(setOfPuuid);
 
                     allPlayersPuuidFromServer.addAll(puuids);
 
                     log.info("{} {} {} {}", tier, division, finalCountPages, puuids);
+
+                    Thread.sleep(request_delay);
 
                 } while (true);
 

@@ -22,7 +22,7 @@ public class ClientAppController {
     }
 
     @GetMapping("/main")
-    public String getMainPage(Model model) {
+    public String getMainPage(Model model) throws InterruptedException {
 
         log.info("Entered [/draft-predict/main] endpoint");
 

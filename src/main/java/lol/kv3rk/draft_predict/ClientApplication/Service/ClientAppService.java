@@ -5,9 +5,6 @@ import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampionsDTO;
 import lol.kv3rk.draft_predict.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesRepository;
 import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +24,7 @@ public class ClientAppService {
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
     }
+
 
     public long countMatches() {
 

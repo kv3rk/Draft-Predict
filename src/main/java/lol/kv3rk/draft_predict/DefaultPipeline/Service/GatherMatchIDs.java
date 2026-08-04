@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -83,41 +85,30 @@ public class GatherMatchIDs {
                                     List<String> allPlayersPuuidFromServer) throws InterruptedException {
 
 
-//        Thread.sleep(120000);
+        Thread.sleep(10000);
 
         Set<String> allMatchesIDs = new LinkedHashSet<>();
 
-//        allPlayersPuuidFromServer.forEach(puuid -> {
-//
-//            try {
-//
-//                List<String> matchesIDs = formatResponse(euWebClient, puuid);
-//
-//                allMatchesIDs.addAll(matchesIDs);
-//
-//            } catch (InterruptedException e) {
-//
-//                throw new RuntimeException(e);
-//
-//            }
-//
-//        });
-
-        for (int i = 0; i < 10; i++) {
+        allPlayersPuuidFromServer.forEach(puuid -> {
 
             try {
 
-                List<String> matchesIDs = formatResponse(webClient, allPlayersPuuidFromServer.get(i));
+                List<String> matchesIDs = formatResponse(webClient, puuid);
 
-                allMatchesIDs.addAll(matchesIDs);
+                if (!matchesIDs.isEmpty()) {
+
+                    allMatchesIDs.addAll(matchesIDs);
+                }
+
 
             } catch (InterruptedException e) {
 
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
 
             }
 
-        }
+        });
 
         return allMatchesIDs;
 
@@ -125,7 +116,7 @@ public class GatherMatchIDs {
 
     private List<String> formatResponse(WebClient regionalWebClient, String puuid) throws InterruptedException {
 
-        List<String> matchesIDs = regionalWebClient
+        ResponseEntity<List<String>> response = regionalWebClient
                 .get()
                 .uri(
                         "/lol/match/v5/matches/by-puuid",
@@ -147,8 +138,25 @@ public class GatherMatchIDs {
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<String>>() {
                 })
-                .block()
-                .getBody();
+                .block();
+
+        if (response == null) {
+
+            return List.of();
+
+        }
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+
+            return List.of();
+        }
+
+        if (!response.hasBody()) {
+
+            return List.of();
+        }
+
+        List<String> matchesIDs = response.getBody();
 
         log.info("{}: {}", puuid, matchesIDs);
 
