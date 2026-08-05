@@ -88,7 +88,6 @@ public class GatherPUUID {
 
         Set<String> allPlayersPuuidFromServer = new LinkedHashSet<>();
 
-
         for (String tier : tierParameters) {
 
             division:
@@ -138,6 +137,13 @@ public class GatherPUUID {
                         Thread.sleep(request_delay);
                         countPages = 1;
                         break division;
+                    }
+
+                    if (tier.equals("MASTER") && finalCountPages <= 40) {
+
+                        Thread.sleep(request_delay);
+                        countPages++;
+                        continue;
                     }
 
                     Set<LeagueEntryDTO> setOfPuuid = response.getBody();
