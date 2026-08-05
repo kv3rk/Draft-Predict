@@ -10,7 +10,7 @@ public class RiotRequestParameters {
     public List<String> tierParameters() {
 
         List<String> tierParameters = List.of(
-                "GRANDMASTER", "CHALLENGER"
+                "MASTER", "GRANDMASTER", "CHALLENGER"
         );
 
         return tierParameters;

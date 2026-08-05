@@ -2,24 +2,26 @@ package lol.kv3rk.draft_predict.ServerApplication.Service;
 
 import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
 import lol.kv3rk.draft_predict.DefaultPipeline.Service.GatherMatchInfo;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @EnableScheduling
 @Component
-public class ScheduledInvocationSystem {
+@Profile("dev")
+public class DevScheduledInvocationSystem {
 
     private final GatherMatchInfo gatherMatchInfo;
     private final ChampionIdDB championIdDB;
 
-    public ScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
-                                     ChampionIdDB championIdDB) {
+    public DevScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
+                                         ChampionIdDB championIdDB) {
         this.gatherMatchInfo = gatherMatchInfo;
         this.championIdDB = championIdDB;
     }
 
-    @Scheduled(cron = "0 1 0 1/1 * *", zone = "UTC")
+    @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
     public void everyDayRoutine() throws InterruptedException {
 
         championIdDB.populateChampionAndIdsDB();
@@ -30,4 +32,3 @@ public class ScheduledInvocationSystem {
 
     }
 }
-// initialDelay = 1, fixedDelay = Long.MAX_VALUE
