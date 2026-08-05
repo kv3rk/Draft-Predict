@@ -30,3 +30,4 @@ public class ScheduledInvocationSystem {
 
     }
 }
+// initialDelay = 1, fixedDelay = Long.MAX_VALUE

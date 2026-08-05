@@ -2,7 +2,6 @@ package lol.kv3rk.draft_predict.DefaultPipeline.Component;
 
 import lol.kv3rk.draft_predict.DefaultPipeline.DTO.GameDataDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -19,12 +18,21 @@ public class ChampionIdDB {
             .baseUrl("https://ddragon.leagueoflegends.com")
             .build();
 
-    @Value("${api.patch}")
+    private final GatherActualPatch gatherActualPatch;
+
     private String api_patch;
 
     private Map<String, String> championAndIdsDB = new LinkedHashMap<>();
 
-    public void populateChampionAndIdsDB() {
+    public ChampionIdDB(GatherActualPatch gatherActualPatch) {
+        this.gatherActualPatch = gatherActualPatch;
+    }
+
+    public void populateChampionAndIdsDB() throws InterruptedException {
+
+        api_patch = gatherActualPatch.getActualPatch();
+
+        Thread.sleep(10000);
 
         GameDataDTO gameDataDTO = formatResponse(gameDataWebClient);
 
