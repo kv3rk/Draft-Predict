@@ -131,7 +131,7 @@ public class GatherPUUID {
                         continue;
                     }
 
-                    if (!response.hasBody()) {
+                    if (response.getBody().isEmpty()) {
 
                         countPages = 1;
                         break division;

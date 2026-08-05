@@ -151,7 +151,7 @@ public class GatherMatchIDs {
             return List.of();
         }
 
-        if (!response.hasBody()) {
+        if (response.getBody().isEmpty()) {
 
             return List.of();
         }
