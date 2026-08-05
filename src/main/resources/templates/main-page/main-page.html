@@ -148,7 +148,12 @@
                 <span class="games-count" id="totalGames" th:text="${amountOfMatches}">none</span>
                 ranked games
             </p>
-            <p class="footer-meta">Patch <span th:text="${actualPatch}">none</span> • Servers (EUW, EUNE, KR, NA) • Updated in the morning • Ranks (Master, Grandmaster, Challenger)</p>
+            <p class="footer-meta">
+                Patch <span th:text="${actualPatch}">none</span>
+                • Servers (<span th:text="${servers}">EUW, EUNE, KR, NA</span>)
+                • Updated in the morning
+                • Ranks (<span th:text="${tiers}">Master, Grandmaster, Challenger</span>)
+            </p>
         </div>
     </footer>
 </div>

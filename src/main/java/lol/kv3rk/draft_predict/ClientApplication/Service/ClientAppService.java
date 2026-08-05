@@ -5,9 +5,12 @@ import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampionsDTO;
 import lol.kv3rk.draft_predict.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesRepository;
 import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
+import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotRequestParameters;
+import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -21,14 +24,17 @@ public class ClientAppService {
     private final MatchesRepository matchesRepository;
     private final ParticipantsRepository participantsRepository;
     private final BansRepository bansRepository;
+    private final RiotRequestParameters riotRequestParameters;
 
     public ClientAppService(MatchesRepository matchesRepository,
                             ParticipantsRepository participantsRepository,
-                            BansRepository bansRepository) {
+                            BansRepository bansRepository,
+                            RiotRequestParameters riotRequestParameters) {
 
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
+        this.riotRequestParameters = riotRequestParameters;
     }
 
 
@@ -72,5 +78,19 @@ public class ClientAppService {
     public List<MostBannedChampions> getMostBannedChampions() {
 
         return bansRepository.getMostBannedChampions();
+    }
+
+    public List<String> getTierParameters() {
+
+        return riotRequestParameters.tierParameters();
+    }
+
+    public List<String> getRiotServerName() {
+
+        List<String> riotServerName = Arrays.stream(RiotServerName.values())
+                .map(Enum::name)
+                .toList();
+
+        return riotServerName;
     }
 }

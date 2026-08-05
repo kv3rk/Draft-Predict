@@ -30,6 +30,8 @@ public class ClientAppController {
         model.addAttribute("actualPatch", clientAppService.actualPatch());
         model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions());
         model.addAttribute("mostBannedChampions", clientAppService.getMostBannedChampions());
+        model.addAttribute("servers", String.join(", ", clientAppService.getRiotServerName()));
+        model.addAttribute("tiers",   String.join(", ", clientAppService.getTierParameters()));
 
         return "main-page/main-page";
     }
