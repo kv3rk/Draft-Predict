@@ -19,7 +19,7 @@ public class ScheduledInvocationSystem {
         this.championIdDB = championIdDB;
     }
 
-    @Scheduled(cron = "0 24 5 1/1 * *", zone = "UTC")
+    @Scheduled(cron = "0 33 5 1/1 * *", zone = "UTC")
     public void everyDayRoutine() throws InterruptedException {
 
         championIdDB.populateChampionAndIdsDB();

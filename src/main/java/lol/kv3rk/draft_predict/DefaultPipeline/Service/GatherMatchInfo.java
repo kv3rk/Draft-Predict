@@ -143,11 +143,13 @@ public class GatherMatchInfo {
 
         if (response == null) {
 
+            Thread.sleep(request_delay);
             return new MatchDTO(new InfoDTO("", List.of(), List.of()));
         }
 
         if (!response.getStatusCode().is2xxSuccessful()) {
 
+            Thread.sleep(request_delay);
             return new MatchDTO(new InfoDTO("", List.of(), List.of()));
         }
 

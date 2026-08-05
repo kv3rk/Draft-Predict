@@ -142,17 +142,20 @@ public class GatherMatchIDs {
 
         if (response == null) {
 
+            Thread.sleep(request_delay);
             return List.of();
 
         }
 
         if (!response.getStatusCode().is2xxSuccessful()) {
 
+            Thread.sleep(request_delay);
             return List.of();
         }
 
         if (response.getBody().isEmpty()) {
 
+            Thread.sleep(request_delay);
             return List.of();
         }
 

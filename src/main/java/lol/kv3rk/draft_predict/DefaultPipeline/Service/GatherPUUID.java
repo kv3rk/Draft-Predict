@@ -121,18 +121,21 @@ public class GatherPUUID {
 
                     if (response == null) {
 
+                        Thread.sleep(request_delay);
                         countPages++;
                         continue;
                     }
 
                     if (!response.getStatusCode().is2xxSuccessful()) {
 
+                        Thread.sleep(request_delay);
                         countPages++;
                         continue;
                     }
 
                     if (response.getBody().isEmpty()) {
 
+                        Thread.sleep(request_delay);
                         countPages = 1;
                         break division;
                     }
