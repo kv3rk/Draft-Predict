@@ -28,10 +28,11 @@ public class ClientAppController {
 
         model.addAttribute("amountOfMatches", clientAppService.countMatches());
         model.addAttribute("actualPatch", clientAppService.actualPatch());
-        model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions());
+        model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampionsByPickRate());
         model.addAttribute("mostBannedChampions", clientAppService.getMostBannedChampions());
         model.addAttribute("servers", String.join(", ", clientAppService.getRiotServerName()));
-        model.addAttribute("tiers",   String.join(", ", clientAppService.getTierParameters()));
+        model.addAttribute("tiers", String.join(", ", clientAppService.getTierParameters()));
+        model.addAttribute("timeUpdated", clientAppService.lastTimeUpdate());
 
         return "main-page/main-page";
     }

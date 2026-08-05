@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Locale;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
@@ -24,4 +24,15 @@ public interface MatchesRepository extends JpaRepository<MatchesEntity, String> 
             value = "select m.patch from matches as m group by m.patch order by m.patch desc"
     )
     Optional<Double> actualPatch();
+
+    @Query(
+            nativeQuery = true,
+            value = """
+                    select m.match_date from matches m
+                    group by m.match_date
+                    order by m.match_date desc
+                    limit 1
+                    """
+    )
+    Optional<LocalDate> getDateOfLastMatch();
 }

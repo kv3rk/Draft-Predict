@@ -80,15 +80,18 @@
                             <td class="col-rank" th:text="${iter.count}">1</td>
                             <td class="col-champ">
                                 <div class="champ-cell">
-                                    <div class="champ-avatar" th:text="${#strings.substring(champ.champion, 0, 1)}">A</div>
+                                    <div class="champ-avatar" th:text="${#strings.substring(champ.champion, 0, 1)}">A
+                                    </div>
                                     <span class="champ-name" th:text="${champ.champion}">Aurora</span>
                                 </div>
                             </td>
                             <td class="col-rate">
-                                <span class="rate-badge win" th:text="${#numbers.formatDecimal(champ.winRate, 1, 1)} + '%'">54.2%</span>
+                                <span class="rate-badge win"
+                                      th:text="${#numbers.formatDecimal(champ.winRate, 1, 1)} + '%'">54.2%</span>
                             </td>
                             <td class="col-rate">
-                                <span class="rate-badge pick" th:text="${#numbers.formatDecimal(champ.pickRate, 1, 0)} + '%'">13%</span>
+                                <span class="rate-badge pick"
+                                      th:text="${#numbers.formatDecimal(champ.pickRate, 1, 0)} + '%'">13%</span>
                             </td>
                         </tr>
                         </tbody>
@@ -124,7 +127,8 @@
                             <td class="col-rank" th:text="${iter.count}">1</td>
                             <td class="col-champ">
                                 <div class="champ-cell">
-                                    <div class="champ-avatar" th:text="${#strings.substring(champ.champion, 0, 1)}">Y</div>
+                                    <div class="champ-avatar" th:text="${#strings.substring(champ.champion, 0, 1)}">Y
+                                    </div>
                                     <span class="champ-name" th:text="${champ.champion}">Yasuo</span>
                                 </div>
                             </td>
@@ -151,7 +155,7 @@
             <p class="footer-meta">
                 Patch <span th:text="${actualPatch}">none</span>
                 • Servers (<span th:text="${servers}">EUW, EUNE, KR, NA</span>)
-                • Updated in the morning
+                • Updated <span th:text="${timeUpdated}">none</span>
                 • Ranks (<span th:text="${tiers}">Master, Grandmaster, Challenger</span>)
             </p>
         </div>

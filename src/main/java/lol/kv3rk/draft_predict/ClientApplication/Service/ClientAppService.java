@@ -1,7 +1,7 @@
 package lol.kv3rk.draft_predict.ClientApplication.Service;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.MostBannedChampions;
-import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampionsDTO;
+import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesRepository;
 import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
@@ -10,12 +10,9 @@ import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Slf4j
@@ -40,39 +37,21 @@ public class ClientAppService {
 
     public long countMatches() {
 
-        Optional<Long> amountMatches = matchesRepository.countMatches();
+        long actualAmountMatches = matchesRepository.countMatches().orElse(0L);
 
-        AtomicLong actualAmountMatches = new AtomicLong();
-
-        amountMatches.ifPresentOrElse(
-                actualAmountMatches::set,
-                () -> {
-                    log.warn("Cannot count amount of matches");
-                }
-        );
-
-        return actualAmountMatches.get();
+        return actualAmountMatches;
     }
 
     public double actualPatch() {
 
-        Optional<Double> patch = matchesRepository.actualPatch();
+        double actualPatch = matchesRepository.actualPatch().orElse(0.0);
 
-        AtomicReference<Double> actualPatch = new AtomicReference<>((double) 0);
-
-        patch.ifPresentOrElse(
-                actualPatch::set,
-                () -> {
-                    log.warn("Actual patch doesnt exists in db");
-                }
-        );
-
-        return actualPatch.get();
+        return actualPatch;
     }
 
-    public List<TopPerformingChampionsDTO> getTopPerformingChampions() {
+    public List<TopPerformingChampions> getTopPerformingChampionsByPickRate() {
 
-        return participantsRepository.getTopPerformingChampions();
+        return participantsRepository.getTopPerformingChampionsByPickRate();
     }
 
     public List<MostBannedChampions> getMostBannedChampions() {
@@ -92,5 +71,14 @@ public class ClientAppService {
                 .toList();
 
         return riotServerName;
+    }
+
+    public String lastTimeUpdate() {
+
+        String lastTimeUpdate = matchesRepository.getDateOfLastMatch().map(
+                LocalDate::toString
+        ).orElse("none");
+
+        return lastTimeUpdate;
     }
 }

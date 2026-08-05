@@ -5,6 +5,7 @@ import java.util.List;
 public record InfoDTO(
 
         String gameVersion,
+        long gameCreation,
         List<ParticipantDTO> participants,
         List<TeamDTO> teams
 

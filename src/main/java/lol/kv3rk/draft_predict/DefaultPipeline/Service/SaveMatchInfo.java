@@ -12,6 +12,7 @@ import lol.kv3rk.draft_predict.common.RiotDTO.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -39,12 +40,13 @@ public class SaveMatchInfo {
 
         log.info("--------------------------------------");
         double gameVersion = Double.parseDouble(extractGameVersion(matchInfo.info()).substring(0, 5));
+        LocalDate matchDate = LocalDate.ofEpochDay(extractGameCreation(matchInfo.info()));
         log.info("Game version: {}", gameVersion);
         log.info("Match server: {}", server);
         log.info("Match id: {}", matchID);
 
         MatchesEntity newMatch = MatchesEntity.builder()
-                .matchId(matchID).patch(gameVersion).server(server)
+                .matchId(matchID).patch(gameVersion).server(server).matchDate(matchDate)
                 .build();
         matchesRepository.save(newMatch);
 
@@ -101,6 +103,12 @@ public class SaveMatchInfo {
     private String extractGameVersion(InfoDTO infoDTO) {
 
         return infoDTO.gameVersion();
+
+    }
+
+    private long extractGameCreation(InfoDTO infoDTO) {
+
+        return infoDTO.gameCreation();
 
     }
 

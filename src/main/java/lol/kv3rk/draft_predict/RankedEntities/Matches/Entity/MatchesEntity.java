@@ -3,6 +3,8 @@ package lol.kv3rk.draft_predict.RankedEntities.Matches.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -19,4 +21,7 @@ public class MatchesEntity {
 
     @Column(nullable = false)
     private String server;
+
+    @Column(nullable = false)
+    private LocalDate matchDate;
 }

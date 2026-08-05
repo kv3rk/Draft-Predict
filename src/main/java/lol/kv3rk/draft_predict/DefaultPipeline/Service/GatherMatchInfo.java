@@ -1,14 +1,7 @@
 package lol.kv3rk.draft_predict.DefaultPipeline.Service;
 
-import jakarta.transaction.Transactional;
-import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
-import lol.kv3rk.draft_predict.RankedEntities.Bans.Entity.BansEntity;
-import lol.kv3rk.draft_predict.RankedEntities.Bans.Repository.BansRepository;
-import lol.kv3rk.draft_predict.RankedEntities.Matches.Entity.MatchesEntity;
-import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesRepository;
-import lol.kv3rk.draft_predict.RankedEntities.Participants.Entity.ParticipantsEntity;
-import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
-import lol.kv3rk.draft_predict.common.RiotDTO.*;
+import lol.kv3rk.draft_predict.common.RiotDTO.InfoDTO;
+import lol.kv3rk.draft_predict.common.RiotDTO.MatchDTO;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -144,13 +137,13 @@ public class GatherMatchInfo {
         if (response == null) {
 
             Thread.sleep(request_delay);
-            return new MatchDTO(new InfoDTO("", List.of(), List.of()));
+            return new MatchDTO(new InfoDTO("", 0, List.of(), List.of()));
         }
 
         if (!response.getStatusCode().is2xxSuccessful()) {
 
             Thread.sleep(request_delay);
-            return new MatchDTO(new InfoDTO("", List.of(), List.of()));
+            return new MatchDTO(new InfoDTO("", 0, List.of(), List.of()));
         }
 
         MatchDTO matchInfo = response.getBody();
