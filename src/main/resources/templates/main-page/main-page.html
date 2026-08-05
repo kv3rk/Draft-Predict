@@ -133,7 +133,7 @@
                                 </div>
                             </td>
                             <td class="col-rate">
-                                <span class="rate-badge ban" th:text="${champ.banRate} + '%'">38%</span>
+                                <span class="rate-badge ban" th:text="${#numbers.formatDecimal(champ.banRate, 1, 1)} + '%'">38%</span>
                             </td>
                         </tr>
                         </tbody>

@@ -16,19 +16,26 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
     @Query(
             nativeQuery = true,
             value = """
-                    with total_matches as(
-                    	select
-                    		count(match_id) * 2 as total
-                    	from matches m
+                    WITH actual_patch AS (
+                        SELECT MAX(patch) AS patch
+                        FROM matches
+                    ),
+                    total_matches AS (
+                        SELECT COUNT(*) * 2 AS total
+                        FROM matches
                     )
-                    select
-                    	b.champion as champion,
-                    	count(b.champion) * 100 / tm.total as ban_rate
-                    from bans b
-                    cross join total_matches as tm
-                    group by champion, tm.total
-                    order by ban_rate desc
-                    limit 5;
+                    SELECT
+                        b.champion,
+                        COUNT(*) * 100.0 / tm.total AS ban_rate
+                    FROM bans b
+                    JOIN matches m
+                        ON m.match_id = b.match_id
+                    CROSS JOIN total_matches tm
+                    CROSS JOIN actual_patch ap
+                    WHERE m.patch = ap.patch and b.champion is not null
+                    GROUP BY b.champion, tm.total
+                    ORDER BY ban_rate DESC
+                    LIMIT 5;
                     """
     )
     List<MostBannedChampions> getMostBannedChampions();
