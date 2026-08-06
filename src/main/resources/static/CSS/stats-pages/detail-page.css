@@ -316,8 +316,6 @@ body {
 
 .stats-table tbody tr {
     transition: all var(--transition-fast);
-    opacity: 0;
-    animation: rowFadeIn 0.5s var(--transition-base) forwards;
     border-radius: var(--radius-sm);
 }
 
@@ -503,17 +501,6 @@ tr:hover .champ-avatar {
     }
 }
 
-@keyframes rowFadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
 @keyframes shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
@@ -537,6 +524,44 @@ tr:hover .champ-avatar {
     background: rgba(255,255,255,0.18);
 }
 
+/* ─── Detail Page Additions ─── */
+.detail-dashboard {
+    align-items: flex-start;
+    padding-top: 40px;
+}
+
+.detail-card {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ─── Card Link (Homepage) ─── */
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-link .stats-card {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+}
+
+.card-link .stats-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: var(--shadow-md), 0 0 60px rgba(201, 169, 110, 0.15);
+    cursor: pointer;
+}
+
+.card-link .card-header {
+    margin-bottom: 0;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 900px) {
     .stats-grid {
@@ -551,6 +576,10 @@ tr:hover .champ-avatar {
 
     .stats-card {
         padding: 22px;
+    }
+
+    .detail-card {
+        max-width: 100%;
     }
 }
 
@@ -573,28 +602,4 @@ tr:hover .champ-avatar {
         height: 30px;
         font-size: 0.95rem;
     }
-}
-
-.card-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-}
-
-.card-link .stats-card {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 220px;
-}
-
-.card-link .stats-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: var(--shadow-md), 0 0 60px rgba(201, 169, 110, 0.15);
-    cursor: pointer;
-}
-
-.card-link .card-header {
-    margin-bottom: 0;
 }
