@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-
 <head>
 
     <!--    Meta-->
@@ -80,7 +78,25 @@
                         </div>
                         <div class="card-title-group">
                             <h2 class="card-title">Best Duo</h2>
-                            <p class="card-subtitle">Top Mid & Jungle synergies</p>
+                            <p class="card-subtitle">Best Duo synergies</p>
+                        </div>
+                    </div>
+                </section>
+            </a>
+
+            <a th:href="@{/draft-predict/best-trio}" class="card-link">
+                <section class="stats-card" id="bestTrioCard">
+                    <div class="card-header">
+                        <div class="card-icon trio-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="6" cy="12" r="4"/>
+                                <circle cx="12" cy="8" r="4"/>
+                                <circle cx="18" cy="12" r="4"/>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <h2 class="card-title">Best Trio</h2>
+                            <p class="card-subtitle">Best Trio synergies</p>
                         </div>
                     </div>
                 </section>

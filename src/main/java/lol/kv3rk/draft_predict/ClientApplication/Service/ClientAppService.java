@@ -3,6 +3,7 @@ package lol.kv3rk.draft_predict.ClientApplication.Service;
 import lol.kv3rk.draft_predict.ClientApplication.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.Repository.RankedRequests;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
@@ -99,5 +100,10 @@ public class ClientAppService {
     public List<BestDuo> getBestDuoChampions(String role1, String role2) {
 
         return rankedRequests.getBestDuoChampions(role1, role2);
+    }
+
+    public List<BestTrio> getBestTrioChampions(String role1, String role2, String role3) {
+
+        return rankedRequests.getBestTrioChampions(role1, role2, role3);
     }
 }

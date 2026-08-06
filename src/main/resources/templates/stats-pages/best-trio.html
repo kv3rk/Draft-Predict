@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!--    Title-->
-    <title>Best Duo | Draft Predict</title>
+    <title>Best Trio | Draft Predict</title>
 
     <!--    CSS-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,13 +16,13 @@
           rel="stylesheet">
     <link rel="stylesheet" href="/CSS/common.css">
     <link rel="stylesheet" href="/CSS/stats-pages/detail-page.css">
-    <link rel="stylesheet" href="/CSS/stats-pages/best-duo.css">
+    <link rel="stylesheet" href="/CSS/stats-pages/best-trio.css">
 
     <!--    Logo-->
     <link rel="icon" href="/IMG/logo/riot-logo.png">
 
     <!--    JS-->
-    <script src="/JS/stats-pages/best-duo.js" defer></script>
+    <script src="/JS/stats-pages/best-trio.js" defer></script>
 
 </head>
 <body>
@@ -48,24 +48,36 @@
     </header>
 
     <main class="dashboard detail-dashboard">
-        <section class="stats-card detail-card" id="bestDuoCard">
+        <section class="stats-card detail-card" id="bestTrioCard">
             <div class="card-header">
-                <div class="card-icon duo-icon">
+                <div class="card-icon trio-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="9" cy="12" r="5"/>
-                        <circle cx="15" cy="12" r="5"/>
+                        <circle cx="6" cy="12" r="4"/>
+                        <circle cx="12" cy="8" r="4"/>
+                        <circle cx="18" cy="12" r="4"/>
                     </svg>
                 </div>
                 <div class="card-title-group">
-                    <h2 class="card-title">Best Duo</h2>
-                    <p class="card-subtitle">Best Duo synergies</p>
+                    <h2 class="card-title">Best Trio</h2>
+                    <p class="card-subtitle">Best Trio synergies</p>
                 </div>
             </div>
 
             <!-- Role Filter -->
-            <div class="role-filter">
+            <div class="role-filter trio-filter">
                 <label for="role1">Role 1</label>
                 <select id="role1" class="role-select">
+                    <option value="TOP" selected>TOP</option>
+                    <option value="JUNGLE">JUNGLE</option>
+                    <option value="MIDDLE">MIDDLE</option>
+                    <option value="BOTTOM">BOTTOM</option>
+                    <option value="UTILITY">UTILITY</option>
+                </select>
+
+                <span class="role-divider">+</span>
+
+                <label for="role2">Role 2</label>
+                <select id="role2" class="role-select">
                     <option value="TOP">TOP</option>
                     <option value="JUNGLE">JUNGLE</option>
                     <option value="MIDDLE" selected>MIDDLE</option>
@@ -73,10 +85,10 @@
                     <option value="UTILITY">UTILITY</option>
                 </select>
 
-                <span class="role-divider">&</span>
+                <span class="role-divider">+</span>
 
-                <label for="role2">Role 2</label>
-                <select id="role2" class="role-select">
+                <label for="role3">Role 3</label>
+                <select id="role3" class="role-select">
                     <option value="TOP">TOP</option>
                     <option value="JUNGLE" selected>JUNGLE</option>
                     <option value="MIDDLE">MIDDLE</option>
@@ -94,30 +106,37 @@
                         <th class="col-rank">#</th>
                         <th class="col-champ">Champion 1</th>
                         <th class="col-champ">Champion 2</th>
+                        <th class="col-champ">Champion 3</th>
                         <th class="col-rate">Pick Rate</th>
                         <th class="col-rate">Win Rate</th>
                     </tr>
                     </thead>
-                    <tbody id="duoTableBody">
-                    <tr th:each="duo, iter : ${bestDuoChampions}">
+                    <tbody id="trioTableBody">
+                    <tr th:each="trio, iter : ${bestTrioChampions}">
                         <td class="col-rank" th:text="${iter.count}">1</td>
                         <td class="col-champ">
                             <div class="champ-cell">
-                                <div class="champ-avatar" th:text="${#strings.substring(duo.champion1, 0, 1)}">A</div>
-                                <span class="champ-name" th:text="${duo.champion1}">Ahri</span>
+                                <div class="champ-avatar" th:text="${#strings.substring(trio.champion1, 0, 1)}">A</div>
+                                <span class="champ-name" th:text="${trio.champion1}">Aatrox</span>
                             </div>
                         </td>
                         <td class="col-champ">
                             <div class="champ-cell">
-                                <div class="champ-avatar" th:text="${#strings.substring(duo.champion2, 0, 1)}">L</div>
-                                <span class="champ-name" th:text="${duo.champion2}">Lee Sin</span>
+                                <div class="champ-avatar" th:text="${#strings.substring(trio.champion2, 0, 1)}">S</div>
+                                <span class="champ-name" th:text="${trio.champion2}">Syndra</span>
+                            </div>
+                        </td>
+                        <td class="col-champ">
+                            <div class="champ-cell">
+                                <div class="champ-avatar" th:text="${#strings.substring(trio.champion3, 0, 1)}">L</div>
+                                <span class="champ-name" th:text="${trio.champion3}">Lee Sin</span>
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(duo.pickRate, 1, 1)} + '%'">12.5%</span>
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(trio.pickRate, 1, 1)} + '%'">8.5%</span>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge win" th:text="${#numbers.formatDecimal(duo.winRate, 1, 1)} + '%'">54.2%</span>
+                            <span class="rate-badge win" th:text="${#numbers.formatDecimal(trio.winRate, 1, 1)} + '%'">56.3%</span>
                         </td>
                     </tr>
                     </tbody>

@@ -3,6 +3,7 @@ package lol.kv3rk.draft_predict.ClientApplication.Controller;
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppService;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -67,6 +68,14 @@ public class ClientAppController {
         return "stats-pages/best-duo";
     }
 
+    @GetMapping("/best-trio")
+    public String getBestTrioPage(Model model) {
+        log.info("Entered [/draft-predict/best-trio] endpoint");
+        addCommonAttributes(model);
+        model.addAttribute("bestTrioChampions", clientAppService.getBestTrioChampions("TOP", "MIDDLE", "JUNGLE"));
+        return "stats-pages/best-trio";
+    }
+
     @GetMapping("/find/best-duo")
     @ResponseBody
     public List<BestDuo> findBestDuo(@RequestParam String role1, @RequestParam String role2) {
@@ -79,6 +88,15 @@ public class ClientAppController {
     public List<TopPerformingChampions> findWinPick(@RequestParam String orderParameter) {
         log.info("Entered [/draft-predict/find/win-pick] endpoint");
         return clientAppService.getTopPerformingChampions(orderParameter);
+    }
+
+    @GetMapping("/find/best-trio")
+    @ResponseBody
+    public List<BestTrio> findBestTrio(@RequestParam String role1,
+                                       @RequestParam String role2,
+                                       @RequestParam String role3) {
+        log.info("Entered [/draft-predict//find/best-trio] endpoint");
+        return clientAppService.getBestTrioChampions(role1, role2, role3);
     }
 
 }
