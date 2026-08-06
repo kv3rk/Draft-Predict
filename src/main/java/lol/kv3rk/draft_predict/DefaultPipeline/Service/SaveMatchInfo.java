@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Slf4j
@@ -40,7 +42,11 @@ public class SaveMatchInfo {
 
         log.info("--------------------------------------");
         double gameVersion = Double.parseDouble(extractGameVersion(matchInfo.info()).substring(0, 5));
-        LocalDate matchDate = LocalDate.ofEpochDay(extractGameCreation(matchInfo.info()));
+        LocalDate matchDate = LocalDate.from(
+                LocalDateTime.ofEpochSecond(extractGameCreation(matchInfo.info()),
+                        0,
+                        ZoneOffset.UTC)
+        );
         log.info("Game version: {}", gameVersion);
         log.info("Match server: {}", server);
         log.info("Match id: {}", matchID);
