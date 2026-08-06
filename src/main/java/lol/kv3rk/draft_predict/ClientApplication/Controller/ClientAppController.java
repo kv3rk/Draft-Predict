@@ -1,5 +1,6 @@
 package lol.kv3rk.draft_predict.ClientApplication.Controller;
 
+import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppService;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class ClientAppController {
     public String getWinPickPage(Model model) {
         log.info("Entered [/draft-predict/win-pick] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampionsByPickRate());
+        model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions("pick_rate"));
         return "stats-pages/win-pick";
     }
 
@@ -71,6 +72,13 @@ public class ClientAppController {
     public List<BestDuo> findBestDuo(@RequestParam String role1, @RequestParam String role2) {
         log.info("Entered [/draft-predict/find/best-duo] endpoint");
         return clientAppService.getBestDuoChampions(role1, role2);
+    }
+
+    @GetMapping("/find/win-pick")
+    @ResponseBody
+    public List<TopPerformingChampions> findWinPick(@RequestParam String orderParameter) {
+        log.info("Entered [/draft-predict/find/win-pick] endpoint");
+        return clientAppService.getTopPerformingChampions(orderParameter);
     }
 
 }

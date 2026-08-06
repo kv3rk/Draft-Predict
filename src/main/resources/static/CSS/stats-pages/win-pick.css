@@ -1,0 +1,23 @@
+/* ─── Sortable Headers ─── */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--transition-fast);
+    position: relative;
+}
+
+.sortable:hover {
+    color: var(--text-primary);
+}
+
+.sort-arrow {
+    display: none;
+    margin-left: 6px;
+    font-size: 0.7rem;
+    color: var(--accent-gold);
+    vertical-align: middle;
+}
+
+.sortable.active .sort-arrow {
+    display: inline-block;
+}

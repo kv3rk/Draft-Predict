@@ -54,9 +54,18 @@ public class ClientAppService {
         return actualPatch;
     }
 
-    public List<TopPerformingChampions> getTopPerformingChampionsByPickRate() {
+    public List<TopPerformingChampions> getTopPerformingChampions(String orderParameter) {
 
-        return participantsRepository.getTopPerformingChampionsByPickRate();
+        if (orderParameter.equals("pick_rate")) {
+
+            return participantsRepository.getTopPerformingChampionsByPickRate();
+
+        } else if (orderParameter.equals("win_rate")) {
+
+            return participantsRepository.getTopPerformingChampionsByWinRate();
+        }
+
+        return List.of();
     }
 
     public List<MostBannedChampions> getMostBannedChampions() {
