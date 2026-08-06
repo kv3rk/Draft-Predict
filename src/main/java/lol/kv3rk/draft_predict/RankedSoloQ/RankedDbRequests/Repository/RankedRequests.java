@@ -4,6 +4,7 @@ import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -40,8 +41,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	and p.team_id = ap.team_id
                     cross join total_matches tm
                     where
-                    	p.position = 'MIDDLE'
-                    	and ap.position = 'JUNGLE'
+                    	p.position = :role1
+                    	and ap.position = :role2
                     group by
                     	p.champion,
                     	ap.champion,
@@ -69,5 +70,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     limit 5;
                     """
     )
-    List<BestDuo> getBestDuoChampions();
+    List<BestDuo> getBestDuoChampions(
+            @Param("role1") String role1,
+            @Param("role2") String role2
+    );
 }

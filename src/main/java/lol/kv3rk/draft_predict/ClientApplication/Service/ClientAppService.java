@@ -87,8 +87,8 @@ public class ClientAppService {
         return lastTimeUpdate;
     }
 
-    public List<BestDuo> getBestDuoChampions() {
+    public List<BestDuo> getBestDuoChampions(String role1, String role2) {
 
-        return rankedRequests.getBestDuoChampions();
+        return rankedRequests.getBestDuoChampions(role1, role2);
     }
 }

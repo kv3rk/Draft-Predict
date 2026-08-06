@@ -1,12 +1,17 @@
 package lol.kv3rk.draft_predict.ClientApplication.Controller;
 
 import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppService;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/draft-predict")
@@ -57,9 +62,15 @@ public class ClientAppController {
     public String getBestDuoPage(Model model) {
         log.info("Entered [/draft-predict/best-duo] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("bestDuoChampions", clientAppService.getBestDuoChampions());
+        model.addAttribute("bestDuoChampions", clientAppService.getBestDuoChampions("MIDDLE", "JUNGLE"));
         return "stats-pages/best-duo";
     }
 
+    @GetMapping("/find/best-duo")
+    @ResponseBody
+    public List<BestDuo> findBestDuo(@RequestParam String role1, @RequestParam String role2) {
+        log.info("Entered [/draft-predict/find/best-duo] endpoint");
+        return clientAppService.getBestDuoChampions(role1, role2);
+    }
 
 }
