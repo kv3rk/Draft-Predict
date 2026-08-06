@@ -2,9 +2,11 @@ package lol.kv3rk.draft_predict.ClientApplication.Service;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
-import lol.kv3rk.draft_predict.RankedEntities.Bans.Repository.BansRepository;
-import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesRepository;
-import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.Repository.RankedRequests;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Repository.ParticipantsRepository;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotRequestParameters;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import lombok.extern.slf4j.Slf4j;
@@ -22,16 +24,19 @@ public class ClientAppService {
     private final ParticipantsRepository participantsRepository;
     private final BansRepository bansRepository;
     private final RiotRequestParameters riotRequestParameters;
+    private final RankedRequests rankedRequests;
 
     public ClientAppService(MatchesRepository matchesRepository,
                             ParticipantsRepository participantsRepository,
                             BansRepository bansRepository,
-                            RiotRequestParameters riotRequestParameters) {
+                            RiotRequestParameters riotRequestParameters,
+                            RankedRequests rankedRequests) {
 
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
         this.riotRequestParameters = riotRequestParameters;
+        this.rankedRequests = rankedRequests;
     }
 
 
@@ -80,5 +85,10 @@ public class ClientAppService {
         ).orElse("none");
 
         return lastTimeUpdate;
+    }
+
+    public List<BestDuo> getBestDuoChampions() {
+
+        return rankedRequests.getBestDuoChampions();
     }
 }

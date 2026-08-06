@@ -2,12 +2,12 @@ package lol.kv3rk.draft_predict.DefaultPipeline.Service;
 
 import jakarta.transaction.Transactional;
 import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
-import lol.kv3rk.draft_predict.RankedEntities.Bans.Entity.BansEntity;
-import lol.kv3rk.draft_predict.RankedEntities.Bans.Repository.BansRepository;
-import lol.kv3rk.draft_predict.RankedEntities.Matches.Entity.MatchesEntity;
-import lol.kv3rk.draft_predict.RankedEntities.Matches.Repository.MatchesRepository;
-import lol.kv3rk.draft_predict.RankedEntities.Participants.Entity.ParticipantsEntity;
-import lol.kv3rk.draft_predict.RankedEntities.Participants.Repository.ParticipantsRepository;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Entity.BansEntity;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Entity.ParticipantsEntity;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Repository.ParticipantsRepository;
 import lol.kv3rk.draft_predict.common.RiotDTO.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

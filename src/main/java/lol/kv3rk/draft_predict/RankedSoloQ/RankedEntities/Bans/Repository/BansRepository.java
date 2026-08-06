@@ -1,8 +1,7 @@
-package lol.kv3rk.draft_predict.RankedEntities.Bans.Repository;
+package lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Repository;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.MostBannedChampions;
-import lol.kv3rk.draft_predict.RankedEntities.Bans.Entity.BansEntity;
-import org.springframework.data.domain.Pageable;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Entity.BansEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

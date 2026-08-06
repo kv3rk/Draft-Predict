@@ -1,7 +1,7 @@
-package lol.kv3rk.draft_predict.RankedEntities.Participants.Repository;
+package lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Repository;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
-import lol.kv3rk.draft_predict.RankedEntities.Participants.Entity.ParticipantsEntity;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Entity.ParticipantsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

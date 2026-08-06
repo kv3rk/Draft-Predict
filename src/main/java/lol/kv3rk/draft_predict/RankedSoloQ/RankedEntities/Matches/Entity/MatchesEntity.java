@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.RankedEntities.Matches.Entity;
+package lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;

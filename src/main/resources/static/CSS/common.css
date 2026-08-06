@@ -259,6 +259,11 @@ body {
     color: var(--accent-ban);
 }
 
+.duo-icon {
+    background: rgba(167, 139, 250, 0.15);
+    color: #a78bfa;
+}
+
 .card-title {
     font-size: 1.125rem;
     font-weight: 700;

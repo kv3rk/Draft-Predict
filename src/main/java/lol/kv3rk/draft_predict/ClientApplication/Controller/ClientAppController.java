@@ -42,7 +42,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/win-pick] endpoint");
         addCommonAttributes(model);
         model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampionsByPickRate());
-        return "stats-pages/top-perform/win-pick";
+        return "stats-pages/win-pick";
     }
 
     @GetMapping("/ban-rates")
@@ -50,7 +50,15 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/ban-rates] endpoint");
         addCommonAttributes(model);
         model.addAttribute("mostBannedChampions", clientAppService.getMostBannedChampions());
-        return "stats-pages/top-ban/ban-rates";
+        return "stats-pages/ban-rates";
+    }
+
+    @GetMapping("/best-duo")
+    public String getBestDuoPage(Model model) {
+        log.info("Entered [/draft-predict/best-duo] endpoint");
+        addCommonAttributes(model);
+        model.addAttribute("bestDuoChampions", clientAppService.getBestDuoChampions());
+        return "stats-pages/best-duo";
     }
 
 

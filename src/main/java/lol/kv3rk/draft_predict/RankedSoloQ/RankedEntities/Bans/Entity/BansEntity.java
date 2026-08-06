@@ -1,7 +1,7 @@
-package lol.kv3rk.draft_predict.RankedEntities.Bans.Entity;
+package lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Entity;
 
 import jakarta.persistence.*;
-import lol.kv3rk.draft_predict.RankedEntities.Matches.Entity.MatchesEntity;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;
 import lombok.*;
 
 import java.util.UUID;

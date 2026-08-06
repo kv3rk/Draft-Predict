@@ -1,6 +1,6 @@
-package lol.kv3rk.draft_predict.RankedEntities.Matches.Repository;
+package lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Repository;
 
-import lol.kv3rk.draft_predict.RankedEntities.Matches.Entity.MatchesEntity;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
