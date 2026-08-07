@@ -17,7 +17,7 @@ public class MatchesEntity {
     private String matchId;
 
     @Column(nullable = false)
-    private double patch;
+    private String patch;
 
     @Column(nullable = false)
     private String server;

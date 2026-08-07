@@ -15,9 +15,25 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
     @Query(
             nativeQuery = true,
             value = """
-                    WITH actual_patch AS (
-                        SELECT MAX(patch) AS patch
-                        FROM matches
+                    with last_match as(
+                    	select
+                    		match_date
+                    	from matches m
+                    	group by m.match_date
+                    	order by m.match_date desc
+                    	limit 1
+                    ),
+                    actual_patch as(
+                    	select
+                    	patch
+                    from
+                    	matches m
+                    cross join last_match lm
+                    where
+                    	m.match_date = lm.match_date
+                    group by
+                    	m.patch
+                    limit 1
                     ),
                     total_matches AS (
                         SELECT COUNT(*) * 2 AS total

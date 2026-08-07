@@ -42,7 +42,9 @@ public class SaveMatchInfo {
     public void saveMatchInfo(MatchDTO matchInfo, String server, String matchID) {
 
         log.info("--------------------------------------");
-        double gameVersion = Double.parseDouble(extractGameVersion(matchInfo.info()).substring(0, 5));
+        String fullPatch = extractGameVersion(matchInfo.info());
+        int secondDot = fullPatch.indexOf('.', fullPatch.indexOf('.') + 1);
+        String gameVersion = fullPatch.substring(0, secondDot);
         Long epochTime = extractGameCreation(matchInfo.info());
         LocalDate matchDate = LocalDate.from(
                 LocalDateTime.ofEpochSecond(

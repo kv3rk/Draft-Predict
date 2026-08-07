@@ -48,9 +48,9 @@ public class ClientAppService {
         return actualAmountMatches;
     }
 
-    public double actualPatch() {
+    public String actualPatch() {
 
-        double actualPatch = matchesRepository.actualPatch().orElse(0.0);
+        String actualPatch = matchesRepository.actualPatch().orElse("0.0");
 
         return actualPatch;
     }

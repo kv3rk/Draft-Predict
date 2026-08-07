@@ -21,9 +21,28 @@ public interface MatchesRepository extends JpaRepository<MatchesEntity, String> 
 
     @Query(
             nativeQuery = true,
-            value = "select m.patch from matches as m group by m.patch order by m.patch desc"
+            value = """
+                    with last_match as(
+                    	select
+                    		match_date
+                    	from matches m
+                    	group by m.match_date
+                    	order by m.match_date desc
+                    	limit 1
+                    )
+                    select
+                    	patch
+                    from
+                    	matches m
+                    cross join last_match lm
+                    where
+                    	m.match_date = lm.match_date
+                    group by
+                    	m.patch
+                    limit 1;
+                    """
     )
-    Optional<Double> actualPatch();
+    Optional<String> actualPatch();
 
     @Query(
             nativeQuery = true,
