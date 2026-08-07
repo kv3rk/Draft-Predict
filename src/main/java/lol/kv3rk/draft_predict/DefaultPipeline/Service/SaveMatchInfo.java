@@ -12,6 +12,7 @@ import lol.kv3rk.draft_predict.common.RiotDTO.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -42,10 +43,13 @@ public class SaveMatchInfo {
 
         log.info("--------------------------------------");
         double gameVersion = Double.parseDouble(extractGameVersion(matchInfo.info()).substring(0, 5));
+        Long epochTime = extractGameCreation(matchInfo.info());
         LocalDate matchDate = LocalDate.from(
-                LocalDateTime.ofEpochSecond(extractGameCreation(matchInfo.info()),
+                LocalDateTime.ofEpochSecond(
+                        Instant.ofEpochMilli(epochTime).getEpochSecond(),
                         0,
-                        ZoneOffset.UTC)
+                        ZoneOffset.UTC
+                )
         );
         log.info("Game version: {}", gameVersion);
         log.info("Match server: {}", server);
