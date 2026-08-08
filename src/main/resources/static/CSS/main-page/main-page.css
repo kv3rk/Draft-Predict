@@ -21,7 +21,7 @@
     animation-delay: 0.15s;
 }
 
-#banCard {
+#bestDuoCard {
     animation-delay: 0.3s;
 }
 
@@ -29,11 +29,10 @@
     animation-delay: 0.45s;
 }
 
-#bestDuoCard {
+#champFlexCard {
     animation-delay: 0.6s;
 }
-
-#champFlexCard {
+#banCard {
     animation-delay: 0.75s;
 }
 
