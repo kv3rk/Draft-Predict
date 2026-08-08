@@ -36,7 +36,7 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
                     limit 1
                     ),
                     total_matches AS (
-                        SELECT COUNT(*) * 2 AS total
+                        SELECT COUNT(*) AS total
                         FROM matches
                     )
                     SELECT
