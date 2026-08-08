@@ -32,8 +32,13 @@
 #champFlexCard {
     animation-delay: 0.6s;
 }
-#banCard {
+
+#draftPresenceCard {
     animation-delay: 0.75s;
+}
+
+#banCard {
+    animation-delay: 0.9s;
 }
 
 /* ─── Card Link (Homepage) ─── */

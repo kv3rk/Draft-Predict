@@ -2,10 +2,7 @@ package lol.kv3rk.draft_predict.ClientApplication.Controller;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppService;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.Champion;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,6 +35,8 @@ public class ClientAppController {
         model.addAttribute("tiers", String.join(", ", clientAppService.getTierParameters()));
         model.addAttribute("timeUpdated", clientAppService.lastTimeUpdate());
     }
+
+    //-------------- Page Endpoints --------------
 
     @GetMapping("/main")
     public String getMainPage(Model model) {
@@ -86,6 +85,16 @@ public class ClientAppController {
         return "stats-pages/champ-flex";
     }
 
+    @GetMapping("/draft-presence")
+    public String getChampionDraftPresence(Model model) {
+        log.info("Entered [/draft-predict/draft-presence] endpoint");
+        addCommonAttributes(model);
+        model.addAttribute("championDraftPresence", clientAppService.getChampionDraftPresence("Yone"));
+        return "stats-pages/draft-presence";
+    }
+
+    //-------------- Info Endpoints --------------
+
     @GetMapping("/find/best-duo")
     @ResponseBody
     public List<BestDuo> findBestDuo(@RequestParam String role1, @RequestParam String role2) {
@@ -114,6 +123,13 @@ public class ClientAppController {
     public ChampionFlexibility findChampFlex(@RequestParam String name) {
         log.info("Entered [/draft-predict/find/champ-flex] endpoint");
         return clientAppService.getChampionFlexibility(name);
+    }
+
+    @GetMapping("/find/draft-presence")
+    @ResponseBody
+    public ChampionPresence findDraftPresence(@RequestParam String name) {
+        log.info("Entered [/draft-predict/find/draft-presence] endpoint");
+        return clientAppService.getChampionDraftPresence(name);
     }
 
     @GetMapping("/get/champion-list")

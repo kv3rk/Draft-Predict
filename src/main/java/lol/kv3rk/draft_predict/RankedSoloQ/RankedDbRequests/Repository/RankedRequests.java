@@ -3,6 +3,7 @@ package lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.Repository;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -296,4 +297,69 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
     ChampionFlexibility getChampionFlexibility(
             @Param("name") String name
     );
+
+    @Query(
+            nativeQuery = true,
+            value = """
+                    
+                                        with total_matches_table as(
+                                        	select
+                                        		count(m.match_id) as total_matches
+                                        	from matches m
+                                        ),
+                                        total_ban_list as(
+                                        	select
+                                        		b.champion,
+                                        		b.match_id
+                                        	from
+                                        		bans b
+                                        	where
+                                        		b.champion <> ''
+                                        	group by
+                                        		b.champion,
+                                        		b.match_id
+                                        ),
+                                        total_pick_list as (
+                                        select
+                                        		p.champion,
+                                        		p.match_id
+                                        from
+                                        	participants p
+                                        group by
+                                        		p.champion,
+                                        		p.match_id
+                                        ),
+                                        total_amount as (
+                                        select
+                                        		tpl.champion
+                                        from
+                                        		total_pick_list tpl
+                                        union all
+                                        	(
+                                        select
+                                        		tbl.champion
+                                        from
+                                        		total_ban_list tbl)
+                                        )
+                                        select
+                                        	ta.champion as champion,
+                                        	round(count(ta.champion) * 100.0 / tm.total_matches, 2) as presence
+                                        from
+                                        	total_amount ta
+                                        cross join total_matches_table tm
+                                        where
+                                        	champion = :name
+                                        group by
+                                        	champion,
+                                        	tm.total_matches
+                                        order by
+                                        	presence desc
+                                        limit 1;
+                    
+                    """
+    )
+    ChampionPresence getChampionDraftPresence(
+            @Param("name") String name
+    );
+
 }

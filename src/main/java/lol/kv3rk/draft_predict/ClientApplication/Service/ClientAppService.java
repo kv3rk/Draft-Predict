@@ -2,10 +2,7 @@ package lol.kv3rk.draft_predict.ClientApplication.Service;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.Champion;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.*;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.Repository.RankedRequests;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
@@ -117,5 +114,10 @@ public class ClientAppService {
     public List<Champion> getChampionList() {
 
         return participantsRepository.getChampionList();
+    }
+
+    public ChampionPresence getChampionDraftPresence(String name) {
+
+        return rankedRequests.getChampionDraftPresence(name);
     }
 }
