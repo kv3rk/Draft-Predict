@@ -4,6 +4,8 @@ import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppService;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.Champion;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -76,6 +78,14 @@ public class ClientAppController {
         return "stats-pages/best-trio";
     }
 
+    @GetMapping("/champ-flex")
+    public String getChampionFlexibility(Model model) {
+        log.info("Entered [/draft-predict/champ-flex] endpoint");
+        addCommonAttributes(model);
+        model.addAttribute("championFlexibility", clientAppService.getChampionFlexibility("Yone"));
+        return "stats-pages/champ-flex";
+    }
+
     @GetMapping("/find/best-duo")
     @ResponseBody
     public List<BestDuo> findBestDuo(@RequestParam String role1, @RequestParam String role2) {
@@ -99,4 +109,17 @@ public class ClientAppController {
         return clientAppService.getBestTrioChampions(role1, role2, role3);
     }
 
+    @GetMapping("/find/champ-flex")
+    @ResponseBody
+    public ChampionFlexibility findChampFlex(@RequestParam String name) {
+        log.info("Entered [/draft-predict/find/champ-flex] endpoint");
+        return clientAppService.getChampionFlexibility(name);
+    }
+
+    @GetMapping("/get/champion-list")
+    @ResponseBody
+    public List<Champion> getChampionList() {
+        log.info("Entered [/draft-predict/get/champion-list] endpoint");
+        return clientAppService.getChampionList();
+    }
 }

@@ -1,6 +1,7 @@
 package lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Repository;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.Champion;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Entity.ParticipantsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -93,5 +94,20 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     """
     )
     List<TopPerformingChampions> getTopPerformingChampionsByWinRate();
+
+    @Query(
+            nativeQuery = true,
+            value = """
+                    select
+                    	p.champion as champion
+                    from
+                    	participants p
+                    group by
+                    	champion
+                    order by
+                    	champion;
+                    """
+    )
+    List<Champion> getChampionList();
 
 }

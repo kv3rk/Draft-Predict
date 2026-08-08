@@ -2,6 +2,7 @@ package lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.Repository;
 
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -146,5 +147,153 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
             @Param("role1") String role1,
             @Param("role2") String role2,
             @Param("role3") String role3
+    );
+
+
+    @Query(
+            nativeQuery = true,
+            value = """
+                    
+                    with top_flex as(
+                    select
+                    	p.champion,
+                    	count(p.champion) as total_t
+                    from
+                    	participants p
+                    where
+                    	p.position = 'TOP'
+                    group by
+                    	p.champion
+                    ),
+                    jungle_flex as(
+                    select
+                    	p.champion,
+                    	count(p.champion) as total_j
+                    from
+                    	participants p
+                    where
+                    	p.position = 'JUNGLE'
+                    group by
+                    	p.champion
+                    ),
+                    middle_flex as(
+                    select
+                    	p.champion,
+                    	count(p.champion) as total_m
+                    from
+                    	participants p
+                    where
+                    	p.position = 'MIDDLE'
+                    group by
+                    	p.champion
+                    ),
+                    bottom_flex as(
+                    select
+                    	p.champion,
+                    	count(p.champion) as total_b
+                    from
+                    	participants p
+                    where
+                    	p.position = 'BOTTOM'
+                    group by
+                    	p.champion
+                    ),
+                    utility_flex as(
+                    select
+                    	p.champion,
+                    	count(p.champion) as total_u
+                    from
+                    	participants p
+                    where
+                    	p.position = 'UTILITY'
+                    group by
+                    	p.champion
+                    ),
+                    total_matches as (
+                    select
+                    		p.champion,
+                    		count(p.champion) as total
+                    from
+                    	participants p
+                    group by
+                    	p.champion
+                    ),
+                    result_table as (
+                    select
+                    	tm.champion,
+                    			case
+                    		when (tf.total_t * 100.0 / tm.total) > 0 then round (tf.total_t * 100.0 / tm.total,
+                    		1)
+                    		else 0
+                    	end as flexibility_top,
+                    		case
+                    		when (jf.total_j * 100.0 / tm.total) > 0 then round (jf.total_j * 100.0 / tm.total,
+                    		1)
+                    		else 0
+                    	end as flexibility_jungle,
+                    		case
+                    		when (mf.total_m * 100.0 / tm.total) > 0 then round (mf.total_m * 100.0 / tm.total,
+                    		1)
+                    		else 0
+                    	end as flexibility_middle,
+                    		case
+                    		when (bf.total_b * 100.0 / tm.total) > 0 then round (bf.total_b * 100.0 / tm.total,
+                    		1)
+                    		else 0
+                    	end as flexibility_bottom,
+                    		case
+                    		when (uf.total_u * 100.0 / tm.total) > 0 then round (uf.total_u * 100.0 / tm.total,
+                    		1)
+                    		else 0
+                    	end as flexibility_utility
+                    from
+                    	total_matches tm
+                    left join top_flex tf on
+                    	tf.champion = tm.champion
+                    left join jungle_flex jf on
+                    	jf.champion = tm.champion
+                    left join middle_flex mf on
+                    	mf.champion = tm.champion
+                    left join bottom_flex bf on
+                    	bf.champion = tm.champion
+                    left join utility_flex uf on
+                    	uf.champion = tm.champion
+                    ),
+                    avg_flexibility as (
+                    select
+                    	round(avg(rt.flexibility_top) , 1) avg_top,
+                    	round(avg(rt.flexibility_jungle) , 1) avg_jungle,
+                    	round(avg(rt.flexibility_middle) , 1) avg_middle,
+                    	round(avg(rt.flexibility_bottom) , 1) avg_bottom,
+                    	round(avg(rt.flexibility_utility) , 1) avg_utility
+                    from
+                    	result_table rt
+                    )
+                    select
+                    	rt.champion as champion,
+                    	case
+                    		when rt.flexibility_top > avg_flex.avg_top then rt.flexibility_top
+                    	end as top,
+                    	case
+                    		when rt.flexibility_jungle > avg_flex.avg_jungle then rt.flexibility_jungle
+                    	end as jungle,
+                    	case
+                    		when rt.flexibility_middle > avg_flex.avg_middle then rt.flexibility_middle
+                    	end as middle,
+                    	case
+                    		when rt.flexibility_bottom > avg_flex.avg_bottom then rt.flexibility_bottom
+                    	end as bottom,
+                    	case
+                    		when rt.flexibility_utility > avg_flex.avg_utility then rt.flexibility_utility
+                    	end as utility
+                    from
+                    	result_table rt
+                    cross join avg_flexibility avg_flex
+                    where
+                    	champion = :name;
+                    """
+    )
+    ChampionFlexibility getChampionFlexibility(
+            @Param("name") String name
     );
 }

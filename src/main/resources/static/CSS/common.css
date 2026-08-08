@@ -269,6 +269,11 @@ body {
     color: var(--accent-pick);
 }
 
+.flex-icon {
+    background: rgba(192, 132, 252, 0.15);
+    color: #c084fc;
+}
+
 .card-title {
     font-size: 1.125rem;
     font-weight: 700;
