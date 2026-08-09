@@ -126,7 +126,7 @@ function renderPresence(data) {
                     <span class="presence-symbol">%</span>
                 </div>
             </div>
-            <div class="presence-label">Pick + Ban Rate</div>
+            <div class="presence-label">Draft presence rate</div>
         </div>`;
 }
 

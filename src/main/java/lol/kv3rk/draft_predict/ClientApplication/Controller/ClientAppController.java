@@ -81,7 +81,7 @@ public class ClientAppController {
     public String getChampionFlexibility(Model model) {
         log.info("Entered [/draft-predict/champ-flex] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("championFlexibility", clientAppService.getChampionFlexibility("Yone"));
+        model.addAttribute("championFlexibility", clientAppService.getChampionFlexibility("Aatrox"));
         return "stats-pages/champ-flex";
     }
 
@@ -89,7 +89,7 @@ public class ClientAppController {
     public String getChampionDraftPresence(Model model) {
         log.info("Entered [/draft-predict/draft-presence] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("championDraftPresence", clientAppService.getChampionDraftPresence("Yone"));
+        model.addAttribute("championDraftPresence", clientAppService.getChampionDraftPresence("Aatrox"));
         return "stats-pages/draft-presence";
     }
 

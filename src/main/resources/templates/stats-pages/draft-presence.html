@@ -58,7 +58,7 @@
                 </div>
                 <div class="card-title-group">
                     <h2 class="card-title">Draft Presence</h2>
-                    <p class="card-subtitle" th:text="'Presence for ' + ${championDraftPresence.champion}">Presence for Yone</p>
+                    <p class="card-subtitle" th:text="'Presence for ' + ${championDraftPresence.champion}">Presence for Aatrox</p>
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
                             <span class="presence-symbol">%</span>
                         </div>
                     </div>
-                    <div class="presence-label">Pick + Ban Rate</div>
+                    <div class="presence-label">Draft presence rate</div>
                 </div>
 
                 <div class="presence-empty" th:if="!${championDraftPresence.presence.isPresent()}">
