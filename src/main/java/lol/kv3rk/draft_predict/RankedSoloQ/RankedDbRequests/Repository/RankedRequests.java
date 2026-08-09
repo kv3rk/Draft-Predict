@@ -92,10 +92,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	p1.champion as champion_1,
                     	p2.champion as champion_2,
                     	p3.champion as champion_3,
-                    	ROUND(
-                                COUNT(*) * 100.0 / tm.total,
-                                2
-                            ) as pick_rate,
+                    	COUNT(*) as pick_rate,
                     	ROUND(
                                 AVG(case when p1.win then 1 else 0 end) * 100,
                                 1

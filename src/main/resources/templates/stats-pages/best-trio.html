@@ -107,7 +107,7 @@
                         <th class="col-champ">Champion 1</th>
                         <th class="col-champ">Champion 2</th>
                         <th class="col-champ">Champion 3</th>
-                        <th class="col-rate">Pick Rate</th>
+                        <th class="col-rate">Games</th>
                         <th class="col-rate">Win Rate</th>
                     </tr>
                     </thead>
@@ -133,7 +133,7 @@
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(trio.pickRate, 1, 1)} + '%'">8.5%</span>
+                            <span class="rate-badge pick" th:text="${trio.pickRate}">0</span>
                         </td>
                         <td class="col-rate">
                             <span class="rate-badge win" th:text="${#numbers.formatDecimal(trio.winRate, 1, 1)} + '%'">56.3%</span>

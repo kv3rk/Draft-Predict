@@ -8,7 +8,7 @@ public interface BestTrio {
 
     String getChampion3();
 
-    double getPickRate();
+    int getPickRate();
 
     double getWinRate();
 }
