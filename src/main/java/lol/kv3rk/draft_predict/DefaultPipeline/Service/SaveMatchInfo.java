@@ -42,6 +42,20 @@ public class SaveMatchInfo {
     public void saveMatchInfo(MatchDTO matchInfo, String server, String matchID) {
 
         log.info("--------------------------------------");
+
+        //Save match general info
+        saveMatchGeneralInfo(matchInfo, server, matchID);
+
+        //Save champions pick/win rate stats
+        saveParticipantDTO(matchInfo, matchID);
+
+        //Save champions ban rate stats
+        saveTeamDTO(matchInfo, matchID);
+    }
+
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    protected void saveMatchGeneralInfo(MatchDTO matchInfo, String server, String matchID) {
+
         String fullPatch = extractGameVersion(matchInfo.info());
         int secondDot = fullPatch.indexOf('.', fullPatch.indexOf('.') + 1);
         String gameVersion = fullPatch.substring(0, secondDot);
@@ -62,6 +76,10 @@ public class SaveMatchInfo {
                 .build();
         matchesRepository.save(newMatch);
 
+    }
+
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    protected void saveParticipantDTO(MatchDTO matchInfo, String matchID) {
 
         List<ParticipantDTO> participantDTOList = extractParticipantDTOList(matchInfo.info());
         participantDTOList.forEach(participantDTO -> {
@@ -84,6 +102,10 @@ public class SaveMatchInfo {
                 }
 
         );
+    }
+
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    protected void saveTeamDTO(MatchDTO matchInfo, String matchID) {
 
         List<TeamDTO> teamDTOList = extractTeamDTOList(matchInfo.info());
         teamDTOList.forEach(teamDTO -> {
@@ -106,9 +128,7 @@ public class SaveMatchInfo {
 
                     );
                 }
-
         );
-        log.info("--------------------------------------");
 
     }
 
