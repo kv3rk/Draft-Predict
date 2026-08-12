@@ -33,4 +33,13 @@ public class ParticipantsEntity {
 
     @Column(nullable = false)
     private boolean win;
+
+    @Column(nullable = false)
+    private int xp;
+
+    @Column(nullable = false)
+    private int farm;
+
+    @Column(nullable = false)
+    private int gold;
 }

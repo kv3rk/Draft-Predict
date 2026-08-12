@@ -112,6 +112,19 @@ public class SaveMatchInfo {
                                         participantFrameDTO.xp(),
                                         participantFrameDTO.minionsKilled() + participantFrameDTO.jungleMinionsKilled(),
                                         participantFrameDTO.totalGold());
+
+                                ParticipantsEntity newParticipant = ParticipantsEntity.builder()
+                                        .matchId(matchesRepository.findByMatchId(matchID))
+                                        .champion(championName)
+                                        .position(lane)
+                                        .teamId(teamId)
+                                        .win(win)
+                                        .xp(participantFrameDTO.xp())
+                                        .farm(participantFrameDTO.minionsKilled() + participantFrameDTO.jungleMinionsKilled())
+                                        .gold(participantFrameDTO.totalGold())
+                                        .build();
+                                participantsRepository.save(newParticipant);
+
                             },
                             () -> {
                                 log.info("{} - {}: {}. Team {}. Lane stats: xp - {}, farm - {}, gold - {}",
@@ -119,18 +132,21 @@ public class SaveMatchInfo {
                                         0,
                                         0 + 0,
                                         0);
+                                ParticipantsEntity newParticipant = ParticipantsEntity.builder()
+                                        .matchId(matchesRepository.findByMatchId(matchID))
+                                        .champion(championName)
+                                        .position(lane)
+                                        .teamId(teamId)
+                                        .win(win)
+                                        .xp(0)
+                                        .farm(0)
+                                        .gold(0)
+                                        .build();
+                                participantsRepository.save(newParticipant);
                             }
 
                     );
 
-                    ParticipantsEntity newParticipant = ParticipantsEntity.builder()
-                            .matchId(matchesRepository.findByMatchId(matchID))
-                            .champion(championName)
-                            .position(lane)
-                            .teamId(teamId)
-                            .win(win)
-                            .build();
-                    participantsRepository.save(newParticipant);
 
                 }
 
