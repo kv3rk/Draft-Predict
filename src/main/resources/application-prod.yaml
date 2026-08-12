@@ -11,6 +11,10 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
 
+  http:
+    codecs:
+      max-in-memory-size: 10MB
+
 server:
   servlet:
     session:

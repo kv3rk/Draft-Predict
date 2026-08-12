@@ -9,6 +9,10 @@ import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Repository.Mat
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Entity.ParticipantsEntity;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Participants.Repository.ParticipantsRepository;
 import lol.kv3rk.draft_predict.common.RiotDTO.*;
+import lol.kv3rk.draft_predict.common.RiotDTO.TimeLine.FramesTimeLineDTO;
+import lol.kv3rk.draft_predict.common.RiotDTO.TimeLine.ParticipantFrameDTO;
+import lol.kv3rk.draft_predict.common.RiotDTO.TimeLine.ParticipantFramesDTO;
+import lol.kv3rk.draft_predict.common.RiotDTO.TimeLine.TimelineDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -39,7 +44,10 @@ public class SaveMatchInfo {
     }
 
     @Transactional
-    public void saveMatchInfo(MatchDTO matchInfo, String server, String matchID) {
+    public void saveMatchInfo(MatchDTO matchInfo,
+                              String server,
+                              String matchID,
+                              TimelineDTO timeLineMatchInfo) {
 
         log.info("--------------------------------------");
 
@@ -47,7 +55,7 @@ public class SaveMatchInfo {
         saveMatchGeneralInfo(matchInfo, server, matchID);
 
         //Save champions pick/win rate stats
-        saveParticipantDTO(matchInfo, matchID);
+        saveParticipantDTO(matchInfo, matchID, timeLineMatchInfo);
 
         //Save champions ban rate stats
         saveTeamDTO(matchInfo, matchID);
@@ -79,7 +87,9 @@ public class SaveMatchInfo {
     }
 
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    protected void saveParticipantDTO(MatchDTO matchInfo, String matchID) {
+    protected void saveParticipantDTO(MatchDTO matchInfo,
+                                      String matchID,
+                                      TimelineDTO timeLineMatchInfo) {
 
         List<ParticipantDTO> participantDTOList = extractParticipantDTOList(matchInfo.info());
         participantDTOList.forEach(participantDTO -> {
@@ -89,7 +99,30 @@ public class SaveMatchInfo {
                     boolean win = participantDTO.win();
                     int teamId = participantDTO.teamId();
 
-                    log.info("{} - {}: {}. Team {}", championName, lane, win, teamId);
+                    Optional<ParticipantFrameDTO> laneChampionStats = extractParticipantFrameDTO(
+                            lane,
+                            teamId,
+                            timeLineMatchInfo
+                    );
+
+                    laneChampionStats.ifPresentOrElse(
+                            participantFrameDTO -> {
+                                log.info("{} - {}: {}. Team {}. Lane stats: xp - {}, farm - {}, gold - {}",
+                                        championName, lane, win, teamId,
+                                        participantFrameDTO.xp(),
+                                        participantFrameDTO.minionsKilled() + participantFrameDTO.jungleMinionsKilled(),
+                                        participantFrameDTO.totalGold());
+                            },
+                            () -> {
+                                log.info("{} - {}: {}. Team {}. Lane stats: xp - {}, farm - {}, gold - {}",
+                                        championName, lane, win, teamId,
+                                        0,
+                                        0 + 0,
+                                        0);
+                            }
+
+                    );
+
                     ParticipantsEntity newParticipant = ParticipantsEntity.builder()
                             .matchId(matchesRepository.findByMatchId(matchID))
                             .champion(championName)
@@ -160,4 +193,72 @@ public class SaveMatchInfo {
 
         return teamDTO.bans();
     }
+
+    private Optional<ParticipantFrameDTO> extractParticipantFrameDTO(String lane, int teamId, TimelineDTO timeLineMatchInfo) {
+
+
+        ParticipantFramesDTO laneChampionStats = timeLineMatchInfo.info()
+                .frames()
+                .stream()
+                .filter(framesTimeLineDTO ->
+                        framesTimeLineDTO.timestamp() > 890000 && framesTimeLineDTO.timestamp() < 910000
+                )
+                .findFirst()
+                .orElse(new FramesTimeLineDTO(0, new ParticipantFramesDTO(
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0),
+                        new ParticipantFrameDTO(0, 0, 0, 0)
+                )))
+                .participantFrames();
+
+
+        if (teamId == 100) {
+
+            Optional<ParticipantFrameDTO> participantFrameDTOBlueSide = switch (lane) {
+                case "TOP":
+                    yield Optional.of(laneChampionStats._1());
+                case "JUNGLE":
+                    yield Optional.of(laneChampionStats._2());
+                case "MIDDLE":
+                    yield Optional.of(laneChampionStats._3());
+                case "BOTTOM":
+                    yield Optional.of(laneChampionStats._4());
+                case "UTILITY":
+                    yield Optional.of(laneChampionStats._5());
+                default:
+                    yield Optional.empty();
+            };
+
+            return participantFrameDTOBlueSide;
+
+        } else {
+
+            Optional<ParticipantFrameDTO> participantFrameDTORedSide = switch (lane) {
+                case "TOP":
+                    yield Optional.of(laneChampionStats._6());
+                case "JUNGLE":
+                    yield Optional.of(laneChampionStats._7());
+                case "MIDDLE":
+                    yield Optional.of(laneChampionStats._8());
+                case "BOTTOM":
+                    yield Optional.of(laneChampionStats._9());
+                case "UTILITY":
+                    yield Optional.of(laneChampionStats._10());
+                default:
+                    yield Optional.empty();
+            };
+
+            return participantFrameDTORedSide;
+
+        }
+
+    }
+
 }

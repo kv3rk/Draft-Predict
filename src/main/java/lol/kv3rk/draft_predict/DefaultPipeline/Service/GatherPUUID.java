@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -146,11 +147,17 @@ public class GatherPUUID {
                         continue;
                     }
 
-                    Set<LeagueEntryDTO> setOfPuuid = response.getBody();
+                    //Dev profile feature for testing
+//                    if (tier.equals("CHALLENGER") && finalCountPages > 1) {
+//
+//                        Thread.sleep(request_delay);
+//                        countPages = 1;
+//                        break division;
+//                    }
 
                     countPages++;
 
-                    Set<String> puuids = getPUUIDForPlayers(setOfPuuid);
+                    Set<String> puuids = getPUUIDForPlayers(response.getBody());
 
                     allPlayersPuuidFromServer.addAll(puuids);
 
@@ -171,7 +178,7 @@ public class GatherPUUID {
 
     private Set<String> getPUUIDForPlayers(Set<LeagueEntryDTO> setOfPlayers) {
 
-        Set<String> puuids = new LinkedHashSet<>();
+        List<String> puuids = new ArrayList<>();
 
         setOfPlayers.forEach(leagueEntryDTO -> {
 
@@ -180,7 +187,10 @@ public class GatherPUUID {
 
         });
 
-        return puuids;
+//        Set<String> setPuuids = Set.copyOf(puuids.subList(0,5));
+        Set<String> setPuuids = Set.copyOf(puuids);
+
+        return setPuuids;
     }
 
 

@@ -21,14 +21,14 @@ public class DevScheduledInvocationSystem {
         this.championIdDB = championIdDB;
     }
 
-    @Scheduled(initialDelay = Long.MAX_VALUE, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
     public void everyDayRoutine() throws InterruptedException {
 
         championIdDB.populateChampionAndIdsDB();
         gatherMatchInfo.getEUWMatchInfo();
-        gatherMatchInfo.getNAMatchInfo();
-        gatherMatchInfo.getKRMatchInfo();
-        gatherMatchInfo.getEUNEMatchInfo();
+//        gatherMatchInfo.getNAMatchInfo();
+//        gatherMatchInfo.getKRMatchInfo();
+//        gatherMatchInfo.getEUNEMatchInfo();
 
     }
 }

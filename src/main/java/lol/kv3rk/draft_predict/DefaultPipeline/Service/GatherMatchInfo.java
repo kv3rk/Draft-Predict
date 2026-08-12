@@ -2,15 +2,19 @@ package lol.kv3rk.draft_predict.DefaultPipeline.Service;
 
 import lol.kv3rk.draft_predict.common.RiotDTO.InfoDTO;
 import lol.kv3rk.draft_predict.common.RiotDTO.MatchDTO;
+import lol.kv3rk.draft_predict.common.RiotDTO.TimeLine.InfoTimeLineDTO;
+import lol.kv3rk.draft_predict.common.RiotDTO.TimeLine.TimelineDTO;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URI;
+import java.sql.Time;
 import java.util.List;
 
 @Slf4j
@@ -96,10 +100,14 @@ public class GatherMatchInfo {
 
                     try {
 
-                        MatchDTO matchInfo = formatResponse(webClient, matchID);
-                        if (!matchInfo.info().gameVersion().isEmpty()) {
+                        MatchDTO matchInfo = formatMatchInfoResponse(webClient, matchID);
+                        TimelineDTO timeLineMatchInfo = formatMatchTimeLineInfoResponse(
+                                webClient, matchID
+                        );
+                        if (!(matchInfo.info().gameVersion().isEmpty() ||
+                                timeLineMatchInfo.info().frames().isEmpty())) {
 
-                            saveMatchInfo.saveMatchInfo(matchInfo, server, matchID);
+                            saveMatchInfo.saveMatchInfo(matchInfo, server, matchID, timeLineMatchInfo);
                         }
 
                     } catch (InterruptedException e) {
@@ -113,8 +121,8 @@ public class GatherMatchInfo {
 
     }
 
-    private MatchDTO formatResponse(WebClient regionalWebClient,
-                                    String matchID) throws InterruptedException {
+    private MatchDTO formatMatchInfoResponse(WebClient regionalWebClient,
+                                             String matchID) throws InterruptedException {
 
         ResponseEntity<MatchDTO> response = regionalWebClient
                 .get()
@@ -152,6 +160,47 @@ public class GatherMatchInfo {
 
         return matchInfo;
 
+    }
+
+    private TimelineDTO formatMatchTimeLineInfoResponse(WebClient regionalWebClient,
+                                                        String matchID) throws InterruptedException {
+
+
+        ResponseEntity<TimelineDTO> response = regionalWebClient
+                .get()
+                .uri(
+                        "/lol/match/v5/matches",
+                        (uriBuilder) -> {
+
+                            return URI.create(uriBuilder
+                                    .pathSegment(matchID)
+                                    .pathSegment("timeline")
+                                    .queryParam("api_key", api_key)
+                                    .toUriString());
+                        }
+                )
+                .retrieve()
+                .toEntity(TimelineDTO.class)
+                .block();
+
+        if (response == null) {
+
+            Thread.sleep(request_delay);
+            return new TimelineDTO(new InfoTimeLineDTO(List.of()));
+        }
+
+        if (!response.getStatusCode().is2xxSuccessful()){
+
+            Thread.sleep(request_delay);
+            return new TimelineDTO(new InfoTimeLineDTO(List.of()));
+        }
+
+
+        TimelineDTO timelineDTO = response.getBody();
+
+        Thread.sleep(request_delay);
+
+        return timelineDTO;
     }
 
 }
