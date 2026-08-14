@@ -21,7 +21,8 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	COUNT(*) as total
                     from
                     	matches as m
-                    where m.patch = actual_patch()
+                    cross join actual_patch() ap(patch)
+                    where m.patch = ap.patch
                     )
                     select
                     	p.champion as champion,
@@ -31,7 +32,8 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	participants p
                     join matches m on m.match_id = p.match_id
                     cross join total_matches tm
-                    where m.patch = actual_patch()
+                    cross join actual_patch() ap(patch)
+                    where m.patch = ap.patch
                     group by
                     	champion,
                     	tm.total
@@ -50,7 +52,8 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	    COUNT(*) as total
                         from
                     	    matches as m
-                        where m.patch = actual_patch()
+                        cross join actual_patch() ap(patch)
+                        where m.patch = ap.patch
                     )
                     select
                     	p.champion as champion,
@@ -60,7 +63,8 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	participants p
                     join matches m on m.match_id = p.match_id
                     cross join total_matches tm
-                    where m.patch = actual_patch()
+                    cross join actual_patch() ap(patch)
+                    where m.patch = ap.patch
                     group by
                     	champion,
                     	tm.total

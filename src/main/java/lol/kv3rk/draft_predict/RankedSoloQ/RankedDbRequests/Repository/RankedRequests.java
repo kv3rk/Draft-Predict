@@ -20,7 +20,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	COUNT(*) as total
                     from
                     	matches as m
-                    where m.patch = actual_patch()
+                    cross join actual_patch() ap(patch)
+                    where m.patch = ap.patch
                     ),
                     duo_stats as (
                     select
@@ -44,10 +45,11 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                         on
                         m.match_id = p.match_id
                     cross join total_matches tm
+                    cross join actual_patch() ap(patch)
                     where
                     	p.position = :role1
                     	and ap.position = :role2
-                        and m.patch = actual_patch()
+                        and m.patch = ap.patch
                     group by
                     	p.champion,
                     	ap.champion,
@@ -88,7 +90,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	COUNT(*) as total
                     from
                     	matches as m
-                    where m.patch = actual_patch()
+                    cross join actual_patch() ap(patch)
+                    where m.patch = ap.patch
                     ),
                     trio_stats as (
                     select
@@ -114,11 +117,12 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                         on
                         p1.match_id = m.match_id
                     cross join total_matches tm
+                    cross join actual_patch() ap(patch)
                     where
                     	p1.position = :role1
                     	and p2.position = :role2
                     	and p3.position = :role3
-                        and m.patch = actual_patch()
+                        and m.patch = ap.patch
                     group by
                     	p1.champion,
                     	p2.champion,
@@ -384,13 +388,14 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     join matches m
                         on
                     	m.match_id = p.match_id
+                    cross join actual_patch() ap(patch)
                     where
                     	p.xp > 1
                     	and p2.xp > 1
                     	and p.champion = :champion1
                     	and p2.champion = :champion2
                     	and p.position = :lane
-                    	and m.patch = actual_patch()
+                    	and m.patch = ap.patch
                     group by
                     	p.champion,
                     	p2.champion;

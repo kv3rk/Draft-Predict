@@ -18,7 +18,8 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
                     with total_matches AS (
                         SELECT COUNT(*) AS total
                         FROM matches as m
-                        where m.patch = actual_patch()
+                        cross join actual_patch() ap(patch)
+                        where m.patch = ap.patch
                     )
                     SELECT
                         b.champion,
@@ -27,7 +28,8 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
                     JOIN matches m
                         ON m.match_id = b.match_id
                     CROSS JOIN total_matches tm
-                    WHERE m.patch = actual_patch() and b.champion is not null
+                    cross join actual_patch() ap(patch)
+                    WHERE m.patch = ap.patch and b.champion is not null
                     GROUP BY b.champion, tm.total
                     ORDER BY ban_rate DESC
                     LIMIT 5;

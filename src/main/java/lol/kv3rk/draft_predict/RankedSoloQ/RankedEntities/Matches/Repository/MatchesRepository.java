@@ -19,7 +19,8 @@ public interface MatchesRepository extends JpaRepository<MatchesEntity, String> 
                     select
                         COUNT(m.match_id)
                     from matches as m
-                    where m.patch=actual_patch();
+                    cross join actual_patch() ap(patch)
+                    where m.patch = ap.patch
                     """
     )
     Optional<Long> countMatches();
