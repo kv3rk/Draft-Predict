@@ -26,6 +26,9 @@ function init() {
 async function loadPatchList() {
     const patchSelect = document.getElementById('patchSelect');
 
+    // Если уже есть опции от Thymeleaf (не только заглушка), не трогаем
+    if (patchSelect.options.length > 1) return;
+
     try {
         const response = await fetch('/draft-predict/get/patch-list', {
             method: 'GET',
@@ -50,7 +53,10 @@ async function loadPatchList() {
 
     } catch (err) {
         console.error('Failed to load patch list:', err);
-        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
+        // Не затираем существующие опции, если они есть
+        if (patchSelect.options.length <= 1) {
+            patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
+        }
     }
 }
 
