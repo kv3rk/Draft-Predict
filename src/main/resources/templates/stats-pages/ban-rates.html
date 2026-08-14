@@ -16,12 +16,13 @@
           rel="stylesheet">
     <link rel="stylesheet" href="/CSS/stats-pages/detail-page.css">
     <link rel="stylesheet" href="/CSS/common.css">
+    <link rel="stylesheet" href="/CSS/stats-pages/ban-rates.css">
 
     <!--    Logo-->
     <link rel="icon" href="/IMG/logo/riot-logo.png">
 
     <!--    JS-->
-    <script src="/JS/main-page/main-page.js"></script>
+    <script src="/JS/stats-pages/ban-rates.js" defer></script>
 
 </head>
 <body>
@@ -58,6 +59,18 @@
                     <p class="card-subtitle">Most banned champions</p>
                 </div>
             </div>
+
+            <!-- Patch Filter -->
+            <div class="patch-filter">
+                <div class="filter-group">
+                    <label for="patchSelect">Patch</label>
+                    <select id="patchSelect" class="patch-select">
+                        <option value="" disabled>Loading patches...</option>
+                    </select>
+                </div>
+                <button id="searchBtn" class="search-btn" type="button">Search</button>
+            </div>
+
             <div class="table-wrapper">
                 <table class="stats-table">
                     <thead>

@@ -68,9 +68,16 @@ public class ClientAppService {
         return List.of();
     }
 
-    public List<MostBannedChampions> getMostBannedChampions() {
+    public List<MostBannedChampions> getMostBannedChampions(String patch) {
 
-        return bansRepository.getMostBannedChampions();
+        if (patch.equals("All patches")){
+
+            return bansRepository.getMostBannedChampionsAllPatches();
+        } else {
+
+            return bansRepository.getMostBannedChampions(patch);
+        }
+
     }
 
     public List<String> getTierParameters() {
@@ -124,5 +131,14 @@ public class ClientAppService {
     public CounterPick getCounterPick(String champion1, String champion2, String lane) {
 
         return rankedRequests.getCounterPicks(champion1, champion2, lane);
+    }
+
+    public List<String> getPatchList() {
+
+        List<String> allPatches = matchesRepository.getPatchList();
+
+        allPatches.addFirst("All patches");
+
+        return allPatches;
     }
 }

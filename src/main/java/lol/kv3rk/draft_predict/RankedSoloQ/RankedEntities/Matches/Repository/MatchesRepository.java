@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,8 +20,6 @@ public interface MatchesRepository extends JpaRepository<MatchesEntity, String> 
                     select
                         COUNT(m.match_id)
                     from matches as m
-                    cross join actual_patch() ap(patch)
-                    where m.patch = ap.patch
                     """
     )
     Optional<Long> countMatches();
@@ -43,4 +42,19 @@ public interface MatchesRepository extends JpaRepository<MatchesEntity, String> 
                     """
     )
     Optional<LocalDate> getDateOfLastMatch();
+
+    @Query(
+            nativeQuery = true,
+            value = """
+                    select
+                    	m.patch
+                    from
+                    	matches m
+                    group by
+                    	patch
+                    order by
+                    	patch;
+                    """
+    )
+    List<String> getPatchList();
 }

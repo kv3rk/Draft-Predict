@@ -1,5 +1,6 @@
 package lol.kv3rk.draft_predict.ClientApplication.Controller;
 
+import lol.kv3rk.draft_predict.ClientApplication.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ClientApplication.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppService;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.*;
@@ -34,6 +35,7 @@ public class ClientAppController {
         model.addAttribute("servers", String.join(", ", clientAppService.getRiotServerName()));
         model.addAttribute("tiers", String.join(", ", clientAppService.getTierParameters()));
         model.addAttribute("timeUpdated", clientAppService.lastTimeUpdate());
+        model.addAttribute("patchList", clientAppService.getPatchList());
     }
 
     //-------------- Page Endpoints --------------
@@ -57,7 +59,9 @@ public class ClientAppController {
     public String getBanRatesPage(Model model) {
         log.info("Entered [/draft-predict/ban-rates] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("mostBannedChampions", clientAppService.getMostBannedChampions());
+        model.addAttribute("mostBannedChampions", clientAppService.getMostBannedChampions(
+                clientAppService.actualPatch()
+        ));
         return "stats-pages/ban-rates";
     }
 
@@ -156,5 +160,19 @@ public class ClientAppController {
                                        @RequestParam String lane) {
         log.info("Entered [/draft-predict/get/counter-pick] endpoint");
         return clientAppService.getCounterPick(champion1, champion2, lane);
+    }
+
+    @GetMapping("/get/patch-list")
+    @ResponseBody
+    public List<String> getPatchList() {
+        log.info("Entered [/draft-predict/get/patch-list] endpoint");
+        return clientAppService.getPatchList();
+    }
+
+    @GetMapping("/find/ban-rates")
+    @ResponseBody
+    public List<MostBannedChampions> findBanRates(@RequestParam String patch) {
+        log.info("Entered [/draft-predict/find/ban-rates] endpoint");
+        return clientAppService.getMostBannedChampions(patch);
     }
 }
