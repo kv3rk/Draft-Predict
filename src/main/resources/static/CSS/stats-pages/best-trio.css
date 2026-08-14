@@ -4,36 +4,64 @@
     color: var(--accent-pick);
 }
 
-/* ─── Role Filter overrides ─── */
+/* ─── Role Filter ─── */
 .role-filter {
+    display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 24px;
     padding: 16px 20px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-card);
+    flex-wrap: wrap;
     animation: fadeSlideUp 0.6s 0.2s both;
 }
 
 .role-filter label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-/* ─── Custom Select overrides ─── */
+/* ─── Role Select ─── */
 .role-select {
+    appearance: none;
+    -webkit-appearance: none;
     background: var(--bg-secondary);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
     padding: 10px 36px 10px 14px;
+    color: var(--text-primary);
     font-family: 'Inter', sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b92a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    min-width: 120px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    min-width: 120px;
+}
+
+.role-select:hover {
+    border-color: var(--border-hover);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px var(--accent-gold-glow);
 }
 
 .role-select option {
     background-color: #1a2340;
+    color: var(--text-primary);
     font-weight: 600;
     padding: 8px;
 }
@@ -43,7 +71,7 @@
     color: var(--bg-primary);
 }
 
-/* ─── Divider ─── */
+/* ─── Role Divider ─── */
 .role-divider {
     color: var(--accent-gold);
     font-weight: 700;
@@ -51,18 +79,71 @@
     user-select: none;
 }
 
-/* ─── Search Button override ─── */
-.role-filter .search-btn {
+/* ─── Patch Select (внутри role-filter) ─── */
+.patch-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 10px 36px 10px 14px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b92a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    min-width: 120px;
+}
+
+.patch-select:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px var(--accent-gold-glow);
+}
+
+.patch-select option {
+    background-color: #1a2340;
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 8px;
+}
+
+/* ─── Search Button ─── */
+.search-btn {
     margin-left: auto;
     padding: 10px 28px;
+    background: linear-gradient(135deg, var(--accent-gold), #a08050);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
     box-shadow: 0 4px 16px var(--accent-gold-glow);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.role-filter .search-btn:hover {
+.search-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 24px var(--accent-gold-glow);
+}
+
+.search-btn:active {
+    transform: translateY(0);
+}
+
+.search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* ─── Responsive ─── */
@@ -82,7 +163,7 @@
         margin: 2px 0;
     }
 
-    .role-filter .search-btn {
+    .search-btn {
         margin-left: 0;
         width: 100%;
         margin-top: 4px;

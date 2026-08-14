@@ -1,11 +1,5 @@
-/* ─── Flex Icon ─── */
-.flex-icon {
-    background: rgba(167, 139, 250, 0.15);
-    color: #a78bfa;
-}
-
-/* ─── Champion Filter ─── */
-.champion-filter {
+/* ─── Patch Filter ─── */
+.patch-filter {
     display: flex;
     align-items: flex-end;
     gap: 12px;
@@ -13,41 +7,16 @@
     flex-wrap: wrap;
 }
 
-.champion-filter label {
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group label {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
-}
-
-/* ─── Champion Select ─── */
-.champion-select {
-    min-width: 200px;
-    max-width: 280px;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-card);
-    background: rgba(15, 20, 35, 0.8);
-    color: var(--text-primary);
-    font-size: 0.9375rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b92a8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
-}
-
-.champion-select:focus {
-    outline: none;
-    border-color: var(--accent-gold);
-    box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
-}
-
-.champion-select option {
-    background: var(--bg-primary);
-    color: var(--text-primary);
 }
 
 /* ─── Patch Select ─── */
@@ -81,14 +50,6 @@
     color: var(--text-primary);
 }
 
-/* ─── Filter Divider ─── */
-.filter-divider {
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.9375rem;
-    padding-bottom: 10px;
-}
-
 /* ─── Search Button ─── */
 .search-btn {
     padding: 10px 24px;
@@ -117,39 +78,13 @@
     cursor: not-allowed;
 }
 
-/* ─── Role Cell ─── */
-.role-cell {
-    display: flex;
-    align-items: center;
-}
-
-.role-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-card);
-}
-
-/* ─── Column Widths ─── */
-.col-role {
-    min-width: 120px;
-}
-
 /* ─── Responsive ─── */
 @media (max-width: 480px) {
-    .champion-filter {
+    .patch-filter {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .champion-select,
     .patch-select {
         max-width: none;
     }
