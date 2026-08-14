@@ -120,4 +120,9 @@ public class ClientAppService {
 
         return rankedRequests.getChampionDraftPresence(name);
     }
+
+    public CounterPick getCounterPick(String champion1, String champion2, String lane) {
+
+        return rankedRequests.getCounterPicks(champion1, champion2, lane);
+    }
 }

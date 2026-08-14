@@ -37,8 +37,12 @@
     animation-delay: 0.75s;
 }
 
-#banCard {
+#counterPickCard {
     animation-delay: 0.9s;
+}
+
+#banCard {
+    animation-delay: 1.05s;
 }
 
 /* ─── Card Link (Homepage) ─── */

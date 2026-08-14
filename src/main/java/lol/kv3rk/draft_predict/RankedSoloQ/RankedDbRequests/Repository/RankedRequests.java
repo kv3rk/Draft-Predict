@@ -1,9 +1,6 @@
 package lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.Repository;
 
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
-import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
+import lol.kv3rk.draft_predict.RankedSoloQ.RankedDbRequests.DTO.*;
 import lol.kv3rk.draft_predict.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +19,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     select
                     	COUNT(*) as total
                     from
-                    	matches
+                    	matches as m
+                    where m.patch = actual_patch()
                     ),
                     duo_stats as (
                     select
@@ -42,10 +40,14 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                           on
                     	p.match_id = ap.match_id
                     	and p.team_id = ap.team_id
+                    join matches m
+                        on
+                        m.match_id = p.match_id
                     cross join total_matches tm
                     where
                     	p.position = :role1
                     	and ap.position = :role2
+                        and m.patch = actual_patch()
                     group by
                     	p.champion,
                     	ap.champion,
@@ -85,7 +87,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     select
                     	COUNT(*) as total
                     from
-                    	matches
+                    	matches as m
+                    where m.patch = actual_patch()
                     ),
                     trio_stats as (
                     select
@@ -107,11 +110,15 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	on
                     	p3.match_id = p2.match_id
                     	and p3.team_id = p2.team_id
+                    join matches m
+                        on
+                        p1.match_id = m.match_id
                     cross join total_matches tm
                     where
                     	p1.position = :role1
                     	and p2.position = :role2
                     	and p3.position = :role3
+                        and m.patch = actual_patch()
                     group by
                     	p1.champion,
                     	p2.champion,
@@ -357,6 +364,43 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
     )
     ChampionPresence getChampionDraftPresence(
             @Param("name") String name
+    );
+
+    @Query(
+            nativeQuery = true,
+            value = """
+                    select
+                    	p.champion as champion1,
+                    	p2.champion as champion2,
+                    	round(avg(p.xp - p2.xp), 1) as xp,
+                    	round(avg(p.farm - p2.farm), 1) as farm,
+                    	round(avg(p.gold - p2.gold), 1) as gold
+                    from
+                    	participants p
+                    join participants p2
+                        on
+                    	p.match_id = p2.match_id
+                    	and p.position = p2.position
+                    join matches m
+                        on
+                    	m.match_id = p.match_id
+                    where
+                    	p.xp > 1
+                    	and p2.xp > 1
+                    	and p.champion = :champion1
+                    	and p2.champion = :champion2
+                    	and p.position = :lane
+                    	and m.patch = actual_patch()
+                    group by
+                    	p.champion,
+                    	p2.champion;
+                    
+                    """
+    )
+    CounterPick getCounterPicks(
+            @Param("champion1") String champion1,
+            @Param("champion2") String champion2,
+            @Param("lane") String lane
     );
 
 }

@@ -93,6 +93,16 @@ public class ClientAppController {
         return "stats-pages/draft-presence";
     }
 
+    @GetMapping("/counter-pick")
+    public String getCounterPick(Model model) {
+        log.info("Entered [/draft-predict/counter-pick] endpoint");
+        addCommonAttributes(model);
+        model.addAttribute("championCounterPick", clientAppService.getCounterPick(
+                "Aatrox", "Ahri", "MIDDLE"
+        ));
+        return "stats-pages/counter-pick";
+    }
+
     //-------------- Info Endpoints --------------
 
     @GetMapping("/find/best-duo")
@@ -137,5 +147,14 @@ public class ClientAppController {
     public List<Champion> getChampionList() {
         log.info("Entered [/draft-predict/get/champion-list] endpoint");
         return clientAppService.getChampionList();
+    }
+
+    @GetMapping("/get/counter-pick")
+    @ResponseBody
+    public CounterPick findCounterPick(@RequestParam String champion1,
+                                       @RequestParam String champion2,
+                                       @RequestParam String lane) {
+        log.info("Entered [/draft-predict/get/counter-pick] endpoint");
+        return clientAppService.getCounterPick(champion1, champion2, lane);
     }
 }

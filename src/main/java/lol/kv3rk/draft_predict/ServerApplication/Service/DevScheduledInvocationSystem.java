@@ -16,12 +16,12 @@ public class DevScheduledInvocationSystem {
     private final ChampionIdDB championIdDB;
 
     public DevScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
-                                         ChampionIdDB championIdDB) {
+                                        ChampionIdDB championIdDB) {
         this.gatherMatchInfo = gatherMatchInfo;
         this.championIdDB = championIdDB;
     }
 
-    @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = Long.MAX_VALUE, fixedDelay = Long.MAX_VALUE)
     public void everyDayRoutine() throws InterruptedException {
 
         championIdDB.populateChampionAndIdsDB();
