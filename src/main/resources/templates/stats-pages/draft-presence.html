@@ -69,7 +69,6 @@
                     <option value="" disabled selected>Loading champions...</option>
                 </select>
 
-                <!-- Patch filer -->
                 <span class="filter-divider">|</span>
                 <label for="patchSelect">Patch</label>
                 <select id="patchSelect" class="patch-select">
@@ -80,23 +79,28 @@
             </div>
 
             <div class="presence-display" id="presenceDisplay">
-                <div class="presence-value-wrapper" th:if="${championDraftPresence.presence.isPresent()}">
+                <!-- ИСПРАВЛЕНО: orElse(null) для Optional -->
+                <div class="presence-value-wrapper"
+                     th:with="presenceVal=${championDraftPresence != null && championDraftPresence.presence != null ? championDraftPresence.presence.orElse(null) : null}"
+                     th:if="${presenceVal != null}">
                     <div class="presence-ring">
                         <svg class="presence-ring-svg" viewBox="0 0 120 120">
                             <circle class="presence-ring-bg" cx="60" cy="60" r="54"/>
                             <circle class="presence-ring-progress" cx="60" cy="60" r="54"
-                                    th:stroke-dasharray="${championDraftPresence.presence.get() * 3.39} + ' 339.292'"
-                                    th:style="'stroke-dashoffset: 0; --target-progress: ' + ${championDraftPresence.presence.get()}"/>
+                                    th:stroke-dasharray="${presenceVal * 3.39} + ' 339.292'"
+                                    th:style="'stroke-dashoffset: 0; --target-progress: ' + ${presenceVal}"/>
                         </svg>
                         <div class="presence-number">
-                            <span class="presence-percent" th:text="${#numbers.formatDecimal(championDraftPresence.presence.get(), 1, 1)}">0.0</span>
+                            <span class="presence-percent" th:text="${#numbers.formatDecimal(presenceVal, 1, 1)}">0.0</span>
                             <span class="presence-symbol">%</span>
                         </div>
                     </div>
                     <div class="presence-label">Draft presence rate</div>
                 </div>
 
-                <div class="presence-empty" th:if="!${championDraftPresence.presence.isPresent()}">
+                <div class="presence-empty"
+                     th:with="presenceVal=${championDraftPresence != null && championDraftPresence.presence != null ? championDraftPresence.presence.orElse(null) : null}"
+                     th:if="${presenceVal == null}">
                     <p>No presence data found for this champion.</p>
                 </div>
             </div>

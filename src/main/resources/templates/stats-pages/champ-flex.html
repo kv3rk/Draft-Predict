@@ -68,6 +68,13 @@
                     <option value="" disabled selected>Loading champions...</option>
                 </select>
 
+                <!-- Patch filter -->
+                <span class="filter-divider">|</span>
+                <label for="patchSelect">Patch</label>
+                <select id="patchSelect" class="patch-select">
+                    <option value="" disabled>Loading patches...</option>
+                </select>
+
                 <button id="searchBtn" class="search-btn" type="button">Search</button>
             </div>
 
@@ -82,7 +89,9 @@
                     </tr>
                     </thead>
                     <tbody id="flexTableBody">
-                    <tr th:if="${championFlexibility.top.isPresent()}" style="animation-delay: 0.06s">
+                    <!-- ИСПРАВЛЕНО: orElse(null) вместо isPresent()/get() -->
+                    <tr th:with="topVal=${championFlexibility.top != null ? championFlexibility.top.orElse(null) : null}"
+                        th:if="${topVal != null}" style="animation-delay: 0.06s">
                         <td class="col-rank">1</td>
                         <td class="col-role">
                             <div class="role-cell">
@@ -90,15 +99,16 @@
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(championFlexibility.top.get(), 1, 1)} + '%'">45.2%</span>
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(topVal, 1, 1)} + '%'">45.2%</span>
                         </td>
                         <td class="col-bar">
                             <div class="bar-track">
-                                <div class="bar-fill pick" th:style="'width:' + ${championFlexibility.top.get()} + '%'"></div>
+                                <div class="bar-fill pick" th:style="'width:' + ${topVal} + '%'"></div>
                             </div>
                         </td>
                     </tr>
-                    <tr th:if="${championFlexibility.jungle.isPresent()}" style="animation-delay: 0.12s">
+                    <tr th:with="jungleVal=${championFlexibility.jungle != null ? championFlexibility.jungle.orElse(null) : null}"
+                        th:if="${jungleVal != null}" style="animation-delay: 0.12s">
                         <td class="col-rank">2</td>
                         <td class="col-role">
                             <div class="role-cell">
@@ -106,15 +116,16 @@
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(championFlexibility.jungle.get(), 1, 1)} + '%'">12.5%</span>
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(jungleVal, 1, 1)} + '%'">12.5%</span>
                         </td>
                         <td class="col-bar">
                             <div class="bar-track">
-                                <div class="bar-fill pick" th:style="'width:' + ${championFlexibility.jungle.get()} + '%'"></div>
+                                <div class="bar-fill pick" th:style="'width:' + ${jungleVal} + '%'"></div>
                             </div>
                         </td>
                     </tr>
-                    <tr th:if="${championFlexibility.middle.isPresent()}" style="animation-delay: 0.18s">
+                    <tr th:with="middleVal=${championFlexibility.middle != null ? championFlexibility.middle.orElse(null) : null}"
+                        th:if="${middleVal != null}" style="animation-delay: 0.18s">
                         <td class="col-rank">3</td>
                         <td class="col-role">
                             <div class="role-cell">
@@ -122,15 +133,16 @@
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(championFlexibility.middle.get(), 1, 1)} + '%'">38.7%</span>
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(middleVal, 1, 1)} + '%'">38.7%</span>
                         </td>
                         <td class="col-bar">
                             <div class="bar-track">
-                                <div class="bar-fill pick" th:style="'width:' + ${championFlexibility.middle.get()} + '%'"></div>
+                                <div class="bar-fill pick" th:style="'width:' + ${middleVal} + '%'"></div>
                             </div>
                         </td>
                     </tr>
-                    <tr th:if="${championFlexibility.bottom.isPresent()}" style="animation-delay: 0.24s">
+                    <tr th:with="bottomVal=${championFlexibility.bottom != null ? championFlexibility.bottom.orElse(null) : null}"
+                        th:if="${bottomVal != null}" style="animation-delay: 0.24s">
                         <td class="col-rank">4</td>
                         <td class="col-role">
                             <div class="role-cell">
@@ -138,15 +150,16 @@
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(championFlexibility.bottom.get(), 1, 1)} + '%'">3.2%</span>
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(bottomVal, 1, 1)} + '%'">3.2%</span>
                         </td>
                         <td class="col-bar">
                             <div class="bar-track">
-                                <div class="bar-fill pick" th:style="'width:' + ${championFlexibility.bottom.get()} + '%'"></div>
+                                <div class="bar-fill pick" th:style="'width:' + ${bottomVal} + '%'"></div>
                             </div>
                         </td>
                     </tr>
-                    <tr th:if="${championFlexibility.utility.isPresent()}" style="animation-delay: 0.30s">
+                    <tr th:with="utilityVal=${championFlexibility.utility != null ? championFlexibility.utility.orElse(null) : null}"
+                        th:if="${utilityVal != null}" style="animation-delay: 0.30s">
                         <td class="col-rank">5</td>
                         <td class="col-role">
                             <div class="role-cell">
@@ -154,15 +167,21 @@
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(championFlexibility.utility.get(), 1, 1)} + '%'">0.4%</span>
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(utilityVal, 1, 1)} + '%'">0.4%</span>
                         </td>
                         <td class="col-bar">
                             <div class="bar-track">
-                                <div class="bar-fill pick" th:style="'width:' + ${championFlexibility.utility.get()} + '%'"></div>
+                                <div class="bar-fill pick" th:style="'width:' + ${utilityVal} + '%'"></div>
                             </div>
                         </td>
                     </tr>
-                    <tr th:if="!${championFlexibility.top.isPresent()} and !${championFlexibility.jungle.isPresent()} and !${championFlexibility.middle.isPresent()} and !${championFlexibility.bottom.isPresent()} and !${championFlexibility.utility.isPresent()}">
+                    <tr th:with="
+                        topVal=${championFlexibility.top != null ? championFlexibility.top.orElse(null) : null},
+                        jungleVal=${championFlexibility.jungle != null ? championFlexibility.jungle.orElse(null) : null},
+                        middleVal=${championFlexibility.middle != null ? championFlexibility.middle.orElse(null) : null},
+                        bottomVal=${championFlexibility.bottom != null ? championFlexibility.bottom.orElse(null) : null},
+                        utilityVal=${championFlexibility.utility != null ? championFlexibility.utility.orElse(null) : null}"
+                        th:if="${topVal == null and jungleVal == null and middleVal == null and bottomVal == null and utilityVal == null}">
                         <td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
                             No flexibility data found for this champion.
                         </td>

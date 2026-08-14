@@ -52,7 +52,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/win-pick] endpoint");
         addCommonAttributes(model);
         model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions("pick_rate",
-                clientAppService.actualPatch()));
+                "%"));
         return "stats-pages/win-pick";
     }
 
@@ -61,7 +61,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/ban-rates] endpoint");
         addCommonAttributes(model);
         model.addAttribute("mostBannedChampions", clientAppService.getMostBannedChampions(
-                clientAppService.actualPatch()
+                "%"
         ));
         return "stats-pages/ban-rates";
     }
@@ -71,7 +71,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/best-duo] endpoint");
         addCommonAttributes(model);
         model.addAttribute("bestDuoChampions", clientAppService.getBestDuoChampions(
-                "MIDDLE", "JUNGLE", clientAppService.actualPatch()));
+                "MIDDLE", "JUNGLE", "%"));
         return "stats-pages/best-duo";
     }
 
@@ -80,7 +80,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/best-trio] endpoint");
         addCommonAttributes(model);
         model.addAttribute("bestTrioChampions", clientAppService.getBestTrioChampions(
-                "TOP", "MIDDLE", "JUNGLE", clientAppService.actualPatch()));
+                "TOP", "MIDDLE", "JUNGLE", "%"));
         return "stats-pages/best-trio";
     }
 
@@ -88,7 +88,8 @@ public class ClientAppController {
     public String getChampionFlexibility(Model model) {
         log.info("Entered [/draft-predict/champ-flex] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("championFlexibility", clientAppService.getChampionFlexibility("Aatrox"));
+        model.addAttribute("championFlexibility", clientAppService.getChampionFlexibility(
+                "Aatrox", "%"));
         return "stats-pages/champ-flex";
     }
 
@@ -97,7 +98,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/draft-presence] endpoint");
         addCommonAttributes(model);
         model.addAttribute("championDraftPresence", clientAppService.getChampionDraftPresence(
-                "Aatrox", clientAppService.actualPatch()));
+                "Aatrox", "%"));
         return "stats-pages/draft-presence";
     }
 
@@ -106,7 +107,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/counter-pick] endpoint");
         addCommonAttributes(model);
         model.addAttribute("championCounterPick", clientAppService.getCounterPick(
-                "Aatrox", "Ahri", "MIDDLE", clientAppService.actualPatch()
+                "Aatrox", "Ahri", "MIDDLE", "%"
         ));
         return "stats-pages/counter-pick";
     }
@@ -142,9 +143,10 @@ public class ClientAppController {
 
     @GetMapping("/find/champ-flex")
     @ResponseBody
-    public ChampionFlexibility findChampFlex(@RequestParam String name) {
+    public ChampionFlexibility findChampFlex(@RequestParam String name,
+                                             @RequestParam String patch) {
         log.info("Entered [/draft-predict/find/champ-flex] endpoint");
-        return clientAppService.getChampionFlexibility(name);
+        return clientAppService.getChampionFlexibility(name, patch);
     }
 
     @GetMapping("/find/draft-presence")

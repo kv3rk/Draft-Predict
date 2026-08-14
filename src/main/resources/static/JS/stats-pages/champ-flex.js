@@ -3,14 +3,16 @@ document.addEventListener('DOMContentLoaded', init);
 /* ─── Initialization ─── */
 function init() {
     const championSelect = document.getElementById('championSelect');
+    const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
 
-    if (!championSelect || !searchBtn) {
+    if (!championSelect || !patchSelect || !searchBtn) {
         console.error('Required DOM elements not found');
         return;
     }
 
     loadChampionList();
+    loadPatchList();
     searchBtn.addEventListener('click', handleSearch);
 }
 
@@ -42,7 +44,6 @@ async function loadChampionList() {
             return `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
         }).join('');
 
-        // По умолчанию выбираем первого в списке
         championSelect.selectedIndex = 0;
 
     } catch (err) {
@@ -51,9 +52,42 @@ async function loadChampionList() {
     }
 }
 
+/* ─── Load Patch List ─── */
+async function loadPatchList() {
+    const patchSelect = document.getElementById('patchSelect');
+
+    try {
+        const response = await fetch('/draft-predict/get/patch-list', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const patches = await response.json();
+
+        if (!Array.isArray(patches) || patches.length === 0) {
+            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
+            return;
+        }
+
+        patchSelect.innerHTML = patches.map(p => {
+            const selected = p === 'All patches' ? 'selected' : '';
+            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('Failed to load patch list:', err);
+        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
+    }
+}
+
 /* ─── Search Handler ─── */
 async function handleSearch() {
     const champion = document.getElementById('championSelect').value;
+    const patch = document.getElementById('patchSelect').value;
     const searchBtn = document.getElementById('searchBtn');
 
     if (!champion) {
@@ -64,7 +98,7 @@ async function handleSearch() {
     setLoadingState(searchBtn, true);
 
     try {
-        const data = await fetchChampFlex(champion);
+        const data = await fetchChampFlex(champion, patch);
         renderTable(data);
         updateSubtitle(data.champion);
     } catch (err) {
@@ -76,9 +110,10 @@ async function handleSearch() {
 }
 
 /* ─── Async Fetch ─── */
-async function fetchChampFlex(name) {
+async function fetchChampFlex(name, patch) {
     const params = new URLSearchParams({
-        name: name
+        name: name,
+        patch: patch
     });
 
     const response = await fetch(`/draft-predict/find/champ-flex?${params.toString()}`, {
