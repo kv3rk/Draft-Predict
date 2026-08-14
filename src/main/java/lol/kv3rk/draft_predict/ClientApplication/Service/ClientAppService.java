@@ -54,15 +54,29 @@ public class ClientAppService {
         return actualPatch;
     }
 
-    public List<TopPerformingChampions> getTopPerformingChampions(String orderParameter) {
+    public List<TopPerformingChampions> getTopPerformingChampions(String orderParameter,
+                                                                  String patch) {
 
         if (orderParameter.equals("pick_rate")) {
 
-            return participantsRepository.getTopPerformingChampionsByPickRate();
+            if (patch.equals("All patches")) {
+
+                return participantsRepository.getTopPerformingChampionsByPickRate("%");
+            } else {
+
+                return participantsRepository.getTopPerformingChampionsByPickRate(patch);
+            }
+
 
         } else if (orderParameter.equals("win_rate")) {
 
-            return participantsRepository.getTopPerformingChampionsByWinRate();
+            if (patch.equals("All patches")) {
+
+                return participantsRepository.getTopPerformingChampionsByWinRate("%");
+            } else {
+
+                return participantsRepository.getTopPerformingChampionsByWinRate(patch);
+            }
         }
 
         return List.of();
@@ -70,9 +84,9 @@ public class ClientAppService {
 
     public List<MostBannedChampions> getMostBannedChampions(String patch) {
 
-        if (patch.equals("All patches")){
+        if (patch.equals("All patches")) {
 
-            return bansRepository.getMostBannedChampionsAllPatches();
+            return bansRepository.getMostBannedChampions("%");
         } else {
 
             return bansRepository.getMostBannedChampions(patch);
@@ -103,14 +117,29 @@ public class ClientAppService {
         return lastTimeUpdate;
     }
 
-    public List<BestDuo> getBestDuoChampions(String role1, String role2) {
+    public List<BestDuo> getBestDuoChampions(String role1, String role2,
+                                             String patch) {
 
-        return rankedRequests.getBestDuoChampions(role1, role2);
+        if (patch.equals("All patches")) {
+
+            return rankedRequests.getBestDuoChampions(role1, role2, "%");
+        } else {
+
+            return rankedRequests.getBestDuoChampions(role1, role2, patch);
+        }
     }
 
-    public List<BestTrio> getBestTrioChampions(String role1, String role2, String role3) {
+    public List<BestTrio> getBestTrioChampions(String role1,
+                                               String role2,
+                                               String role3,
+                                               String patch) {
+        if (patch.equals("All patches")) {
 
-        return rankedRequests.getBestTrioChampions(role1, role2, role3);
+            return rankedRequests.getBestTrioChampions(role1, role2, role3, "%");
+        } else {
+
+            return rankedRequests.getBestTrioChampions(role1, role2, role3, patch);
+        }
     }
 
     public ChampionFlexibility getChampionFlexibility(String name) {
@@ -123,14 +152,30 @@ public class ClientAppService {
         return participantsRepository.getChampionList();
     }
 
-    public ChampionPresence getChampionDraftPresence(String name) {
+    public ChampionPresence getChampionDraftPresence(String name,
+                                                     String patch) {
+        if (patch.equals("All patches")) {
 
-        return rankedRequests.getChampionDraftPresence(name);
+            return rankedRequests.getChampionDraftPresence(name, "%");
+        } else {
+
+            return rankedRequests.getChampionDraftPresence(name, patch);
+        }
+
     }
 
-    public CounterPick getCounterPick(String champion1, String champion2, String lane) {
+    public CounterPick getCounterPick(String champion1,
+                                      String champion2,
+                                      String lane,
+                                      String patch) {
+        if (patch.equals("All patches")) {
 
-        return rankedRequests.getCounterPicks(champion1, champion2, lane);
+            return rankedRequests.getCounterPicks(champion1, champion2, lane, "%");
+        } else {
+
+            return rankedRequests.getCounterPicks(champion1, champion2, lane, patch);
+        }
+
     }
 
     public List<String> getPatchList() {

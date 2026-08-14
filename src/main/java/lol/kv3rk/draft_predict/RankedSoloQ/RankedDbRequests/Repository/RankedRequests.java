@@ -20,8 +20,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	COUNT(*) as total
                     from
                     	matches as m
-                    cross join actual_patch() ap(patch)
-                    where m.patch = ap.patch
+                    where m.patch like :patch
                     ),
                     duo_stats as (
                     select
@@ -45,11 +44,10 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                         on
                         m.match_id = p.match_id
                     cross join total_matches tm
-                    cross join actual_patch() ap(patch)
                     where
                     	p.position = :role1
                     	and ap.position = :role2
-                        and m.patch = ap.patch
+                        and m.patch like :patch
                     group by
                     	p.champion,
                     	ap.champion,
@@ -79,7 +77,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
     )
     List<BestDuo> getBestDuoChampions(
             @Param("role1") String role1,
-            @Param("role2") String role2
+            @Param("role2") String role2,
+            @Param("patch") String patch
     );
 
     @Query(
@@ -90,8 +89,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	COUNT(*) as total
                     from
                     	matches as m
-                    cross join actual_patch() ap(patch)
-                    where m.patch = ap.patch
+                    where m.patch like :patch
                     ),
                     trio_stats as (
                     select
@@ -117,12 +115,11 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                         on
                         p1.match_id = m.match_id
                     cross join total_matches tm
-                    cross join actual_patch() ap(patch)
                     where
                     	p1.position = :role1
                     	and p2.position = :role2
                     	and p3.position = :role3
-                        and m.patch = ap.patch
+                        and m.patch like :patch
                     group by
                     	p1.champion,
                     	p2.champion,
@@ -155,7 +152,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
     List<BestTrio> getBestTrioChampions(
             @Param("role1") String role1,
             @Param("role2") String role2,
-            @Param("role3") String role3
+            @Param("role3") String role3,
+            @Param("patch") String patch
     );
 
 
@@ -314,6 +312,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                                         	select
                                         		count(m.match_id) as total_matches
                                         	from matches m
+                                            where m.patch like :patch
                                         ),
                                         total_ban_list as(
                                         	select
@@ -321,8 +320,10 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                                         		b.match_id
                                         	from
                                         		bans b
+                                            join matches m on m.match_id = b.match_id
                                         	where
                                         		b.champion <> ''
+                                                and m.patch like :patch
                                         	group by
                                         		b.champion,
                                         		b.match_id
@@ -333,6 +334,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                                         		p.match_id
                                         from
                                         	participants p
+                                        join matches m on m.match_id = b.match_id
+                                        where m.patch like :patch
                                         group by
                                         		p.champion,
                                         		p.match_id
@@ -367,7 +370,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     """
     )
     ChampionPresence getChampionDraftPresence(
-            @Param("name") String name
+            @Param("name") String name,
+            @Param("patch") String patch
     );
 
     @Query(
@@ -388,14 +392,13 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     join matches m
                         on
                     	m.match_id = p.match_id
-                    cross join actual_patch() ap(patch)
                     where
                     	p.xp > 1
                     	and p2.xp > 1
                     	and p.champion = :champion1
                     	and p2.champion = :champion2
                     	and p.position = :lane
-                    	and m.patch = ap.patch
+                    	and m.patch like :patch
                     group by
                     	p.champion,
                     	p2.champion;
@@ -405,7 +408,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
     CounterPick getCounterPicks(
             @Param("champion1") String champion1,
             @Param("champion2") String champion2,
-            @Param("lane") String lane
+            @Param("lane") String lane,
+            @Param("patch") String patch
     );
 
 }

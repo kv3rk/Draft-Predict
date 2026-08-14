@@ -5,9 +5,10 @@ function init() {
     const role1Select = document.getElementById('role1');
     const role2Select = document.getElementById('role2');
     const role3Select = document.getElementById('role3');
+    const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
 
-    if (!role1Select || !role2Select || !role3Select || !searchBtn) {
+    if (!role1Select || !role2Select || !role3Select || !patchSelect || !searchBtn) {
         console.error('Required DOM elements not found');
         return;
     }
@@ -16,6 +17,41 @@ function init() {
     role2Select.addEventListener('change', validateRoles);
     role3Select.addEventListener('change', validateRoles);
     searchBtn.addEventListener('click', handleSearch);
+
+    // Загружаем список патчей при инициализации
+    loadPatchList();
+}
+
+/* ─── Load Patch List ─── */
+async function loadPatchList() {
+    const patchSelect = document.getElementById('patchSelect');
+
+    try {
+        const response = await fetch('/draft-predict/get/patch-list', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const patches = await response.json();
+
+        if (!Array.isArray(patches) || patches.length === 0) {
+            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
+            return;
+        }
+
+        patchSelect.innerHTML = patches.map(p => {
+            const selected = p === 'All patches' ? 'selected' : '';
+            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('Failed to load patch list:', err);
+        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
+    }
 }
 
 /* ─── Validation ─── */
@@ -46,12 +82,13 @@ async function handleSearch() {
     const role1 = document.getElementById('role1').value;
     const role2 = document.getElementById('role2').value;
     const role3 = document.getElementById('role3').value;
+    const patch = document.getElementById('patchSelect').value;
     const searchBtn = document.getElementById('searchBtn');
 
     setLoadingState(searchBtn, true);
 
     try {
-        const data = await fetchBestTrios(role1, role2, role3);
+        const data = await fetchBestTrios(role1, role2, role3, patch);
         renderTable(data);
         updateSubtitle(role1, role2, role3);
     } catch (err) {
@@ -63,11 +100,12 @@ async function handleSearch() {
 }
 
 /* ─── Async Fetch ─── */
-async function fetchBestTrios(role1, role2, role3) {
+async function fetchBestTrios(role1, role2, role3, patch) {
     const params = new URLSearchParams({
         role1: role1,
         role2: role2,
-        role3: role3
+        role3: role3,
+        patch: patch
     });
 
     const response = await fetch(`/draft-predict/find/best-trio?${params.toString()}`, {

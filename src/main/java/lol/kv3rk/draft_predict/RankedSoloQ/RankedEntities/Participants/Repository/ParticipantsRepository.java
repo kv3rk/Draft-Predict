@@ -21,8 +21,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	COUNT(*) as total
                     from
                     	matches as m
-                    cross join actual_patch() ap(patch)
-                    where m.patch = ap.patch
+                    where m.patch like :patch
                     )
                     select
                     	p.champion as champion,
@@ -32,8 +31,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	participants p
                     join matches m on m.match_id = p.match_id
                     cross join total_matches tm
-                    cross join actual_patch() ap(patch)
-                    where m.patch = ap.patch
+                    where m.patch like :patch
                     group by
                     	champion,
                     	tm.total
@@ -42,7 +40,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     limit 5;
                     """
     )
-    List<TopPerformingChampions> getTopPerformingChampionsByPickRate();
+    List<TopPerformingChampions> getTopPerformingChampionsByPickRate(String patch);
 
     @Query(
             nativeQuery = true,
@@ -52,8 +50,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	    COUNT(*) as total
                         from
                     	    matches as m
-                        cross join actual_patch() ap(patch)
-                        where m.patch = ap.patch
+                        where m.patch like :patch
                     )
                     select
                     	p.champion as champion,
@@ -63,8 +60,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	participants p
                     join matches m on m.match_id = p.match_id
                     cross join total_matches tm
-                    cross join actual_patch() ap(patch)
-                    where m.patch = ap.patch
+                    where m.patch like :patch
                     group by
                     	champion,
                     	tm.total
@@ -73,7 +69,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     limit 5;
                     """
     )
-    List<TopPerformingChampions> getTopPerformingChampionsByWinRate();
+    List<TopPerformingChampions> getTopPerformingChampionsByWinRate(String patch);
 
     @Query(
             nativeQuery = true,

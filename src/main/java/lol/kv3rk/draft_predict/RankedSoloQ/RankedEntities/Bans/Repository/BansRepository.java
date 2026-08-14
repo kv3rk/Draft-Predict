@@ -19,7 +19,7 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
                     with total_matches AS (
                         SELECT COUNT(*) AS total
                         FROM matches as m
-                        where m.patch = :patch
+                        where m.patch like :patch
                     )
                     SELECT
                         b.champion,
@@ -28,7 +28,7 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
                     JOIN matches m
                         ON m.match_id = b.match_id
                     CROSS JOIN total_matches tm
-                    WHERE m.patch = :patch and b.champion is not null
+                    where m.patch like :patch and b.champion is not null
                     GROUP BY b.champion, tm.total
                     ORDER BY ban_rate DESC
                     LIMIT 5;
@@ -37,26 +37,4 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
     List<MostBannedChampions> getMostBannedChampions(
             @Param("patch") String patch
     );
-
-    @Query(
-            nativeQuery = true,
-            value = """
-                    with total_matches AS (
-                        SELECT COUNT(*) AS total
-                        FROM matches as m
-                    )
-                    SELECT
-                        b.champion,
-                        COUNT(*) * 100.0 / tm.total AS ban_rate
-                    FROM bans b
-                    JOIN matches m
-                        ON m.match_id = b.match_id
-                    CROSS JOIN total_matches tm
-                    WHERE b.champion is not null
-                    GROUP BY b.champion, tm.total
-                    ORDER BY ban_rate DESC
-                    LIMIT 5;
-                    """
-    )
-    List<MostBannedChampions> getMostBannedChampionsAllPatches();
 }

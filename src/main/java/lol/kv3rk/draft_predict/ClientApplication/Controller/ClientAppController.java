@@ -51,7 +51,8 @@ public class ClientAppController {
     public String getWinPickPage(Model model) {
         log.info("Entered [/draft-predict/win-pick] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions("pick_rate"));
+        model.addAttribute("topPerformingChampions", clientAppService.getTopPerformingChampions("pick_rate",
+                clientAppService.actualPatch()));
         return "stats-pages/win-pick";
     }
 
@@ -69,7 +70,8 @@ public class ClientAppController {
     public String getBestDuoPage(Model model) {
         log.info("Entered [/draft-predict/best-duo] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("bestDuoChampions", clientAppService.getBestDuoChampions("MIDDLE", "JUNGLE"));
+        model.addAttribute("bestDuoChampions", clientAppService.getBestDuoChampions(
+                "MIDDLE", "JUNGLE", clientAppService.actualPatch()));
         return "stats-pages/best-duo";
     }
 
@@ -77,7 +79,8 @@ public class ClientAppController {
     public String getBestTrioPage(Model model) {
         log.info("Entered [/draft-predict/best-trio] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("bestTrioChampions", clientAppService.getBestTrioChampions("TOP", "MIDDLE", "JUNGLE"));
+        model.addAttribute("bestTrioChampions", clientAppService.getBestTrioChampions(
+                "TOP", "MIDDLE", "JUNGLE", clientAppService.actualPatch()));
         return "stats-pages/best-trio";
     }
 
@@ -93,7 +96,8 @@ public class ClientAppController {
     public String getChampionDraftPresence(Model model) {
         log.info("Entered [/draft-predict/draft-presence] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("championDraftPresence", clientAppService.getChampionDraftPresence("Aatrox"));
+        model.addAttribute("championDraftPresence", clientAppService.getChampionDraftPresence(
+                "Aatrox", clientAppService.actualPatch()));
         return "stats-pages/draft-presence";
     }
 
@@ -102,7 +106,7 @@ public class ClientAppController {
         log.info("Entered [/draft-predict/counter-pick] endpoint");
         addCommonAttributes(model);
         model.addAttribute("championCounterPick", clientAppService.getCounterPick(
-                "Aatrox", "Ahri", "MIDDLE"
+                "Aatrox", "Ahri", "MIDDLE", clientAppService.actualPatch()
         ));
         return "stats-pages/counter-pick";
     }
@@ -111,25 +115,29 @@ public class ClientAppController {
 
     @GetMapping("/find/best-duo")
     @ResponseBody
-    public List<BestDuo> findBestDuo(@RequestParam String role1, @RequestParam String role2) {
+    public List<BestDuo> findBestDuo(@RequestParam String role1,
+                                     @RequestParam String role2,
+                                     @RequestParam String patch) {
         log.info("Entered [/draft-predict/find/best-duo] endpoint");
-        return clientAppService.getBestDuoChampions(role1, role2);
+        return clientAppService.getBestDuoChampions(role1, role2, patch);
     }
 
     @GetMapping("/find/win-pick")
     @ResponseBody
-    public List<TopPerformingChampions> findWinPick(@RequestParam String orderParameter) {
+    public List<TopPerformingChampions> findWinPick(@RequestParam String orderParameter,
+                                                    @RequestParam String patch) {
         log.info("Entered [/draft-predict/find/win-pick] endpoint");
-        return clientAppService.getTopPerformingChampions(orderParameter);
+        return clientAppService.getTopPerformingChampions(orderParameter, patch);
     }
 
     @GetMapping("/find/best-trio")
     @ResponseBody
     public List<BestTrio> findBestTrio(@RequestParam String role1,
                                        @RequestParam String role2,
-                                       @RequestParam String role3) {
+                                       @RequestParam String role3,
+                                       @RequestParam String patch) {
         log.info("Entered [/draft-predict//find/best-trio] endpoint");
-        return clientAppService.getBestTrioChampions(role1, role2, role3);
+        return clientAppService.getBestTrioChampions(role1, role2, role3, patch);
     }
 
     @GetMapping("/find/champ-flex")
@@ -141,9 +149,10 @@ public class ClientAppController {
 
     @GetMapping("/find/draft-presence")
     @ResponseBody
-    public ChampionPresence findDraftPresence(@RequestParam String name) {
+    public ChampionPresence findDraftPresence(@RequestParam String name,
+                                              @RequestParam String patch) {
         log.info("Entered [/draft-predict/find/draft-presence] endpoint");
-        return clientAppService.getChampionDraftPresence(name);
+        return clientAppService.getChampionDraftPresence(name, patch);
     }
 
     @GetMapping("/get/champion-list")
@@ -157,9 +166,10 @@ public class ClientAppController {
     @ResponseBody
     public CounterPick findCounterPick(@RequestParam String champion1,
                                        @RequestParam String champion2,
-                                       @RequestParam String lane) {
+                                       @RequestParam String lane,
+                                       @RequestParam String patch) {
         log.info("Entered [/draft-predict/get/counter-pick] endpoint");
-        return clientAppService.getCounterPick(champion1, champion2, lane);
+        return clientAppService.getCounterPick(champion1, champion2, lane, patch);
     }
 
     @GetMapping("/get/patch-list")

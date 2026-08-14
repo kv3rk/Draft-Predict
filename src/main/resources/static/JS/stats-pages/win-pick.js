@@ -2,16 +2,64 @@ document.addEventListener('DOMContentLoaded', init);
 
 /* ─── Initialization ─── */
 function init() {
-    updateSortIndicator('pick_rate');
+    const patchSelect = document.getElementById('patchSelect');
+    const searchBtn = document.getElementById('searchBtn');
     const headers = document.querySelectorAll('.sortable');
-    if (headers.length === 0) {
-        console.error('Sortable headers not found');
+
+    if (!patchSelect || !searchBtn) {
+        console.error('Required DOM elements not found');
         return;
     }
 
-    headers.forEach(header => {
-        header.addEventListener('click', handleSortClick);
-    });
+    loadPatchList();
+    searchBtn.addEventListener('click', handleSearch);
+
+    if (headers.length > 0) {
+        headers.forEach(header => {
+            header.addEventListener('click', handleSortClick);
+        });
+    }
+}
+
+/* ─── Load Patch List ─── */
+async function loadPatchList() {
+    const patchSelect = document.getElementById('patchSelect');
+
+    try {
+        const response = await fetch('/draft-predict/get/patch-list', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const patches = await response.json();
+
+        if (!Array.isArray(patches) || patches.length === 0) {
+            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
+            return;
+        }
+
+        patchSelect.innerHTML = patches.map(p => {
+            const selected = p === 'All patches' ? 'selected' : '';
+            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('Failed to load patch list:', err);
+        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
+    }
+}
+
+/* ─── Search Handler ─── */
+async function handleSearch() {
+    const patch = document.getElementById('patchSelect').value;
+    const activeHeader = document.querySelector('.sortable.active');
+    const orderParameter = activeHeader ? activeHeader.dataset.order : 'pick_rate';
+
+    await loadData(orderParameter, patch);
 }
 
 /* ─── Sort Click Handler ─── */
@@ -19,34 +67,45 @@ async function handleSortClick(event) {
     const orderParameter = event.currentTarget.dataset.order;
     if (!orderParameter) return;
 
+    const patch = document.getElementById('patchSelect').value || 'All patches';
+
+    await loadData(orderParameter, patch);
+}
+
+/* ─── Load Data (fetch + render + indicator) ─── */
+async function loadData(orderParameter, patch) {
     try {
-        const data = await fetchWinPick(orderParameter);
+        const data = await fetchWinPick(orderParameter, patch);
         renderTable(data);
         updateSortIndicator(orderParameter);
     } catch (err) {
-        console.error('Sort error:', err);
+        console.error('Load error:', err);
         alert('Failed to load data. Please try again.');
     }
 }
 
 /* ─── Async Fetch ─── */
-async function fetchWinPick(orderParameter) {
+async function fetchWinPick(orderParameter, patch) {
     const params = new URLSearchParams({
-        orderParameter: orderParameter
+        orderParameter: orderParameter,
+        patch: patch
     });
 
     const response = await fetch(`/draft-predict/find/win-pick?${params.toString()}`, {
         method: 'GET',
-        headers: {
-            'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
     });
+
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+        return [];
+    }
 
     if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return await response.json();
+    return JSON.parse(text);
 }
 
 /* ─── Table Render ─── */
@@ -57,7 +116,7 @@ function renderTable(champions) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
-                    No data found.
+                    No data found for this patch.
                 </td>
             </tr>`;
         return;
@@ -102,5 +161,6 @@ function escapeHtml(text) {
 }
 
 function formatNum(num) {
+    if (num === null || num === undefined) return '0.0';
     return Number(num).toFixed(1);
 }

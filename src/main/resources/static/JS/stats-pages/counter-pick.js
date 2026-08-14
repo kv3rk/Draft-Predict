@@ -5,14 +5,16 @@ function init() {
     const champion1Select = document.getElementById('champion1Select');
     const champion2Select = document.getElementById('champion2Select');
     const laneSelect = document.getElementById('laneSelect');
+    const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
 
-    if (!champion1Select || !champion2Select || !laneSelect || !searchBtn) {
+    if (!champion1Select || !champion2Select || !laneSelect || !patchSelect || !searchBtn) {
         console.error('Required DOM elements not found');
         return;
     }
 
     loadChampionList();
+    loadPatchList();
     searchBtn.addEventListener('click', handleSearch);
 }
 
@@ -61,11 +63,44 @@ async function loadChampionList() {
     }
 }
 
+/* ─── Load Patch List ─── */
+async function loadPatchList() {
+    const patchSelect = document.getElementById('patchSelect');
+
+    try {
+        const response = await fetch('/draft-predict/get/patch-list', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const patches = await response.json();
+
+        if (!Array.isArray(patches) || patches.length === 0) {
+            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
+            return;
+        }
+
+        patchSelect.innerHTML = patches.map(p => {
+            const selected = p === 'All patches' ? 'selected' : '';
+            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('Failed to load patch list:', err);
+        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
+    }
+}
+
 /* ─── Search Handler ─── */
 async function handleSearch() {
     const champion1 = document.getElementById('champion1Select').value;
     const champion2 = document.getElementById('champion2Select').value;
     const lane = document.getElementById('laneSelect').value;
+    const patch = document.getElementById('patchSelect').value;
     const searchBtn = document.getElementById('searchBtn');
 
     if (!champion1 || !champion2) {
@@ -81,9 +116,8 @@ async function handleSearch() {
     setLoadingState(searchBtn, true);
 
     try {
-        const data = await fetchCounterPick(champion1, champion2, lane);
+        const data = await fetchCounterPick(champion1, champion2, lane, patch);
 
-        // Если data null или пустой — показываем empty state
         if (!data) {
             renderEmpty();
             updateSubtitle(null, null, lane);
@@ -103,11 +137,12 @@ async function handleSearch() {
 }
 
 /* ─── Async Fetch ─── */
-async function fetchCounterPick(champion1, champion2, lane) {
+async function fetchCounterPick(champion1, champion2, lane, patch) {
     const params = new URLSearchParams({
         champion1: champion1,
         champion2: champion2,
-        lane: lane
+        lane: lane,
+        patch: patch
     });
 
     const response = await fetch(`/draft-predict/get/counter-pick?${params.toString()}`, {
@@ -117,7 +152,6 @@ async function fetchCounterPick(champion1, champion2, lane) {
         }
     });
 
-    // Если 204 No Content или пустой ответ — возвращаем null
     const text = await response.text();
     if (!text || text.trim() === '') {
         return null;
