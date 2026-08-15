@@ -1,7 +1,7 @@
 package lol.kv3rk.draft_predict.ServerApplication.Service;
 
-import lol.kv3rk.draft_predict.DefaultPipeline.Component.ChampionIdDB;
-import lol.kv3rk.draft_predict.DefaultPipeline.Service.GatherMatchInfo;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Component.ChampionIdDB;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Service.GatherMatchInfo;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;

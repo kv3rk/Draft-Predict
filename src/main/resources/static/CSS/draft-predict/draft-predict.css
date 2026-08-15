@@ -1,0 +1,35 @@
+/* ─── Coming Soon ─── */
+.coming-soon-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    animation: fadeSlideUp 0.8s 0.15s both;
+}
+
+.coming-soon-title {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--text-primary), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+}
+
+.coming-soon-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    text-align: center;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 480px) {
+    .coming-soon-title {
+        font-size: 2.25rem;
+    }
+}

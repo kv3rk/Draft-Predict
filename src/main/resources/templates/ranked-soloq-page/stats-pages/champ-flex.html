@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+
+    <!--    Meta-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--    Title-->
+    <title>Champion Flexibility | Draft Predict</title>
+
+    <!--    CSS-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="/CSS/common.css">
+    <link rel="stylesheet" href="/CSS/ranked-soloq/stats-pages/detail-page.css">
+    <link rel="stylesheet" href="/CSS/ranked-soloq/stats-pages/champ-flex.css">
+
+    <!--    Logo-->
+    <link rel="icon" href="/IMG/logo/riot-logo.png">
+
+    <!--    JS-->
+    <script src="/JS/ranked-soloq/champ-flex.js" defer></script>
+
+</head>
+<body>
+<div class="bg-mesh">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<div class="page-wrapper">
+    <header class="site-header">
+        <a th:href="@{/lol/main}" class="logo" aria-label="Go to homepage">
+            <div class="logo-mark">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="2"
+                          stroke-linejoin="round"/>
+                    <path d="M16 11v10M11 13.5l5-2.5 5 2.5M11 18.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="logo-text">Draft Predict</span>
+        </a>
+    </header>
+
+    <main class="dashboard detail-dashboard">
+        <section class="stats-card detail-card" id="champFlexCard">
+            <div class="card-header">
+                <div class="card-icon flex-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 7V4h3M4 17v3h3M20 7V4h-3M20 17v3h-3M9 9h6v6H9z"/>
+                    </svg>
+                </div>
+                <div class="card-title-group">
+                    <h2 class="card-title">Champion Flexibility</h2>
+                    <p class="card-subtitle" th:text="'Flexibility for ' + ${championFlexibility.champion}">Flexibility for Aatrox</p>
+                </div>
+            </div>
+
+            <!-- Champion Filter -->
+            <div class="champion-filter">
+                <label for="championSelect">Champion</label>
+                <select id="championSelect" class="champion-select">
+                    <option value="" disabled selected>Loading champions...</option>
+                </select>
+
+                <!-- Patch filter -->
+                <span class="filter-divider">|</span>
+                <label for="patchSelect">Patch</label>
+                <select id="patchSelect" class="patch-select">
+                    <option value="" disabled>Loading patches...</option>
+                </select>
+
+                <button id="searchBtn" class="search-btn" type="button">Search</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="stats-table">
+                    <thead>
+                    <tr>
+                        <th class="col-rank">#</th>
+                        <th class="col-role">Role</th>
+                        <th class="col-rate">Flexibility</th>
+                        <th class="col-bar">Distribution</th>
+                    </tr>
+                    </thead>
+                    <tbody id="flexTableBody">
+                    <!-- ИСПРАВЛЕНО: orElse(null) вместо isPresent()/get() -->
+                    <tr th:with="topVal=${championFlexibility.top != null ? championFlexibility.top.orElse(null) : null}"
+                        th:if="${topVal != null}" style="animation-delay: 0.06s">
+                        <td class="col-rank">1</td>
+                        <td class="col-role">
+                            <div class="role-cell">
+                                <span class="role-badge">TOP</span>
+                            </div>
+                        </td>
+                        <td class="col-rate">
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(topVal, 1, 1)} + '%'">45.2%</span>
+                        </td>
+                        <td class="col-bar">
+                            <div class="bar-track">
+                                <div class="bar-fill pick" th:style="'width:' + ${topVal} + '%'"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:with="jungleVal=${championFlexibility.jungle != null ? championFlexibility.jungle.orElse(null) : null}"
+                        th:if="${jungleVal != null}" style="animation-delay: 0.12s">
+                        <td class="col-rank">2</td>
+                        <td class="col-role">
+                            <div class="role-cell">
+                                <span class="role-badge">JUNGLE</span>
+                            </div>
+                        </td>
+                        <td class="col-rate">
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(jungleVal, 1, 1)} + '%'">12.5%</span>
+                        </td>
+                        <td class="col-bar">
+                            <div class="bar-track">
+                                <div class="bar-fill pick" th:style="'width:' + ${jungleVal} + '%'"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:with="middleVal=${championFlexibility.middle != null ? championFlexibility.middle.orElse(null) : null}"
+                        th:if="${middleVal != null}" style="animation-delay: 0.18s">
+                        <td class="col-rank">3</td>
+                        <td class="col-role">
+                            <div class="role-cell">
+                                <span class="role-badge">MIDDLE</span>
+                            </div>
+                        </td>
+                        <td class="col-rate">
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(middleVal, 1, 1)} + '%'">38.7%</span>
+                        </td>
+                        <td class="col-bar">
+                            <div class="bar-track">
+                                <div class="bar-fill pick" th:style="'width:' + ${middleVal} + '%'"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:with="bottomVal=${championFlexibility.bottom != null ? championFlexibility.bottom.orElse(null) : null}"
+                        th:if="${bottomVal != null}" style="animation-delay: 0.24s">
+                        <td class="col-rank">4</td>
+                        <td class="col-role">
+                            <div class="role-cell">
+                                <span class="role-badge">BOTTOM</span>
+                            </div>
+                        </td>
+                        <td class="col-rate">
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(bottomVal, 1, 1)} + '%'">3.2%</span>
+                        </td>
+                        <td class="col-bar">
+                            <div class="bar-track">
+                                <div class="bar-fill pick" th:style="'width:' + ${bottomVal} + '%'"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:with="utilityVal=${championFlexibility.utility != null ? championFlexibility.utility.orElse(null) : null}"
+                        th:if="${utilityVal != null}" style="animation-delay: 0.30s">
+                        <td class="col-rank">5</td>
+                        <td class="col-role">
+                            <div class="role-cell">
+                                <span class="role-badge">UTILITY</span>
+                            </div>
+                        </td>
+                        <td class="col-rate">
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(utilityVal, 1, 1)} + '%'">0.4%</span>
+                        </td>
+                        <td class="col-bar">
+                            <div class="bar-track">
+                                <div class="bar-fill pick" th:style="'width:' + ${utilityVal} + '%'"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:with="
+                        topVal=${championFlexibility.top != null ? championFlexibility.top.orElse(null) : null},
+                        jungleVal=${championFlexibility.jungle != null ? championFlexibility.jungle.orElse(null) : null},
+                        middleVal=${championFlexibility.middle != null ? championFlexibility.middle.orElse(null) : null},
+                        bottomVal=${championFlexibility.bottom != null ? championFlexibility.bottom.orElse(null) : null},
+                        utilityVal=${championFlexibility.utility != null ? championFlexibility.utility.orElse(null) : null}"
+                        th:if="${topVal == null and jungleVal == null and middleVal == null and bottomVal == null and utilityVal == null}">
+                        <td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
+                            No flexibility data found for this champion.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-line"></div>
+            <p class="footer-text">
+                Statistics collected from
+                <span class="games-count" id="totalGames" th:text="${amountOfMatches}">none</span>
+                ranked games
+            </p>
+            <p class="footer-meta">
+                Patch <span th:text="${actualPatch}">none</span>
+                • Servers (<span th:text="${servers}">EUW, EUNE, KR, NA</span>)
+                • Updated <span th:text="${timeUpdated}">none</span>
+                • Ranks (<span th:text="${tiers}">Master, Grandmaster, Challenger</span>)
+            </p>
+        </div>
+    </footer>
+</div>
+</body>
+</html>

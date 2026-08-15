@@ -1,0 +1,62 @@
+/* ─── Main Page Grid ─── */
+.main-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#rankedCard {
+    animation-delay: 0.15s;
+}
+
+#draftCard {
+    animation-delay: 0.3s;
+}
+
+/* ─── Main Card Link ─── */
+.main-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.main-card-link .main-card {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 28px;
+}
+
+.main-card-link .main-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: var(--shadow-md), 0 0 60px rgba(201, 169, 110, 0.15);
+    cursor: pointer;
+}
+
+.main-card-link .card-header {
+    margin-bottom: 0;
+}
+
+/* ─── Icons ─── */
+.ranked-icon {
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--accent-win);
+}
+
+.draft-icon {
+    background: rgba(201, 169, 110, 0.15);
+    color: var(--accent-gold);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 480px) {
+    .main-card-link .main-card {
+        min-height: 160px;
+        padding: 22px;
+    }
+}
