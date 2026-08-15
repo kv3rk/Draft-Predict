@@ -8,10 +8,7 @@ function init() {
         return;
     }
 
-    // Listen for setup applied event from general-match-info.js
     document.addEventListener('draftSetupApplied', handleUnlock);
-
-    // Optional: lock on page load (already locked by default via CSS)
 }
 
 function handleUnlock(event) {
@@ -21,5 +18,18 @@ function handleUnlock(event) {
 
     lockOverlay.classList.add('hidden');
 
-    console.log('Draft phase unlocked:', event.detail);
+    // Update center info with setup data
+    const detail = event.detail || {};
+    const patchEl = document.getElementById('draftPatch');
+    const firstPickEl = document.getElementById('draftFirstPick');
+
+    if (patchEl && detail.patch) {
+        patchEl.textContent = 'Patch ' + detail.patch;
+    }
+
+    if (firstPickEl && detail.firstPickSide) {
+        firstPickEl.textContent = 'First Pick: ' + detail.firstPickSide;
+    }
+
+    console.log('Draft phase unlocked:', detail);
 }

@@ -54,17 +54,192 @@
     min-height: 400px;
 }
 
-.draft-content {
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px dashed var(--border-card);
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.02);
-}
-
 .draft-icon {
     background: rgba(201, 169, 110, 0.15);
     color: var(--accent-gold);
+}
+
+/* ─── Draft Interface ─── */
+.draft-interface {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 8px 4px 4px;
+}
+
+/* ─── Bans Row ─── */
+.bans-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.bans-group {
+    display: flex;
+    gap: 8px;
+}
+
+.ban-slot {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.ban-slot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 45%, rgba(248, 113, 113, 0.3) 45%, rgba(248, 113, 113, 0.3) 55%, transparent 55%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.ban-slot:hover {
+    border-color: var(--accent-ban);
+    background: var(--accent-ban-dim);
+}
+
+.ban-slot:hover::after {
+    opacity: 1;
+}
+
+.bans-divider {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* ─── Picks Row ─── */
+.picks-row {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 320px;
+}
+
+.picks-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    max-width: 200px;
+}
+
+.pick-slot {
+    flex: 1;
+    min-height: 56px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.pick-slot:hover {
+    border-color: var(--accent-gold);
+    background: rgba(201, 169, 110, 0.08);
+}
+
+.pick-number {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.blue-picks .pick-slot {
+    border-left: 3px solid #3b82f6;
+}
+
+.red-picks .pick-slot {
+    border-right: 3px solid #ef4444;
+}
+
+/* ─── Draft Center ─── */
+.draft-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 16px;
+    min-width: 140px;
+}
+
+.draft-patch {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--accent-gold);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.draft-vs {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 2px;
+}
+
+.draft-first-pick {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .picks-row {
+        gap: 12px;
+    }
+
+    .draft-center {
+        min-width: 100px;
+        padding: 0 8px;
+    }
+
+    .draft-vs {
+        font-size: 1.125rem;
+    }
+
+    .ban-slot {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bans-row {
+        gap: 8px;
+    }
+
+    .bans-group {
+        gap: 4px;
+    }
+
+    .picks-column {
+        max-width: 120px;
+    }
+
+    .pick-slot {
+        min-height: 44px;
+    }
 }

@@ -70,7 +70,8 @@
                 <div class="setup-field">
                     <label for="patchSelect">Patch</label>
                     <select id="patchSelect" class="setup-select">
-                        <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}" th:selected="${p == 'All patches'}"></option>
+                        <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}"
+                                th:selected="${p == 'All patches'}"></option>
                     </select>
                 </div>
 
@@ -114,9 +115,74 @@
                     </div>
                 </div>
 
-                <!-- Inner content placeholder -->
-                <div class="draft-content" id="draftContent">
-                    <!-- Draft logic will go here later -->
+                <!-- Draft Interface -->
+                <div class="draft-interface" id="draftInterface">
+                    <!-- Bans Row -->
+                    <div class="bans-row">
+                        <div class="bans-group blue-bans">
+                            <div class="ban-slot" data-ban="blue-1"></div>
+                            <div class="ban-slot" data-ban="blue-2"></div>
+                            <div class="ban-slot" data-ban="blue-3"></div>
+                            <div class="ban-slot" data-ban="blue-4"></div>
+                            <div class="ban-slot" data-ban="blue-5"></div>
+                        </div>
+                        <div class="bans-divider">BANS</div>
+                        <div class="bans-group red-bans">
+                            <div class="ban-slot" data-ban="red-1"></div>
+                            <div class="ban-slot" data-ban="red-2"></div>
+                            <div class="ban-slot" data-ban="red-3"></div>
+                            <div class="ban-slot" data-ban="red-4"></div>
+                            <div class="ban-slot" data-ban="red-5"></div>
+                        </div>
+                    </div>
+
+                    <!-- Picks Row -->
+                    <div class="picks-row">
+                        <!-- Blue Side Picks -->
+                        <div class="picks-column blue-picks">
+                            <div class="pick-slot" data-pick="blue-1">
+                                <span class="pick-number">1</span>
+                            </div>
+                            <div class="pick-slot" data-pick="blue-2">
+                                <span class="pick-number">2</span>
+                            </div>
+                            <div class="pick-slot" data-pick="blue-3">
+                                <span class="pick-number">3</span>
+                            </div>
+                            <div class="pick-slot" data-pick="blue-4">
+                                <span class="pick-number">4</span>
+                            </div>
+                            <div class="pick-slot" data-pick="blue-5">
+                                <span class="pick-number">5</span>
+                            </div>
+                        </div>
+
+                        <!-- Center Info -->
+                        <div class="draft-center">
+                            <div class="draft-patch" id="draftPatch">Patch 14.10</div>
+                            <div class="draft-vs">VS</div>
+                            <div class="draft-first-pick" id="draftFirstPick">First Pick: Blue</div>
+                        </div>
+
+                        <!-- Red Side Picks -->
+                        <div class="picks-column red-picks">
+                            <div class="pick-slot" data-pick="red-1">
+                                <span class="pick-number">1</span>
+                            </div>
+                            <div class="pick-slot" data-pick="red-2">
+                                <span class="pick-number">2</span>
+                            </div>
+                            <div class="pick-slot" data-pick="red-3">
+                                <span class="pick-number">3</span>
+                            </div>
+                            <div class="pick-slot" data-pick="red-4">
+                                <span class="pick-number">4</span>
+                            </div>
+                            <div class="pick-slot" data-pick="red-5">
+                                <span class="pick-number">5</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
