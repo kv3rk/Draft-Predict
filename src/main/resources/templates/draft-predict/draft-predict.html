@@ -14,11 +14,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet">
-    <link rel="stylesheet" href="/CSS/draft-predict/draft-predict.css">
     <link rel="stylesheet" href="/CSS/common.css">
+    <link rel="stylesheet" href="/CSS/draft-predict/draft-predict.css">
+    <link rel="stylesheet" href="/CSS/draft-predict/general-match-info.css">
+    <link rel="stylesheet" href="/CSS/draft-predict/draft-phase.css">
 
     <!--    Logo-->
     <link rel="icon" href="/IMG/logo/riot-logo.png">
+
+    <!--    Script-->
+    <script src="/JS/draft-predict/general-match-info.js" defer></script>
+    <script src="/JS/draft-predict/locking-system.js" defer></script>
 
 </head>
 
@@ -44,11 +50,77 @@
         </a>
     </header>
 
-    <main class="coming-soon-main">
-        <h1 class="coming-soon-title">Coming Soon</h1>
-        <p class="coming-soon-subtitle">Draft analysis is under development</p>
-    </main>
+    <main class="draft-main">
+        <!-- Upper Block: Match Setup -->
+        <section class="stats-card match-setup-card" id="matchSetupCard">
+            <div class="card-header">
+                <div class="card-icon setup-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 6.34L2.1 2.1m17.8 17.8l-4.24-4.24M6.34 17.66l-4.24 4.24M23 12h-6m-6 0H1m20.07-4.93l-4.24 4.24M6.34 6.34l-4.24-4.24"/>
+                    </svg>
+                </div>
+                <div class="card-title-group">
+                    <h2 class="card-title">Match Setup</h2>
+                    <p class="card-subtitle">Configure draft parameters</p>
+                </div>
+            </div>
 
+            <div class="setup-form">
+                <div class="setup-field">
+                    <label for="patchSelect">Patch</label>
+                    <select id="patchSelect" class="setup-select">
+                        <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}" th:selected="${p == 'All patches'}"></option>
+                    </select>
+                </div>
+
+                <div class="setup-field">
+                    <label for="firstPickSelect">First Pick</label>
+                    <select id="firstPickSelect" class="setup-select">
+                        <option value="BLUE" selected>Blue Side</option>
+                        <option value="RED">Red Side</option>
+                    </select>
+                </div>
+
+                <button id="applyBtn" class="search-btn apply-btn" type="button">Apply</button>
+            </div>
+        </section>
+
+        <!-- Bottom Block: Draft Phase (locked by default) -->
+        <section class="draft-phase-wrapper" id="draftPhaseWrapper">
+            <div class="lock-overlay" id="lockOverlay">
+                <div class="lock-content">
+                    <div class="lock-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                    </div>
+                    <p class="lock-text">Configure match setup to unlock</p>
+                </div>
+            </div>
+
+            <div class="stats-card draft-phase-card" id="draftPhaseCard">
+                <div class="card-header">
+                    <div class="card-icon draft-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                    </div>
+                    <div class="card-title-group">
+                        <h2 class="card-title">Draft Phase</h2>
+                        <p class="card-subtitle">Select bans and picks</p>
+                    </div>
+                </div>
+
+                <!-- Inner content placeholder -->
+                <div class="draft-content" id="draftContent">
+                    <!-- Draft logic will go here later -->
+                </div>
+            </div>
+        </section>
+    </main>
 </div>
 </body>
 </html>

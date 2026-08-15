@@ -1,0 +1,130 @@
+/* ─── Match Setup Card ─── */
+.match-setup-card {
+    animation: fadeSlideUp 0.8s 0.15s both;
+}
+
+.match-setup-card .card-header {
+    margin-bottom: 24px;
+}
+
+.setup-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.setup-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 160px;
+}
+
+.setup-field label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.setup-select {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b92a8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.setup-select:hover,
+.setup-select:focus {
+    border-color: var(--border-hover);
+    outline: none;
+}
+
+.setup-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* ─── Apply Button ─── */
+.apply-btn {
+    height: 42px;
+    padding: 0 32px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent-gold), #a08050);
+    color: var(--bg-primary);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 16px var(--accent-gold-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.apply-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.apply-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(201, 169, 110, 0.35);
+}
+
+.apply-btn:hover::before {
+    left: 100%;
+}
+
+.apply-btn:active {
+    transform: translateY(0);
+}
+
+.apply-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.apply-btn:disabled::before {
+    display: none;
+}
+
+.setup-icon {
+    background: rgba(96, 165, 250, 0.15);
+    color: var(--accent-pick);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 480px) {
+    .setup-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .apply-btn {
+        width: 100%;
+    }
+}
