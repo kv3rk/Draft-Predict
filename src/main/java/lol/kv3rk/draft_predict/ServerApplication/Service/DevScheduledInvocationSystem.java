@@ -26,9 +26,9 @@ public class DevScheduledInvocationSystem {
 
         championIdDB.populateChampionAndIdsDB();
         gatherMatchInfo.getEUWMatchInfo();
-//        gatherMatchInfo.getNAMatchInfo();
-//        gatherMatchInfo.getKRMatchInfo();
-//        gatherMatchInfo.getEUNEMatchInfo();
+        gatherMatchInfo.getNAMatchInfo();
+        gatherMatchInfo.getKRMatchInfo();
+        gatherMatchInfo.getEUNEMatchInfo();
 
     }
 }
