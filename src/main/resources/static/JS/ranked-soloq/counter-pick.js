@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', init);
 
-/* ─── Initialization ─── */
 function init() {
     const champion1Select = document.getElementById('champion1Select');
     const champion2Select = document.getElementById('champion2Select');
@@ -13,89 +12,9 @@ function init() {
         return;
     }
 
-    loadChampionList();
-    loadPatchList();
     searchBtn.addEventListener('click', handleSearch);
 }
 
-/* ─── Load Champion List ─── */
-async function loadChampionList() {
-    const champion1Select = document.getElementById('champion1Select');
-    const champion2Select = document.getElementById('champion2Select');
-
-    try {
-        const response = await fetch('/draft-predict/get/champion-list', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const champions = await response.json();
-
-        if (!Array.isArray(champions) || champions.length === 0) {
-            const emptyOption = '<option value="" disabled>No champions found</option>';
-            champion1Select.innerHTML = emptyOption;
-            champion2Select.innerHTML = emptyOption;
-            return;
-        }
-
-        const optionsHtml = champions.map(c => {
-            const name = c.champion || 'Unknown';
-            return `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
-        }).join('');
-
-        champion1Select.innerHTML = optionsHtml;
-        champion2Select.innerHTML = optionsHtml;
-
-        champion1Select.selectedIndex = 0;
-        champion2Select.selectedIndex = 1;
-
-    } catch (err) {
-        console.error('Failed to load champion list:', err);
-        const errorOption = '<option value="" disabled>Error loading champions</option>';
-        champion1Select.innerHTML = errorOption;
-        champion2Select.innerHTML = errorOption;
-    }
-}
-
-/* ─── Load Patch List ─── */
-async function loadPatchList() {
-    const patchSelect = document.getElementById('patchSelect');
-
-    try {
-        const response = await fetch('/draft-predict/get/patch-list', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const patches = await response.json();
-
-        if (!Array.isArray(patches) || patches.length === 0) {
-            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
-            return;
-        }
-
-        patchSelect.innerHTML = patches.map(p => {
-            const selected = p === 'All patches' ? 'selected' : '';
-            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
-        }).join('');
-
-    } catch (err) {
-        console.error('Failed to load patch list:', err);
-        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
-    }
-}
-
-/* ─── Search Handler ─── */
 async function handleSearch() {
     const champion1 = document.getElementById('champion1Select').value;
     const champion2 = document.getElementById('champion2Select').value;
@@ -121,13 +40,11 @@ async function handleSearch() {
         if (!data) {
             renderEmpty();
             updateSubtitle(null, null, lane);
-            updateVsLane(lane);
             return;
         }
 
         renderMatchup(data, lane);
         updateSubtitle(data.champion1, data.champion2, lane);
-        updateVsLane(lane);
     } catch (err) {
         console.error('Search error:', err);
         alert('Failed to load data. Please try again.');
@@ -136,7 +53,6 @@ async function handleSearch() {
     }
 }
 
-/* ─── Async Fetch ─── */
 async function fetchCounterPick(champion1, champion2, lane, patch) {
     const params = new URLSearchParams({
         champion1: champion1,
@@ -145,11 +61,9 @@ async function fetchCounterPick(champion1, champion2, lane, patch) {
         patch: patch
     });
 
-    const response = await fetch(`/draft-predict/get/counter-pick?${params.toString()}`, {
+    const response = await fetch(`/ranked-soloq/get/counter-pick?${params.toString()}`, {
         method: 'GET',
-        headers: {
-            'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
     });
 
     const text = await response.text();
@@ -164,7 +78,6 @@ async function fetchCounterPick(champion1, champion2, lane, patch) {
     return JSON.parse(text);
 }
 
-/* ─── Render Empty State ─── */
 function renderEmpty() {
     const display = document.getElementById('matchupDisplay');
     display.innerHTML = `
@@ -173,7 +86,6 @@ function renderEmpty() {
         </div>`;
 }
 
-/* ─── Matchup Render ─── */
 function renderMatchup(data, lane) {
     const display = document.getElementById('matchupDisplay');
 
@@ -202,7 +114,7 @@ function renderMatchup(data, lane) {
 
             <div class="vs-divider">
                 <span class="vs-text">VS</span>
-                <span class="vs-lane" id="vsLane">${escapeHtml(lane || 'UNKNOWN')}</span>
+                <span class="vs-lane">${escapeHtml(lane || 'UNKNOWN')}</span>
             </div>
 
             <div class="champion-side champion-side-right">
@@ -253,7 +165,6 @@ function renderMatchup(data, lane) {
         </div>`;
 }
 
-/* ─── Subtitle Update ─── */
 function updateSubtitle(champion1, champion2, lane) {
     const cardSubtitle = document.querySelector('.card-subtitle');
     if (!cardSubtitle) return;
@@ -266,14 +177,6 @@ function updateSubtitle(champion1, champion2, lane) {
     cardSubtitle.textContent = `Matchup: ${escapeHtml(champion1)} vs ${escapeHtml(champion2)} on ${escapeHtml(lane || 'UNKNOWN')}`;
 }
 
-function updateVsLane(lane) {
-    const vsLane = document.getElementById('vsLane');
-    if (vsLane) {
-        vsLane.textContent = lane || 'UNKNOWN';
-    }
-}
-
-/* ─── UI Helpers ─── */
 function setLoadingState(button, isLoading) {
     if (isLoading) {
         button.dataset.originalText = button.textContent;

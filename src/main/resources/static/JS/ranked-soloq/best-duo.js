@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', init);
 
-/* ─── Initialization ─── */
 function init() {
     const role1Select = document.getElementById('role1');
     const role2Select = document.getElementById('role2');
@@ -15,44 +14,8 @@ function init() {
     role1Select.addEventListener('change', validateRoles);
     role2Select.addEventListener('change', validateRoles);
     searchBtn.addEventListener('click', handleSearch);
-
-    // Загружаем список патчей при инициализации
-    loadPatchList();
 }
 
-/* ─── Load Patch List ─── */
-async function loadPatchList() {
-    const patchSelect = document.getElementById('patchSelect');
-
-    try {
-        const response = await fetch('/draft-predict/get/patch-list', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const patches = await response.json();
-
-        if (!Array.isArray(patches) || patches.length === 0) {
-            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
-            return;
-        }
-
-        patchSelect.innerHTML = patches.map(p => {
-            const selected = p === 'All patches' ? 'selected' : '';
-            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
-        }).join('');
-
-    } catch (err) {
-        console.error('Failed to load patch list:', err);
-        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
-    }
-}
-
-/* ─── Validation ─── */
 function validateRoles() {
     const role1Select = document.getElementById('role1');
     const role2Select = document.getElementById('role2');
@@ -66,7 +29,6 @@ function validateRoles() {
     }
 }
 
-/* ─── Search Handler ─── */
 async function handleSearch() {
     if (!validateRoles()) {
         alert('Please select two different roles');
@@ -92,7 +54,6 @@ async function handleSearch() {
     }
 }
 
-/* ─── Async Fetch ─── */
 async function fetchBestDuos(role1, role2, patch) {
     const params = new URLSearchParams({
         role1: role1,
@@ -100,11 +61,9 @@ async function fetchBestDuos(role1, role2, patch) {
         patch: patch
     });
 
-    const response = await fetch(`/draft-predict/find/best-duo?${params.toString()}`, {
+    const response = await fetch(`/ranked-soloq/find/best-duo?${params.toString()}`, {
         method: 'GET',
-        headers: {
-            'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
     });
 
     if (!response.ok) {
@@ -114,7 +73,6 @@ async function fetchBestDuos(role1, role2, patch) {
     return await response.json();
 }
 
-/* ─── Table Render ─── */
 function renderTable(duos) {
     const tbody = document.getElementById('duoTableBody');
 
@@ -153,7 +111,6 @@ function renderTable(duos) {
     `).join('');
 }
 
-/* ─── Subtitle Update ─── */
 function updateSubtitle(role1, role2) {
     const cardSubtitle = document.querySelector('.card-subtitle');
     if (!cardSubtitle) return;
@@ -162,7 +119,6 @@ function updateSubtitle(role1, role2) {
     cardSubtitle.textContent = `${pretty(role1)} & ${pretty(role2)} synergies`;
 }
 
-/* ─── UI Helpers ─── */
 function setLoadingState(button, isLoading) {
     if (isLoading) {
         button.dataset.originalText = button.textContent;

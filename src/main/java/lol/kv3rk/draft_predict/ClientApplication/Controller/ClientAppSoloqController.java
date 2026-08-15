@@ -36,6 +36,7 @@ public class ClientAppSoloqController {
         model.addAttribute("tiers", String.join(", ", clientAppSoloqService.getTierParameters()));
         model.addAttribute("timeUpdated", clientAppSoloqService.lastTimeUpdate());
         model.addAttribute("patchList", clientAppSoloqService.getPatchList());
+        model.addAttribute("championList", clientAppSoloqService.getChampionList());
     }
 
     //-------------- Page Endpoints --------------

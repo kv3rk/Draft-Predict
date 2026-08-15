@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', init);
 
-/* ─── Initialization ─── */
 function init() {
     const championSelect = document.getElementById('championSelect');
     const patchSelect = document.getElementById('patchSelect');
@@ -11,81 +10,9 @@ function init() {
         return;
     }
 
-    loadChampionList();
-    loadPatchList();
     searchBtn.addEventListener('click', handleSearch);
 }
 
-/* ─── Load Champion List ─── */
-async function loadChampionList() {
-    const championSelect = document.getElementById('championSelect');
-
-    try {
-        const response = await fetch('/draft-predict/get/champion-list', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const champions = await response.json();
-
-        if (!Array.isArray(champions) || champions.length === 0) {
-            championSelect.innerHTML = '<option value="" disabled>No champions found</option>';
-            return;
-        }
-
-        championSelect.innerHTML = champions.map(c => {
-            const name = c.champion || 'Unknown';
-            return `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
-        }).join('');
-
-        // По умолчанию выбираем первого в списке
-        championSelect.selectedIndex = 0;
-
-    } catch (err) {
-        console.error('Failed to load champion list:', err);
-        championSelect.innerHTML = '<option value="" disabled>Error loading champions</option>';
-    }
-}
-
-/* ─── Load Patch List ─── */
-async function loadPatchList() {
-    const patchSelect = document.getElementById('patchSelect');
-
-    try {
-        const response = await fetch('/draft-predict/get/patch-list', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const patches = await response.json();
-
-        if (!Array.isArray(patches) || patches.length === 0) {
-            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
-            return;
-        }
-
-        patchSelect.innerHTML = patches.map(p => {
-            const selected = p === 'All patches' ? 'selected' : '';
-            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
-        }).join('');
-
-    } catch (err) {
-        console.error('Failed to load patch list:', err);
-        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
-    }
-}
-
-/* ─── Search Handler ─── */
 async function handleSearch() {
     const champion = document.getElementById('championSelect').value;
     const patch = document.getElementById('patchSelect').value;
@@ -110,18 +37,12 @@ async function handleSearch() {
     }
 }
 
-/* ─── Async Fetch ─── */
 async function fetchDraftPresence(name, patch) {
-    const params = new URLSearchParams({
-        name: name,
-        patch: patch
-    });
+    const params = new URLSearchParams({ name: name, patch: patch });
 
-    const response = await fetch(`/draft-predict/find/draft-presence?${params.toString()}`, {
+    const response = await fetch(`/ranked-soloq/find/draft-presence?${params.toString()}`, {
         method: 'GET',
-        headers: {
-            'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
     });
 
     if (!response.ok) {
@@ -131,7 +52,6 @@ async function fetchDraftPresence(name, patch) {
     return await response.json();
 }
 
-/* ─── Presence Render ─── */
 function renderPresence(data) {
     const display = document.getElementById('presenceDisplay');
 
@@ -144,9 +64,8 @@ function renderPresence(data) {
     }
 
     const presenceValue = Number(data.presence);
-    const circumference = 2 * Math.PI * 54; // r = 54
+    const circumference = 2 * Math.PI * 54;
     const dashArray = (presenceValue / 100) * circumference;
-    const dashOffset = 0;
 
     display.innerHTML = `
         <div class="presence-value-wrapper">
@@ -155,7 +74,7 @@ function renderPresence(data) {
                     <circle class="presence-ring-bg" cx="60" cy="60" r="54"/>
                     <circle class="presence-ring-progress" cx="60" cy="60" r="54"
                             stroke-dasharray="${dashArray} ${circumference}"
-                            stroke-dashoffset="${dashOffset}"/>
+                            stroke-dashoffset="0"/>
                 </svg>
                 <div class="presence-number">
                     <span class="presence-percent">${formatNum(presenceValue)}</span>
@@ -166,14 +85,12 @@ function renderPresence(data) {
         </div>`;
 }
 
-/* ─── Subtitle Update ─── */
 function updateSubtitle(championName) {
     const cardSubtitle = document.querySelector('.card-subtitle');
     if (!cardSubtitle) return;
     cardSubtitle.textContent = `Presence for ${escapeHtml(championName || 'Unknown')}`;
 }
 
-/* ─── UI Helpers ─── */
 function setLoadingState(button, isLoading) {
     if (isLoading) {
         button.dataset.originalText = button.textContent;

@@ -21,7 +21,7 @@
     <!--    Logo-->
     <link rel="icon" href="/IMG/logo/riot-logo.png">
 
-    <!--    JS-->
+    <!--    Script-->
     <script src="/JS/ranked-soloq/champ-flex.js" defer></script>
 
 </head>
@@ -34,7 +34,7 @@
 
 <div class="page-wrapper">
     <header class="site-header">
-        <a th:href="@{/lol/main}" class="logo" aria-label="Go to homepage">
+        <a th:href="@{/ranked-soloq/main}" class="logo" aria-label="Go to homepage">
             <div class="logo-mark">
                 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="2"
@@ -57,22 +57,23 @@
                 </div>
                 <div class="card-title-group">
                     <h2 class="card-title">Champion Flexibility</h2>
-                    <p class="card-subtitle" th:text="'Flexibility for ' + ${championFlexibility.champion}">Flexibility for Aatrox</p>
+                    <p class="card-subtitle" th:text="'Flexibility for ' + ${championFlexibility.champion}">Flexibility
+                        for Aatrox</p>
                 </div>
             </div>
 
-            <!-- Champion Filter -->
             <div class="champion-filter">
                 <label for="championSelect">Champion</label>
                 <select id="championSelect" class="champion-select">
-                    <option value="" disabled selected>Loading champions...</option>
+                    <option th:each="c : ${championList}" th:value="${c.champion}" th:text="${c.champion}"
+                            th:selected="${c.champion == 'Aatrox'}"></option>
                 </select>
 
-                <!-- Patch filter -->
                 <span class="filter-divider">|</span>
                 <label for="patchSelect">Patch</label>
                 <select id="patchSelect" class="patch-select">
-                    <option value="" disabled>Loading patches...</option>
+                    <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}"
+                            th:selected="${p == 'All patches'}"></option>
                 </select>
 
                 <button id="searchBtn" class="search-btn" type="button">Search</button>
@@ -89,7 +90,6 @@
                     </tr>
                     </thead>
                     <tbody id="flexTableBody">
-                    <!-- ИСПРАВЛЕНО: orElse(null) вместо isPresent()/get() -->
                     <tr th:with="topVal=${championFlexibility.top != null ? championFlexibility.top.orElse(null) : null}"
                         th:if="${topVal != null}" style="animation-delay: 0.06s">
                         <td class="col-rank">1</td>
@@ -99,7 +99,8 @@
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(topVal, 1, 1)} + '%'">45.2%</span>
+                            <span class="rate-badge pick"
+                                  th:text="${#numbers.formatDecimal(topVal, 1, 1)} + '%'">45.2%</span>
                         </td>
                         <td class="col-bar">
                             <div class="bar-track">

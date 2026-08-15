@@ -34,7 +34,7 @@
 
 <div class="page-wrapper">
     <header class="site-header">
-        <a th:href="@{/lol/main}" class="logo" aria-label="Go to homepage">
+        <a th:href="@{/ranked-soloq/main}" class="logo" aria-label="Go to homepage">
             <div class="logo-mark">
                 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="2"
@@ -88,7 +88,7 @@
                 <span class="role-divider">|</span>
                 <label for="patchSelect">Patch</label>
                 <select id="patchSelect" class="patch-select">
-                    <option value="" disabled>Loading patches...</option>
+                    <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}" th:selected="${p == 'All patches'}"></option>
                 </select>
 
                 <button id="searchBtn" class="search-btn" type="button">Search</button>

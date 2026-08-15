@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', init);
 
-/* ─── Initialization ─── */
 function init() {
     const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
@@ -10,43 +9,9 @@ function init() {
         return;
     }
 
-    loadPatchList();
     searchBtn.addEventListener('click', handleSearch);
 }
 
-/* ─── Load Patch List ─── */
-async function loadPatchList() {
-    const patchSelect = document.getElementById('patchSelect');
-
-    try {
-        const response = await fetch('/draft-predict/get/patch-list', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const patches = await response.json();
-
-        if (!Array.isArray(patches) || patches.length === 0) {
-            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
-            return;
-        }
-
-        patchSelect.innerHTML = patches.map(p => {
-            const selected = p === 'All patches' ? 'selected' : '';
-            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
-        }).join('');
-
-    } catch (err) {
-        console.error('Failed to load patch list:', err);
-        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
-    }
-}
-
-/* ─── Search Handler ─── */
 async function handleSearch() {
     const patch = document.getElementById('patchSelect').value;
     const searchBtn = document.getElementById('searchBtn');
@@ -69,11 +34,10 @@ async function handleSearch() {
     }
 }
 
-/* ─── Async Fetch ─── */
 async function fetchBanRates(patch) {
     const params = new URLSearchParams({ patch: patch });
 
-    const response = await fetch(`/draft-predict/find/ban-rates?${params.toString()}`, {
+    const response = await fetch(`/ranked-soloq/find/ban-rates?${params.toString()}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
     });
@@ -90,7 +54,6 @@ async function fetchBanRates(patch) {
     return JSON.parse(text);
 }
 
-/* ─── Table Render ─── */
 function renderTable(data) {
     const tbody = document.querySelector('.stats-table tbody');
 
@@ -126,7 +89,6 @@ function renderTable(data) {
     }).join('');
 }
 
-/* ─── UI Helpers ─── */
 function setLoadingState(button, isLoading) {
     if (isLoading) {
         button.dataset.originalText = button.textContent;

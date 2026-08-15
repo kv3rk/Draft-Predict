@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', init);
 
-/* ─── Initialization ─── */
 function init() {
     const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
@@ -11,7 +10,6 @@ function init() {
         return;
     }
 
-    loadPatchList();
     searchBtn.addEventListener('click', handleSearch);
 
     if (headers.length > 0) {
@@ -21,39 +19,6 @@ function init() {
     }
 }
 
-/* ─── Load Patch List ─── */
-async function loadPatchList() {
-    const patchSelect = document.getElementById('patchSelect');
-
-    try {
-        const response = await fetch('/draft-predict/get/patch-list', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const patches = await response.json();
-
-        if (!Array.isArray(patches) || patches.length === 0) {
-            patchSelect.innerHTML = '<option value="" disabled>No patches found</option>';
-            return;
-        }
-
-        patchSelect.innerHTML = patches.map(p => {
-            const selected = p === 'All patches' ? 'selected' : '';
-            return `<option value="${escapeHtml(p)}" ${selected}>${escapeHtml(p)}</option>`;
-        }).join('');
-
-    } catch (err) {
-        console.error('Failed to load patch list:', err);
-        patchSelect.innerHTML = '<option value="" disabled>Error loading patches</option>';
-    }
-}
-
-/* ─── Search Handler ─── */
 async function handleSearch() {
     const patch = document.getElementById('patchSelect').value;
     const activeHeader = document.querySelector('.sortable.active');
@@ -62,7 +27,6 @@ async function handleSearch() {
     await loadData(orderParameter, patch);
 }
 
-/* ─── Sort Click Handler ─── */
 async function handleSortClick(event) {
     const orderParameter = event.currentTarget.dataset.order;
     if (!orderParameter) return;
@@ -72,7 +36,6 @@ async function handleSortClick(event) {
     await loadData(orderParameter, patch);
 }
 
-/* ─── Load Data (fetch + render + indicator) ─── */
 async function loadData(orderParameter, patch) {
     try {
         const data = await fetchWinPick(orderParameter, patch);
@@ -84,14 +47,13 @@ async function loadData(orderParameter, patch) {
     }
 }
 
-/* ─── Async Fetch ─── */
 async function fetchWinPick(orderParameter, patch) {
     const params = new URLSearchParams({
         orderParameter: orderParameter,
         patch: patch
     });
 
-    const response = await fetch(`/draft-predict/find/win-pick?${params.toString()}`, {
+    const response = await fetch(`/ranked-soloq/find/win-pick?${params.toString()}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
     });
@@ -108,7 +70,6 @@ async function fetchWinPick(orderParameter, patch) {
     return JSON.parse(text);
 }
 
-/* ─── Table Render ─── */
 function renderTable(champions) {
     const tbody = document.getElementById('winPickTableBody');
 
@@ -141,7 +102,6 @@ function renderTable(champions) {
     `).join('');
 }
 
-/* ─── Sort Indicator ─── */
 function updateSortIndicator(activeOrder) {
     const headers = document.querySelectorAll('.sortable');
     headers.forEach(header => {
@@ -153,7 +113,6 @@ function updateSortIndicator(activeOrder) {
     });
 }
 
-/* ─── Helpers ─── */
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
