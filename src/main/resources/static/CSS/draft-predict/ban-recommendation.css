@@ -1,0 +1,66 @@
+/* ─── Ban Recommendations ─── */
+.ban-recommendations {
+    display: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    min-height: 24px;
+}
+
+.ban-rec-item {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-ban);
+    background: var(--accent-ban-dim);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 3px 10px;
+    letter-spacing: 0.3px;
+}
+
+/* ─── Banned option in select ─── */
+option.banned-option {
+    color: #ef4444;
+    text-decoration: line-through;
+    background: rgba(248, 113, 113, 0.08);
+}
+
+option.available-option {
+    color: var(--text-primary);
+}
+
+/* ─── Active Ban Pulse ─── */
+@keyframes banPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.6);
+        border-color: #ef4444;
+    }
+    50% {
+        box-shadow: 0 0 16px 4px rgba(248, 113, 113, 0.4);
+        border-color: #f87171;
+    }
+}
+
+.ban-slot.active-ban {
+    animation: banPulse 1s ease-in-out infinite;
+    border-color: #ef4444;
+    background: rgba(248, 113, 113, 0.15);
+    z-index: 2;
+}
+
+.ban-slot.ban-completed {
+    border-color: var(--border-card);
+    opacity: 0.7;
+    background: rgba(248, 113, 113, 0.08);
+}
+
+.ban-champion-name {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.2;
+    padding: 2px;
+    word-break: break-word;
+}

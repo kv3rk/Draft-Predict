@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -54,5 +55,20 @@ public class ClientAppDraftController {
         response.put("firstPickSide", matchSetupInfoDTO.firstPickSide());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/ban/recommendations")
+    @ResponseBody
+    public ResponseEntity<List<String>> getBanRecommendations(
+            @RequestBody Map<String, List<String>> request) {
+
+        log.info("Entered [/draft-predict/ban/recommendations] endpoint");
+
+        List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
+        List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
+
+        List<String> recommendations = clientAppDraftService.getBanRecommendations(blueSideBans, redSideBans);
+
+        return ResponseEntity.ok(recommendations);
     }
 }
