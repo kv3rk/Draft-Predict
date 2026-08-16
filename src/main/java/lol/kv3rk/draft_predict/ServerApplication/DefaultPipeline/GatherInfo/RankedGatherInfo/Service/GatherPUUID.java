@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Service;
+package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Service;
 
 import lol.kv3rk.draft_predict.common.RiotDTO.LeagueEntryDTO;
 import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotRequestParameters;

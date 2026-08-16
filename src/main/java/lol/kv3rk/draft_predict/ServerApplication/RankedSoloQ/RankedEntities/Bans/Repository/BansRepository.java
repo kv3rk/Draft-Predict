@@ -31,7 +31,7 @@ public interface BansRepository extends JpaRepository<BansEntity, UUID> {
                     where m.patch like :patch and b.champion is not null
                     GROUP BY b.champion, tm.total
                     ORDER BY ban_rate DESC
-                    LIMIT 5;
+                    LIMIT 10;
                     """
     )
     List<MostBannedChampions> getMostBannedChampions(

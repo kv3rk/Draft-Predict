@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DTO;
+package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.DTO;
 
 import java.util.Map;
 

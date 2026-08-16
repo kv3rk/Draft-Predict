@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Service;
+package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Service;
 
 import lol.kv3rk.draft_predict.common.DateAndTime.CustomLocalDateAndTime;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
-package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Component;
+package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Component;
 
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DTO.GameDataDTO;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.DTO.GameDataDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;

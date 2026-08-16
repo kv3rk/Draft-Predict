@@ -1,7 +1,7 @@
-package lol.kv3rk.draft_predict.ServerApplication.Service;
+package lol.kv3rk.draft_predict.ServerApplication.InvocationSystem;
 
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Component.ChampionIdDB;
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Service.GatherMatchInfo;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Component.ChampionIdDB;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Service.GatherMatchInfo;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,19 +9,19 @@ import org.springframework.stereotype.Component;
 
 @EnableScheduling
 @Component
-@Profile("dev")
-public class DevScheduledInvocationSystem {
+@Profile("prod")
+public class ProdScheduledInvocationSystem {
 
     private final GatherMatchInfo gatherMatchInfo;
     private final ChampionIdDB championIdDB;
 
-    public DevScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
-                                        ChampionIdDB championIdDB) {
+    public ProdScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
+                                         ChampionIdDB championIdDB) {
         this.gatherMatchInfo = gatherMatchInfo;
         this.championIdDB = championIdDB;
     }
 
-    @Scheduled(initialDelay = Long.MAX_VALUE, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(cron = "0 1 0 1/1 * *", zone = "UTC")
     public void everyDayRoutine() throws InterruptedException {
 
         championIdDB.populateChampionAndIdsDB();

@@ -155,28 +155,26 @@ public class ClientAppSoloqService {
         return participantsRepository.getChampionList();
     }
 
-    public ChampionPresence getChampionDraftPresence(String name,
-                                                     String patch) {
+    public List<ChampionPresence> getChampionDraftPresence(String patch) {
         if (patch.equals("All patches")) {
 
-            return rankedRequests.getChampionDraftPresence(name, "%");
+            return rankedRequests.getChampionDraftPresence("%");
         } else {
 
-            return rankedRequests.getChampionDraftPresence(name, patch);
+            return rankedRequests.getChampionDraftPresence(patch);
         }
 
     }
 
-    public CounterPick getCounterPick(String champion1,
-                                      String champion2,
+    public List<CounterPick> getCounterPick(String champion1,
                                       String lane,
                                       String patch) {
         if (patch.equals("All patches")) {
 
-            return rankedRequests.getCounterPicks(champion1, champion2, lane, "%");
+            return rankedRequests.getCounterPicks(champion1, lane, "%");
         } else {
 
-            return rankedRequests.getCounterPicks(champion1, champion2, lane, patch);
+            return rankedRequests.getCounterPicks(champion1, lane, patch);
         }
 
     }

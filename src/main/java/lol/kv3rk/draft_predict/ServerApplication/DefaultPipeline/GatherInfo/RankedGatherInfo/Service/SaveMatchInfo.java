@@ -1,7 +1,7 @@
-package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Service;
+package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Service;
 
 import jakarta.transaction.Transactional;
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Component.ChampionIdDB;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Component.ChampionIdDB;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.Entity.BansEntity;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Matches.Entity.MatchesEntity;

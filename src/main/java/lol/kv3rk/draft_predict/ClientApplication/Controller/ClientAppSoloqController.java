@@ -99,7 +99,7 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/draft-presence] endpoint");
         addCommonAttributes(model);
         model.addAttribute("championDraftPresence", clientAppSoloqService.getChampionDraftPresence(
-                "Aatrox", "%"));
+                "%"));
         return "ranked-soloq-page/stats-pages/draft-presence";
     }
 
@@ -108,7 +108,7 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/counter-pick] endpoint");
         addCommonAttributes(model);
         model.addAttribute("championCounterPick", clientAppSoloqService.getCounterPick(
-                "Aatrox", "Ahri", "MIDDLE", "%"
+                "Aatrox", "MIDDLE", "%"
         ));
         return "ranked-soloq-page/stats-pages/counter-pick";
     }
@@ -154,10 +154,9 @@ public class ClientAppSoloqController {
 
     @GetMapping("/find/draft-presence")
     @ResponseBody
-    public ChampionPresence findDraftPresence(@RequestParam String name,
-                                              @RequestParam String patch) {
+    public List<ChampionPresence> findDraftPresence(@RequestParam String patch) {
         log.info("Entered [/ranked-soloq/find/draft-presence] endpoint");
-        return clientAppSoloqService.getChampionDraftPresence(name, patch);
+        return clientAppSoloqService.getChampionDraftPresence(patch);
     }
 
     @GetMapping("/get/champion-list")
@@ -169,12 +168,11 @@ public class ClientAppSoloqController {
 
     @GetMapping("/get/counter-pick")
     @ResponseBody
-    public CounterPick findCounterPick(@RequestParam String champion1,
-                                       @RequestParam String champion2,
+    public List<CounterPick> findCounterPick(@RequestParam String champion1,
                                        @RequestParam String lane,
                                        @RequestParam String patch) {
         log.info("Entered [/ranked-soloq/get/counter-pick] endpoint");
-        return clientAppSoloqService.getCounterPick(champion1, champion2, lane, patch);
+        return clientAppSoloqService.getCounterPick(champion1, lane, patch);
     }
 
     @GetMapping("/get/patch-list")

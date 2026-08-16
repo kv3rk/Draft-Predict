@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    const championSelect = document.getElementById('championSelect');
     const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
 
-    if (!championSelect || !patchSelect || !searchBtn) {
+    if (!patchSelect || !searchBtn) {
         console.error('Required DOM elements not found');
         return;
     }
@@ -14,21 +13,19 @@ function init() {
 }
 
 async function handleSearch() {
-    const champion = document.getElementById('championSelect').value;
     const patch = document.getElementById('patchSelect').value;
     const searchBtn = document.getElementById('searchBtn');
 
-    if (!champion) {
-        alert('Please select a champion');
+    if (!patch) {
+        alert('Please select a patch');
         return;
     }
 
     setLoadingState(searchBtn, true);
 
     try {
-        const data = await fetchDraftPresence(champion, patch);
-        renderPresence(data);
-        updateSubtitle(data.champion);
+        const data = await fetchDraftPresence(patch);
+        renderTable(data);
     } catch (err) {
         console.error('Search error:', err);
         alert('Failed to load data. Please try again.');
@@ -37,8 +34,8 @@ async function handleSearch() {
     }
 }
 
-async function fetchDraftPresence(name, patch) {
-    const params = new URLSearchParams({ name: name, patch: patch });
+async function fetchDraftPresence(patch) {
+    const params = new URLSearchParams({ patch: patch });
 
     const response = await fetch(`/ranked-soloq/find/draft-presence?${params.toString()}`, {
         method: 'GET',
@@ -52,43 +49,38 @@ async function fetchDraftPresence(name, patch) {
     return await response.json();
 }
 
-function renderPresence(data) {
-    const display = document.getElementById('presenceDisplay');
+function renderTable(data) {
+    const tbody = document.getElementById('presenceTableBody');
 
-    if (!data || data.presence == null) {
-        display.innerHTML = `
-            <div class="presence-empty">
-                <p>No presence data found for this champion.</p>
-            </div>`;
+    if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
+                    No presence data found for this patch.
+                </td>
+            </tr>`;
         return;
     }
 
-    const presenceValue = Number(data.presence);
-    const circumference = 2 * Math.PI * 54;
-    const dashArray = (presenceValue / 100) * circumference;
+    tbody.innerHTML = data.map((champ, index) => {
+        const name = champ.champion || 'Unknown';
+        const presence = champ.presence != null ? Number(champ.presence).toFixed(1) : '0.0';
+        const initial = name.charAt(0);
 
-    display.innerHTML = `
-        <div class="presence-value-wrapper">
-            <div class="presence-ring">
-                <svg class="presence-ring-svg" viewBox="0 0 120 120">
-                    <circle class="presence-ring-bg" cx="60" cy="60" r="54"/>
-                    <circle class="presence-ring-progress" cx="60" cy="60" r="54"
-                            stroke-dasharray="${dashArray} ${circumference}"
-                            stroke-dashoffset="0"/>
-                </svg>
-                <div class="presence-number">
-                    <span class="presence-percent">${formatNum(presenceValue)}</span>
-                    <span class="presence-symbol">%</span>
-                </div>
-            </div>
-            <div class="presence-label">Draft presence rate</div>
-        </div>`;
-}
-
-function updateSubtitle(championName) {
-    const cardSubtitle = document.querySelector('.card-subtitle');
-    if (!cardSubtitle) return;
-    cardSubtitle.textContent = `Presence for ${escapeHtml(championName || 'Unknown')}`;
+        return `
+            <tr style="animation-delay: ${index * 0.05}s">
+                <td class="col-rank">${index + 1}</td>
+                <td class="col-champ">
+                    <div class="champ-cell">
+                        <div class="champ-avatar">${escapeHtml(initial)}</div>
+                        <span class="champ-name">${escapeHtml(name)}</span>
+                    </div>
+                </td>
+                <td class="col-rate">
+                    <span class="rate-badge presence">${escapeHtml(presence)}%</span>
+                </td>
+            </tr>`;
+    }).join('');
 }
 
 function setLoadingState(button, isLoading) {
@@ -106,8 +98,4 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-}
-
-function formatNum(num) {
-    return Number(num).toFixed(1);
 }

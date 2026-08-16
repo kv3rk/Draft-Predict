@@ -72,7 +72,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     order by
                     	pick_rate desc,
                     	win_rate desc
-                    limit 5;
+                    limit 10;
                     """
     )
     List<BestDuo> getBestDuoChampions(
@@ -146,7 +146,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     order by
                     	pick_rate desc,
                     	win_rate desc
-                    limit 5;
+                    limit 10;
                     """
     )
     List<BestTrio> getBestTrioChampions(
@@ -361,18 +361,15 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                 from
                     total_amount ta
                 cross join total_matches_table tm
-                where
-                    champion = :name
                 group by
                     champion,
                     tm.total_matches
                 order by
                     presence desc
-                limit 1;
+                limit 10;
                 """
     )
-    ChampionPresence getChampionDraftPresence(
-            @Param("name") String name,
+    List<ChampionPresence> getChampionDraftPresence(
             @Param("patch") String patch
     );
 
@@ -398,18 +395,20 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     	p.xp > 1
                     	and p2.xp > 1
                     	and p.champion = :champion1
-                    	and p2.champion = :champion2
                     	and p.position = :lane
                     	and m.patch like :patch
                     group by
                     	p.champion,
-                    	p2.champion;
-                    
+                    	p2.champion
+                    order by
+                    	xp desc,
+                    	farm desc,
+                    	gold desc
+                    limit 10;
                     """
     )
-    CounterPick getCounterPicks(
+    List<CounterPick> getCounterPicks(
             @Param("champion1") String champion1,
-            @Param("champion2") String champion2,
             @Param("lane") String lane,
             @Param("patch") String patch
     );

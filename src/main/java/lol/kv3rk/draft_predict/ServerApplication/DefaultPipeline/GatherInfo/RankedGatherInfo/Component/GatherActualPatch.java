@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.Component;
+package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Component;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
