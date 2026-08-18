@@ -116,7 +116,7 @@ function renderTable(trios) {
                 </div>
             </td>
             <td class="col-rate">
-                <span class="rate-badge pick">${formatNum(trio.pickRate)}</span>
+                <span class="rate-badge pick">${trio.pickRate}</span>
             </td>
             <td class="col-rate">
                 <span class="rate-badge win">${formatNum(trio.winRate)}%</span>
