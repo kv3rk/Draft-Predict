@@ -42,6 +42,40 @@ public class DraftPredictService {
         Set<String> excludedChampions = Stream.concat(blueSideBans.stream(), redSideBans.stream())
                 .collect(Collectors.toSet());
 
+        return getTop3Champions(excludedChampions);
+    }
+
+    public List<String> getBlueSidePickRecommendations(List<String> blueSideBans,
+                                                       List<String> redSideBans,
+                                                       List<String> blueSidePicks,
+                                                       List<String> redSidePicks) {
+
+        Set<String> excludedChampions = Stream.of(
+                blueSideBans.stream(),
+                redSideBans.stream(),
+                blueSidePicks.stream(),
+                redSidePicks.stream()
+        ).flatMap(s -> s).collect(Collectors.toSet());
+
+        return getTop3Champions(excludedChampions);
+    }
+
+    public List<String> getRedSidePickRecommendations(List<String> blueSideBans,
+                                                      List<String> redSideBans,
+                                                      List<String> blueSidePicks,
+                                                      List<String> redSidePicks) {
+
+        Set<String> excludedChampions = Stream.of(
+                blueSideBans.stream(),
+                redSideBans.stream(),
+                blueSidePicks.stream(),
+                redSidePicks.stream()
+        ).flatMap(s -> s).collect(Collectors.toSet());
+
+        return getTop3Champions(excludedChampions);
+    }
+
+    private List<String> getTop3Champions(Set<String> excludedChampions) {
         List<String> draftPresence = rankedRequests.getChampionDraftPresence("%")
                 .stream()
                 .map(ChampionPresence::getChampion)
@@ -91,21 +125,5 @@ public class DraftPredictService {
                 .limit(3)
                 .map(Map.Entry::getKey)
                 .toList();
-    }
-
-    public List<String> redSideFirstPick() {
-        return List.of();
-    }
-
-    public List<String> blueSideFirstPick() {
-        return List.of();
-    }
-
-    public List<String> redSideSecondPick() {
-        return List.of();
-    }
-
-    public List<String> blueSideSecondPick() {
-        return List.of();
     }
 }
