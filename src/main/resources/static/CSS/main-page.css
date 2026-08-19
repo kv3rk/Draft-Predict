@@ -12,8 +12,12 @@
     animation-delay: 0.15s;
 }
 
-#draftCard {
+#proSceneCard {
     animation-delay: 0.3s;
+}
+
+#draftCard {
+    animation-delay: 0.45s;
 }
 
 /* ─── Main Card Link ─── */
@@ -46,6 +50,11 @@
 .ranked-icon {
     background: rgba(74, 222, 128, 0.15);
     color: var(--accent-win);
+}
+
+.pro-scene-icon {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
 }
 
 .draft-icon {

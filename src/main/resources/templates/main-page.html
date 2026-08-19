@@ -29,6 +29,8 @@
 </div>
 
 <div class="page-wrapper">
+
+    <!--    Navigation panel-->
     <header class="site-header">
         <a th:href="@{/lol/main}" class="logo" aria-label="Go to homepage">
             <div class="logo-mark">
@@ -45,6 +47,8 @@
 
     <main class="dashboard">
         <div class="main-grid">
+
+            <!-- Ranked SoloQ Card -->
             <a th:href="@{/ranked-soloq/main}" class="card-link main-card-link">
                 <section class="stats-card main-card" id="rankedCard">
                     <div class="card-header">
@@ -61,6 +65,29 @@
                 </section>
             </a>
 
+            <!-- Pro Scene Stats Card -->
+            <a th:href="@{/pro-scene/main}" class="main-card-link" id="proSceneCard">
+                <div class="stats-card main-card">
+                    <div class="card-header">
+                        <div class="card-icon pro-scene-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                                <path d="M4 22h16"/>
+                                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <h2 class="card-title">Pro Scene Stats</h2>
+                            <p class="card-subtitle">Professional match data, draft trends & meta analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Draft Predict Card -->
             <a th:href="@{/draft-predict/main}" class="card-link main-card-link">
                 <section class="stats-card main-card" id="draftCard">
                     <div class="card-header">
@@ -80,6 +107,7 @@
         </div>
     </main>
 
+    <!--    Stats panel-->
     <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-line"></div>

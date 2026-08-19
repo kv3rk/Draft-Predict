@@ -1,0 +1,41 @@
+/* ─── Pro Scene Main Layout ─── */
+.pro-scene-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    animation: fadeSlideUp 0.8s var(--transition-base) both;
+}
+
+/* ─── Development Card ─── */
+.development-card {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    padding: 48px 32px;
+}
+
+.development-card .card-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+}
+
+.development-card .card-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+.development-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    letter-spacing: -0.3px;
+}
+
+.development-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}

@@ -50,4 +50,11 @@ public class ClientAppMainController {
         return "redirect:/draft-predict/main";
     }
 
+    @GetMapping("/pro-scene")
+    public String getProScenePage() {
+
+        log.info("Entered [/lol/pro-scene] endpoint");
+        return "redirect:/pro-scene/main";
+    }
+
 }
