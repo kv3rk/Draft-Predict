@@ -34,7 +34,7 @@ function updateChampionSelectStyles() {
         if (!option.value) return;
 
         const isBanned = isChampionBanned(option.value);
-        const isPicked = typeof window.isChampionPicked === 'function' && window.isChampionPicked(option.value);
+        const isPicked = typeof isChampionPicked === 'function' && isChampionPicked(option.value);
 
         option.classList.remove('available-option', 'unavailable-option', 'banned-option', 'picked-option');
 

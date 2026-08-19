@@ -24,6 +24,14 @@ option.banned-option {
     color: #ef4444;
     text-decoration: line-through;
     background: rgba(248, 113, 113, 0.08);
+    font-weight: 500;
+}
+
+/* ─── Picked option in select (GREEN) ─── */
+option.picked-option {
+    color: #4ade80;
+    font-weight: 600;
+    background: rgba(74, 222, 128, 0.08);
 }
 
 option.available-option {

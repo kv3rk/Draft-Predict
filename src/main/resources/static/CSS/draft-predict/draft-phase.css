@@ -75,6 +75,10 @@
     gap: 16px;
 }
 
+.red-bans {
+    flex-direction: row-reverse;
+}
+
 .bans-group {
     display: flex;
     gap: 8px;
