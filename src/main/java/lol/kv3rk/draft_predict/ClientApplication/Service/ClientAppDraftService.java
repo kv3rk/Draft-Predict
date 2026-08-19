@@ -10,7 +10,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class ClientAppDraftService {
-
     private final ClientAppSoloqService clientAppSoloqService;
     private final DraftPredictService draftPredictService;
 
@@ -21,18 +20,34 @@ public class ClientAppDraftService {
     }
 
     public List<Champion> getChampionList() {
-
         return clientAppSoloqService.getChampionList();
     }
 
     public List<String> getPatchList() {
-
         return clientAppSoloqService.getPatchList();
     }
 
     public List<String> getBanRecommendations(List<String> blueSideBans,
-                                              List<String> redSideBans) {
+                                              List<String> redSideBans,
+                                              List<String> blueSidePicks,
+                                              List<String> redSidePicks) {
+        return draftPredictService.getBanRecommendations(blueSideBans,
+                redSideBans, blueSidePicks, redSidePicks);
+    }
 
-        return draftPredictService.getBanRecommendations(blueSideBans, redSideBans);
+    public List<String> getBlueSidePickRecommendations(List<String> blueSideBans,
+                                                       List<String> redSideBans,
+                                                       List<String> blueSidePicks,
+                                                       List<String> redSidePicks) {
+        return draftPredictService.getBlueSidePickRecommendations(blueSideBans,
+                redSideBans, blueSidePicks, redSidePicks);
+    }
+
+    public List<String> getRedSidePickRecommendations(List<String> blueSideBans,
+                                                      List<String> redSideBans,
+                                                      List<String> blueSidePicks,
+                                                      List<String> redSidePicks) {
+        return draftPredictService.getRedSidePickRecommendations(blueSideBans,
+                redSideBans, blueSidePicks, redSidePicks);
     }
 }

@@ -1,16 +1,30 @@
 document.addEventListener('DOMContentLoaded', init);
 
-const BAN_ORDER_BLUE_FIRST = [
-    'blue-1', 'red-1', 'blue-2', 'red-2', 'blue-3', 'red-3'
-];
+const BAN_ORDER_BLUE_FIRST = ['blue-1', 'red-1', 'blue-2', 'red-2', 'blue-3', 'red-3'];
+const BAN_ORDER_RED_FIRST = ['red-1', 'blue-1', 'red-2', 'blue-2', 'red-3', 'blue-3'];
 
-const BAN_ORDER_RED_FIRST = [
-    'red-1', 'blue-1', 'red-2', 'blue-2', 'red-3', 'blue-3'
-];
+// Ровно до 3-го пика каждой стороны (всего 6 пиков)
+const PICK_ORDER_BLUE_FIRST = ['blue-1', 'red-1', 'red-2', 'blue-2', 'blue-3', 'red-3'];
+const PICK_ORDER_RED_FIRST = ['red-1', 'blue-1', 'blue-2', 'red-2', 'red-3', 'blue-3'];
+
+// SECOND BAN PHASE (4th and 5th bans)
+const BAN_ORDER_SECOND_BLUE_FIRST = ['red-4', 'blue-4', 'red-5', 'blue-5'];
+const BAN_ORDER_SECOND_RED_FIRST  = ['blue-4', 'red-4', 'blue-5', 'red-5'];
+
+// SECOND PICK PHASE (4th and 5th picks)
+const PICK_ORDER_SECOND_BLUE_FIRST = ['red-4', 'blue-4', 'blue-5', 'red-5'];
+const PICK_ORDER_SECOND_RED_FIRST  = ['blue-4', 'red-4', 'red-5', 'blue-5'];
 
 let currentBanIndex = 0;
 let currentBanOrder = [];
 let isBanPhaseActive = false;
+
+let currentPickIndex = 0;
+let currentPickOrder = [];
+let isPickPhaseActive = false;
+let currentFirstPickSide = 'BLUE';
+
+let isDraftFinished = false; // флаг полного окончания драфта
 
 function init() {
     document.addEventListener('draftSetupApplied', handleDraftSetup);
@@ -19,16 +33,30 @@ function init() {
     if (select) {
         select.addEventListener('change', (e) => {
             const championName = e.target.value;
-            if (!championName) return;
+            if (!championName || isDraftFinished) {
+                e.target.value = '';
+                return;
+            }
 
-            if (isChampionBanned(championName)) {
-                showToast('This champion is already banned');
+            // 1. Проверка на бан (с уведомлением)
+            if (typeof window.isChampionBanned === 'function' && window.isChampionBanned(championName)) {
+                window.showToast('This champion is already banned');
+                e.target.value = '';
+                return;
+            }
+
+            // 2. Проверка на пик (с уведомлением)
+            if (typeof window.isChampionPicked === 'function' && window.isChampionPicked(championName)) {
+                window.showToast('This champion is already picked and cannot be picked again');
                 e.target.value = '';
                 return;
             }
 
             if (isBanPhaseActive) {
                 advanceBan(championName);
+                e.target.value = '';
+            } else if (isPickPhaseActive) {
+                advancePick(championName);
                 e.target.value = '';
             }
         });
@@ -37,76 +65,79 @@ function init() {
 
 function handleDraftSetup(event) {
     const detail = event.detail || {};
-    const firstPick = detail.firstPickSide || 'BLUE';
+    currentFirstPickSide = detail.firstPickSide || 'BLUE';
 
     currentBanIndex = 0;
     isBanPhaseActive = true;
+    isPickPhaseActive = false;
+    isDraftFinished = false;
 
-    resetBannedChampions();
+    if (typeof window.resetBannedChampions === 'function') window.resetBannedChampions();
+    if (typeof window.resetPickedChampions === 'function') window.resetPickedChampions();
 
     document.querySelectorAll('.ban-slot').forEach(slot => {
         slot.classList.remove('active-ban', 'ban-completed');
         slot.innerHTML = '';
     });
+    document.querySelectorAll('.pick-slot').forEach(slot => {
+        slot.classList.remove('active-pick', 'pick-completed', 'blue-pick', 'red-pick');
+        const pickNum = slot.dataset.pick.split('-')[1];
+        slot.innerHTML = `<span class="pick-number">${pickNum}</span>`;
+    });
 
-    if (firstPick === 'BLUE') {
-        currentBanOrder = [...BAN_ORDER_BLUE_FIRST];
-    } else {
-        currentBanOrder = [...BAN_ORDER_RED_FIRST];
+    const select = document.getElementById('championSelect');
+    if (select) {
+        select.disabled = false;
     }
+
+    currentBanOrder = currentFirstPickSide === 'BLUE' ? [...BAN_ORDER_BLUE_FIRST] : [...BAN_ORDER_RED_FIRST];
 
     highlightCurrentBan();
     fetchBanRecommendations();
 }
 
-function getCurrentSide() {
+// ================= BAN PHASE LOGIC =================
+
+function getCurrentBanSide() {
     const currentSlotId = currentBanOrder[currentBanIndex];
     return currentSlotId.startsWith('blue') ? 'blue' : 'red';
 }
 
 function highlightCurrentBan() {
-    document.querySelectorAll('.ban-slot').forEach(slot => {
-        slot.classList.remove('active-ban');
-    });
-
-    if (currentBanIndex >= currentBanOrder.length) {
+    document.querySelectorAll('.ban-slot').forEach(slot => slot.classList.remove('active-ban'));
+    if (currentBanIndex >= currentBanOrder.length || isDraftFinished) {
         isBanPhaseActive = false;
         return;
     }
-
     const currentSlotId = currentBanOrder[currentBanIndex];
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
-
-    if (slot) {
-        slot.classList.add('active-ban');
-    }
+    if (slot) slot.classList.add('active-ban');
 }
 
 async function fetchBanRecommendations() {
-    if (!isBanPhaseActive) return;
+    if (!isBanPhaseActive || isDraftFinished) return;
 
-    const { blueSideBans, redSideBans } = getBannedChampionsBySide();
+    const bans = typeof window.getBannedChampionsBySide === 'function'
+        ? window.getBannedChampionsBySide()
+        : { blueSideBans: [], redSideBans: [] };
+
+    const picks = typeof window.getPickedChampionsBySide === 'function'
+        ? window.getPickedChampionsBySide()
+        : { blueSidePicks: [], redSidePicks: [] };
 
     try {
         const response = await fetch('/draft-predict/ban/recommendations', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
-                blueSideBans: blueSideBans,
-                redSideBans: redSideBans
+                blueSideBans: bans.blueSideBans,
+                redSideBans: bans.redSideBans,
+                blueSidePicks: picks.blueSidePicks,
+                redSidePicks: picks.redSidePicks
             })
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        renderBanRecommendations(data);
-
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        renderBanRecommendations(await response.json());
     } catch (err) {
         console.error('Failed to fetch ban recommendations:', err);
         renderBanRecommendations([]);
@@ -116,24 +147,19 @@ async function fetchBanRecommendations() {
 function renderBanRecommendations(champions) {
     const container = document.getElementById('banRecommendations');
     if (!container) return;
-
-    if (!champions || champions.length === 0) {
+    if (!champions || champions.length === 0 || isDraftFinished) {
         container.innerHTML = '';
         container.style.display = 'none';
         return;
     }
-
-    container.innerHTML = champions
-        .map(name => `<span class="ban-rec-item">${name}</span>`)
-        .join('');
+    container.innerHTML = champions.map(name => `<span class="ban-rec-item">${name}</span>`).join('');
     container.style.display = 'flex';
 }
 
 function advanceBan(championName) {
-    if (!isBanPhaseActive) return;
-
+    if (!isBanPhaseActive || isDraftFinished) return;
     const currentSlotId = currentBanOrder[currentBanIndex];
-    const side = getCurrentSide();
+    const side = getCurrentBanSide();
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
 
     if (slot) {
@@ -142,8 +168,7 @@ function advanceBan(championName) {
         slot.innerHTML = `<span class="ban-champion-name">${championName}</span>`;
     }
 
-    addBannedChampion(championName, side);
-
+    if (typeof window.addBannedChampion === 'function') window.addBannedChampion(championName, side);
     currentBanIndex++;
 
     if (currentBanIndex < currentBanOrder.length) {
@@ -153,7 +178,186 @@ function advanceBan(championName) {
         isBanPhaseActive = false;
         document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
         renderBanRecommendations([]);
+
+        // Если это первая бан-фаза → запускаем первую пик-фазу
+        if (currentBanOrder.length === 6) {
+            startPickPhase();
+        }
+        // Если это вторая бан-фаза → запускаем вторую пик-фазу
+        else {
+            startSecondPickPhase();
+        }
+    }
+}
+
+function startSecondPickPhase() {
+    console.log('[Draft] Starting second pick phase');
+
+    currentPickIndex = 0;
+    isPickPhaseActive = true;
+
+    currentPickOrder = currentFirstPickSide === 'BLUE'
+        ? [...PICK_ORDER_SECOND_BLUE_FIRST]
+        : [...PICK_ORDER_SECOND_RED_FIRST];
+
+    highlightCurrentPick();
+    fetchPickRecommendations();
+}
+
+// ================= PICK PHASE LOGIC =================
+
+function startPickPhase() {
+    currentPickIndex = 0;
+    isPickPhaseActive = true;
+    currentPickOrder = currentFirstPickSide === 'BLUE' ? [...PICK_ORDER_BLUE_FIRST] : [...PICK_ORDER_RED_FIRST];
+
+    highlightCurrentPick();
+    fetchPickRecommendations();
+}
+
+function startSecondBanPhase() {
+    console.log('[Draft] Starting second ban phase');
+
+    currentBanIndex = 0;
+    isBanPhaseActive = true;
+    isPickPhaseActive = false;
+
+    currentBanOrder = currentFirstPickSide === 'BLUE'
+        ? [...BAN_ORDER_SECOND_BLUE_FIRST]
+        : [...BAN_ORDER_SECOND_RED_FIRST];
+
+    highlightCurrentBan();
+    fetchBanRecommendations();
+}
+
+function getCurrentPickSide() {
+    const currentSlotId = currentPickOrder[currentPickIndex];
+    return currentSlotId.startsWith('blue') ? 'blue' : 'red';
+}
+
+function highlightCurrentPick() {
+    document.querySelectorAll('.pick-slot').forEach(slot => {
+        slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
+    });
+
+    if (currentPickIndex >= currentPickOrder.length || isDraftFinished) {
+        isPickPhaseActive = false;
+        renderPickRecommendations([]);
+        return;
+    }
+
+    const currentSlotId = currentPickOrder[currentPickIndex];
+    const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
+    if (slot) {
+        slot.classList.add('active-pick');
+        slot.classList.add(currentSlotId.startsWith('blue') ? 'blue-pick' : 'red-pick');
+    }
+}
+
+async function fetchPickRecommendations() {
+    if (!isPickPhaseActive || isDraftFinished) return;
+
+    const side = getCurrentPickSide();
+    const bans = typeof window.getBannedChampionsBySide === 'function' ? window.getBannedChampionsBySide() : { blueSideBans: [], redSideBans: [] };
+    const picks = typeof window.getPickedChampionsBySide === 'function' ? window.getPickedChampionsBySide() : { blueSidePicks: [], redSidePicks: [] };
+
+    const endpoint = side === 'blue'
+        ? '/draft-predict/blue-side-pick/recommendations'
+        : '/draft-predict/red-side-pick/recommendations';
+
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                blueSideBans: bans.blueSideBans,
+                redSideBans: bans.redSideBans,
+                blueSidePicks: picks.blueSidePicks,
+                redSidePicks: picks.redSidePicks
+            })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        renderPickRecommendations(await response.json());
+    } catch (err) {
+        console.error('Failed to fetch pick recommendations:', err);
+        renderPickRecommendations([]);
+    }
+}
+
+function renderPickRecommendations(champions) {
+    const container = document.getElementById('pickRecommendations');
+    if (!container) return;
+    if (!champions || champions.length === 0 || isDraftFinished) {
+        container.innerHTML = '';
+        container.style.display = 'none';
+        return;
+    }
+    container.innerHTML = champions.map(name => `<span class="pick-rec-item">${name}</span>`).join('');
+    container.style.display = 'flex';
+}
+
+function advancePick(championName) {
+    if (!isPickPhaseActive || isDraftFinished) return;
+
+    const currentSlotId = currentPickOrder[currentPickIndex];
+    const side = getCurrentPickSide();
+    const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
+
+    if (slot) {
+        slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
+        slot.classList.add('pick-completed');
+        // добавляем класс по сайду
+        const sideClass = side === 'blue' ? 'blue-picked' : 'red-picked';
+        slot.innerHTML = `<span class="pick-champion-name picked ${sideClass}">${championName}</span>`;
+    }
+
+    if (typeof window.addPickedChampion === 'function') {
+        window.addPickedChampion(championName, side);
+    }
+
+    currentPickIndex++;
+
+    if (currentPickIndex < currentPickOrder.length) {
+        highlightCurrentPick();
+        fetchPickRecommendations();
+    } else {
+        // пик-фаза закончилась
+        isPickPhaseActive = false;
+        document.querySelectorAll('.pick-slot').forEach(s => s.classList.remove('active-pick', 'blue-pick', 'red-pick'));
+        renderPickRecommendations([]);
+
+        // если это первая пик-фаза → запускаем вторую бан-фазу
+        if (currentPickOrder.length === 6) {
+            startSecondBanPhase();
+        }
+        // если это вторая пик-фаза (4–5 пики) → полностью завершаем драфт
+        else {
+            finishDraft();
+        }
+    }
+}
+
+function finishDraft() {
+    console.log('[Draft] Finished');
+
+    isDraftFinished = true;
+    isBanPhaseActive = false;
+    isPickPhaseActive = false;
+
+    // чистим рекомендации
+    renderBanRecommendations([]);
+    renderPickRecommendations([]);
+
+    // снимаем подсветки
+    document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
+    document.querySelectorAll('.pick-slot').forEach(s => s.classList.remove('active-pick', 'blue-pick', 'red-pick'));
+
+    // блокируем селект
+    const select = document.getElementById('championSelect');
+    if (select) {
+        select.disabled = true;
     }
 }
 
 window.advanceBan = advanceBan;
+window.advancePick = advancePick;

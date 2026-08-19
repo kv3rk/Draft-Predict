@@ -17,7 +17,6 @@ import java.util.Map;
 @RequestMapping("/draft-predict")
 @Slf4j
 public class ClientAppDraftController {
-
     private final ClientAppDraftService clientAppDraftService;
 
     public ClientAppDraftController(ClientAppDraftService clientAppDraftService) {
@@ -25,14 +24,11 @@ public class ClientAppDraftController {
     }
 
     private void addCommonAttributes(Model model) {
-        model.addAttribute(
-                "patchList", clientAppDraftService.getPatchList());
-        model.addAttribute(
-                "championList", clientAppDraftService.getChampionList());
+        model.addAttribute("patchList", clientAppDraftService.getPatchList());
+        model.addAttribute("championList", clientAppDraftService.getChampionList());
     }
 
     //-------------- Page Endpoints --------------
-
     @GetMapping("/main")
     public String getMainPage(Model model) {
         log.info("Entered [/draft-predict/main] endpoint");
@@ -40,20 +36,16 @@ public class ClientAppDraftController {
         return "draft-predict/draft-predict";
     }
 
-
     //-------------- Info Endpoints --------------
-
     @PostMapping("/setup/match/info")
     @ResponseBody
     public ResponseEntity<Map<String, String>> setupMatchInfo(@RequestBody MatchSetupInfoDTO matchSetupInfoDTO) {
         log.info("Entered [/draft-predict/setup/match/info] endpoint");
         log.info("Patch: {}, FirstPickSide: {}", matchSetupInfoDTO.patch(), matchSetupInfoDTO.firstPickSide());
-
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
         response.put("patch", matchSetupInfoDTO.patch());
         response.put("firstPickSide", matchSetupInfoDTO.firstPickSide());
-
         return ResponseEntity.ok(response);
     }
 
@@ -61,14 +53,44 @@ public class ClientAppDraftController {
     @ResponseBody
     public ResponseEntity<List<String>> getBanRecommendations(
             @RequestBody Map<String, List<String>> request) {
-
         log.info("Entered [/draft-predict/ban/recommendations] endpoint");
-
         List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
         List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
+        List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
+        List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
 
-        List<String> recommendations = clientAppDraftService.getBanRecommendations(blueSideBans, redSideBans);
+        List<String> recommendations = clientAppDraftService.getBanRecommendations(
+                blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+        return ResponseEntity.ok(recommendations);
+    }
 
+    @PostMapping("/blue-side-pick/recommendations")
+    @ResponseBody
+    public ResponseEntity<List<String>> getBlueSidePickRecommendations(
+            @RequestBody Map<String, List<String>> request) {
+        log.info("Entered [/draft-predict/blue-side-pick/recommendations] endpoint");
+        List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
+        List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
+        List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
+        List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
+
+        List<String> recommendations = clientAppDraftService.getBlueSidePickRecommendations(
+                blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+        return ResponseEntity.ok(recommendations);
+    }
+
+    @PostMapping("/red-side-pick/recommendations")
+    @ResponseBody
+    public ResponseEntity<List<String>> getRedSidePickRecommendations(
+            @RequestBody Map<String, List<String>> request) {
+        log.info("Entered [/draft-predict/red-side-pick/recommendations] endpoint");
+        List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
+        List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
+        List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
+        List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
+
+        List<String> recommendations = clientAppDraftService.getRedSidePickRecommendations(
+                blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);
     }
 }

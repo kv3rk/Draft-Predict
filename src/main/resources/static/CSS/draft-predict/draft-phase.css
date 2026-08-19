@@ -366,3 +366,74 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+/* ─── Pick Phase Animations ─── */
+@keyframes pickPulseBlue {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); border-color: #3b82f6; }
+    50% { box-shadow: 0 0 16px 4px rgba(59, 130, 246, 0.4); border-color: #60a5fa; }
+}
+@keyframes pickPulseRed {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); border-color: #ef4444; }
+    50% { box-shadow: 0 0 16px 4px rgba(239, 68, 68, 0.4); border-color: #f87171; }
+}
+
+.pick-slot.active-pick.blue-pick {
+    animation: pickPulseBlue 1.2s ease-in-out infinite;
+    background: rgba(59, 130, 246, 0.15);
+    z-index: 2;
+}
+
+.pick-slot.active-pick.red-pick {
+    animation: pickPulseRed 1.2s ease-in-out infinite;
+    background: rgba(239, 68, 68, 0.15);
+    z-index: 2;
+}
+
+.pick-slot.pick-completed {
+    border-color: var(--border-card);
+    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.pick-champion-name {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    line-height: 1.2;
+    padding: 2px;
+    word-break: break-word;
+}
+
+/* Пикнутые чемпионы по сайду */
+.pick-champion-name.picked.blue-picked {
+    color: #60a5fa; /* синий */
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+.pick-champion-name.picked.red-picked {
+    color: #f87171; /* красный */
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(239, 68, 68, 0.4);
+}
+
+/* Стили для недоступных опций в селекте (бан или пик) */
+.champion-select option.unavailable-option {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+/* ─── Picked Champion (distinct from banned) ─── */
+option.picked-option {
+    color: #60a5fa; /* голубой оттенок */
+    font-weight: 600;
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.pick-champion-name.picked {
+    color: #60a5fa;
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
+}

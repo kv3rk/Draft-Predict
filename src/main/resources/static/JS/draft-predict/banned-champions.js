@@ -32,15 +32,25 @@ function updateChampionSelectStyles() {
     const options = select.querySelectorAll('option');
     options.forEach(option => {
         if (!option.value) return;
-        if (isChampionBanned(option.value)) {
-            option.classList.add('banned-option');
-            option.classList.remove('available-option');
+
+        const isBanned = isChampionBanned(option.value);
+        const isPicked = typeof window.isChampionPicked === 'function' && window.isChampionPicked(option.value);
+
+        option.classList.remove('available-option', 'unavailable-option', 'banned-option', 'picked-option');
+
+        if (isBanned) {
+            option.classList.add('banned-option', 'unavailable-option');
+            option.disabled = true;
+        } else if (isPicked) {
+            option.classList.add('picked-option', 'unavailable-option');
+            option.disabled = true;
         } else {
             option.classList.add('available-option');
-            option.classList.remove('banned-option');
+            option.disabled = false;
         }
     });
 }
+
 
 function resetBannedChampions() {
     bannedChampionsBlueSide.length = 0;
@@ -56,10 +66,8 @@ function showToast(message) {
         toast.className = 'draft-toast';
         document.body.appendChild(toast);
     }
-
     toast.textContent = message;
     toast.classList.add('show');
-
     setTimeout(() => {
         toast.classList.remove('show');
     }, 2500);
@@ -71,3 +79,4 @@ window.getBannedChampionsBySide = getBannedChampionsBySide;
 window.isChampionBanned = isChampionBanned;
 window.resetBannedChampions = resetBannedChampions;
 window.showToast = showToast;
+window.updateChampionSelectStyles = updateChampionSelectStyles;

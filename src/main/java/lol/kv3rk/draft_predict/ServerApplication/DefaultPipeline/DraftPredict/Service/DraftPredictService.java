@@ -37,13 +37,22 @@ public class DraftPredictService {
     }
 
     public List<String> getBanRecommendations(List<String> blueSideBans,
-                                              List<String> redSideBans) {
+                                              List<String> redSideBans,
+                                              List<String> blueSidePicks,
+                                              List<String> redSidePicks) {
 
-        Set<String> excludedChampions = Stream.concat(blueSideBans.stream(), redSideBans.stream())
-                .collect(Collectors.toSet());
+        Set<String> excludedChampions = Stream.of(
+                blueSideBans.stream(),
+                redSideBans.stream(),
+                blueSidePicks.stream(),
+                redSidePicks.stream()
+        ).flatMap(s -> s).collect(Collectors.toSet());
 
-        return getTop3Champions(excludedChampions);
+        Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
+
+        return getTop3ChampionsForBans(excludedChampions, generalFreq);
     }
+
 
     public List<String> getBlueSidePickRecommendations(List<String> blueSideBans,
                                                        List<String> redSideBans,
@@ -57,8 +66,11 @@ public class DraftPredictService {
                 redSidePicks.stream()
         ).flatMap(s -> s).collect(Collectors.toSet());
 
-        return getTop3Champions(excludedChampions);
+        Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
+
+        return getTop3ChampionsForBlueSidePicks(excludedChampions, generalFreq);
     }
+
 
     public List<String> getRedSidePickRecommendations(List<String> blueSideBans,
                                                       List<String> redSideBans,
@@ -72,10 +84,69 @@ public class DraftPredictService {
                 redSidePicks.stream()
         ).flatMap(s -> s).collect(Collectors.toSet());
 
-        return getTop3Champions(excludedChampions);
+        Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
+
+        return getTop3ChampionsForRedSidePicks(excludedChampions, generalFreq);
     }
 
-    private List<String> getTop3Champions(Set<String> excludedChampions) {
+
+    private List<String> getTop3ChampionsForBans(Set<String> excludedChampions,
+                                                 Map<String, Integer> generalFrequencyMap) {
+
+        Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
+
+        // Индивидуальная логика для банов (если нужна)
+        // Например: усилить вес банов
+        bansRepository.getMostBannedChampions("%")
+                .forEach(b -> freq.merge(b.getChampion(), 1, Integer::sum));
+
+        return freq.entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(3)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    private List<String> getTop3ChampionsForBlueSidePicks(Set<String> excludedChampions,
+                                                          Map<String, Integer> generalFrequencyMap) {
+
+        Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
+
+        // Индивидуальная логика для Blue Side picks
+        // Например: усилить вес win rate
+        participantsRepository.getTopPerformingChampionsByWinRate("%")
+                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+
+        return freq.entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(3)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    private List<String> getTop3ChampionsForRedSidePicks(Set<String> excludedChampions,
+                                                         Map<String, Integer> generalFrequencyMap) {
+
+        Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
+
+        // Индивидуальная логика для Red Side picks
+        // Например: усилить вес pick rate
+        participantsRepository.getTopPerformingChampionsByPickRate("%")
+                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+
+        return freq.entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(3)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+
+    private Map<String, Integer> getGeneralFrequencyMap(Set<String> excludedChampions) {
+
         List<String> draftPresence = rankedRequests.getChampionDraftPresence("%")
                 .stream()
                 .map(ChampionPresence::getChampion)
@@ -98,32 +169,12 @@ public class DraftPredictService {
 
         Map<String, Integer> frequencyMap = new HashMap<>();
 
-        for (String champion : draftPresence) {
-            if (!excludedChampions.contains(champion)) {
-                frequencyMap.merge(champion, 1, Integer::sum);
-            }
-        }
-        for (String champion : banRates) {
-            if (!excludedChampions.contains(champion)) {
-                frequencyMap.merge(champion, 1, Integer::sum);
-            }
-        }
-        for (String champion : winRates) {
-            if (!excludedChampions.contains(champion)) {
-                frequencyMap.merge(champion, 1, Integer::sum);
-            }
-        }
-        for (String champion : pickRates) {
-            if (!excludedChampions.contains(champion)) {
-                frequencyMap.merge(champion, 1, Integer::sum);
-            }
-        }
+        Stream.of(draftPresence, banRates, winRates, pickRates)
+                .flatMap(List::stream)
+                .filter(champion -> !excludedChampions.contains(champion))
+                .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
 
-        return frequencyMap.entrySet()
-                .stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
-                .map(Map.Entry::getKey)
-                .toList();
+        return frequencyMap;
     }
+
 }
