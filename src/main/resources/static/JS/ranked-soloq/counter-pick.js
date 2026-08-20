@@ -95,13 +95,13 @@ function renderTable(data) {
                     </div>
                 </td>
                 <td class="col-rate">
+                    <span class="rate-badge gold ${goldClass}">${goldSign}${escapeHtml(gold)}</span>
+                </td>
+                <td class="col-rate">
                     <span class="rate-badge xp ${xpClass}">${xpSign}${escapeHtml(xp)}</span>
                 </td>
                 <td class="col-rate">
                     <span class="rate-badge farm ${farmClass}">${farmSign}${escapeHtml(farm)}</span>
-                </td>
-                <td class="col-rate">
-                    <span class="rate-badge gold ${goldClass}">${goldSign}${escapeHtml(gold)}</span>
                 </td>
             </tr>`;
     }).join('');

@@ -97,9 +97,9 @@
                     <tr>
                         <th class="col-rank">#</th>
                         <th class="col-champ">Counter Champion</th>
+                        <th class="col-rate">Gold Diff</th>
                         <th class="col-rate">XP Diff</th>
                         <th class="col-rate">Farm Diff</th>
-                        <th class="col-rate">Gold Diff</th>
                     </tr>
                     </thead>
                     <tbody id="counterTableBody">
@@ -112,13 +112,13 @@
                             </div>
                         </td>
                         <td class="col-rate">
+                            <span class="rate-badge gold" th:classappend="${counter.gold >= 0} ? 'positive' : 'negative'" th:text="${#numbers.formatDecimal(counter.gold, 1, 1)}">+245</span>
+                        </td>
+                        <td class="col-rate">
                             <span class="rate-badge xp" th:classappend="${counter.xp >= 0} ? 'positive' : 'negative'" th:text="${#numbers.formatDecimal(counter.xp, 1, 1)}">+12.5</span>
                         </td>
                         <td class="col-rate">
                             <span class="rate-badge farm" th:classappend="${counter.farm >= 0} ? 'positive' : 'negative'" th:text="${#numbers.formatDecimal(counter.farm, 1, 1)}">+8.3</span>
-                        </td>
-                        <td class="col-rate">
-                            <span class="rate-badge gold" th:classappend="${counter.gold >= 0} ? 'positive' : 'negative'" th:text="${#numbers.formatDecimal(counter.gold, 1, 1)}">+245</span>
                         </td>
                     </tr>
                     </tbody>
