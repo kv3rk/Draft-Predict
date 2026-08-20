@@ -376,12 +376,32 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
     @Query(
             nativeQuery = true,
             value = """
+                    with total_position_matches as (
+                    select
+                    	p.champion,
+                    	count(p.champion) as total
+                    from
+                    	participants p
+                    join matches m on
+                    	m.match_id = p.match_id
+                    where
+                    	m.patch like :patch
+                    	and p.position = :lane
+                    group by
+                    	p.champion
+                    ),
+                    avg_position_matches as(
+                    	select
+                    	round(avg(tpm.total), 0) as total_avg
+                    from
+                    	total_position_matches tpm
+                    )
                     select
                     	p.champion as champion1,
                     	p2.champion as champion2,
+                    	round(avg(p.gold - p2.gold), 1) as gold,
                     	round(avg(p.xp - p2.xp), 1) as xp,
-                    	round(avg(p.farm - p2.farm), 1) as farm,
-                    	round(avg(p.gold - p2.gold), 1) as gold
+                    	round(avg(p.farm - p2.farm), 1) as farm
                     from
                     	participants p
                     join participants p2
@@ -391,19 +411,24 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     join matches m
                         on
                     	m.match_id = p.match_id
+                    join total_position_matches tpm on
+                    	tpm.champion = p2.champion
+                    cross join avg_position_matches apm
                     where
                     	p.xp > 1
                     	and p2.xp > 1
                     	and p.champion = :champion1
                     	and p.position = :lane
                     	and m.patch like :patch
+                    	and apm.total_avg < tpm.total
+                    	and p.champion <> p2.champion
                     group by
                     	p.champion,
                     	p2.champion
                     order by
+                    	gold desc,
                     	xp desc,
-                    	farm desc,
-                    	gold desc
+                    	farm desc
                     limit 20;
                     """
     )
