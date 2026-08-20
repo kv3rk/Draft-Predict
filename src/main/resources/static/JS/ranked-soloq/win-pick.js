@@ -17,6 +17,7 @@ function init() {
             header.addEventListener('click', handleSortClick);
         });
     }
+    updateSortIndicator('pick_rate');
 }
 
 async function handleSearch() {
