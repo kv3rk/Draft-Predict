@@ -65,19 +65,22 @@
 
             <!-- Role Filter -->
             <div class="role-filter trio-filter">
-                <label for="role1">Role 1</label>
-                <select id="role1" class="role-select">
-                    <option value="TOP" selected>TOP</option>
-                    <option value="JUNGLE">JUNGLE</option>
-                    <option value="MIDDLE">MIDDLE</option>
-                    <option value="BOTTOM">BOTTOM</option>
-                    <option value="UTILITY">UTILITY</option>
+                <label for="champion1Select">Champion 1</label>
+                <select id="champion1Select" class="champion-select">
+                    <option value="" disabled selected>Select champion</option>
+                    <option th:each="c : ${championList}" th:value="${c.champion}" th:text="${c.champion}"></option>
                 </select>
 
-                <span class="role-divider">+</span>
+                <label for="champion2Select">Champion 2</label>
+                <select id="champion2Select" class="champion-select">
+                    <option value="" disabled selected>Select champion</option>
+                    <option th:each="c : ${championList}" th:value="${c.champion}" th:text="${c.champion}"></option>
+                </select>
 
-                <label for="role2">Role 2</label>
-                <select id="role2" class="role-select">
+                <div class="role-divider">|</div>
+
+                <label for="role1">Role 1</label>
+                <select id="role1" class="role-select">
                     <option value="TOP">TOP</option>
                     <option value="JUNGLE">JUNGLE</option>
                     <option value="MIDDLE" selected>MIDDLE</option>
@@ -85,10 +88,8 @@
                     <option value="UTILITY">UTILITY</option>
                 </select>
 
-                <span class="role-divider">+</span>
-
-                <label for="role3">Role 3</label>
-                <select id="role3" class="role-select">
+                <label for="role2">Role 2</label>
+                <select id="role2" class="role-select">
                     <option value="TOP">TOP</option>
                     <option value="JUNGLE" selected>JUNGLE</option>
                     <option value="MIDDLE">MIDDLE</option>
@@ -96,12 +97,21 @@
                     <option value="UTILITY">UTILITY</option>
                 </select>
 
-                <!-- Patch filter -->
-                <span class="role-divider">|</span>
+                <label for="role3">Role 3</label>
+                <select id="role3" class="role-select">
+                    <option value="TOP">TOP</option>
+                    <option value="JUNGLE">JUNGLE</option>
+                    <option value="MIDDLE">MIDDLE</option>
+                    <option value="BOTTOM">BOTTOM</option>
+                    <option value="UTILITY">UTILITY</option>
+                </select>
+
+                <div class="role-divider">|</div>
+
                 <label for="patchSelect">Patch</label>
                 <select id="patchSelect" class="patch-select">
-                    <option value="" disabled th:if="${patchList == null or #lists.isEmpty(patchList)}">Loading patches...</option>
-                    <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}" th:selected="${p == 'All patches'}"></option>
+                    <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}"
+                            th:selected="${p == 'All patches'}"></option>
                 </select>
 
                 <button id="searchBtn" class="search-btn" type="button">Search</button>

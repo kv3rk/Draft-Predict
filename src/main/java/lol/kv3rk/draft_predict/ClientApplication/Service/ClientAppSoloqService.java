@@ -118,27 +118,31 @@ public class ClientAppSoloqService {
     }
 
     public List<BestDuo> getBestDuoChampions(String role1, String role2,
-                                             String patch) {
+                                             String patch, String champion) {
 
         if (patch.equals("All patches")) {
 
-            return rankedRequests.getBestDuoChampions(role1, role2, "%");
+            return rankedRequests.getBestDuoChampions(role1, role2, "%", champion);
         } else {
 
-            return rankedRequests.getBestDuoChampions(role1, role2, patch);
+            return rankedRequests.getBestDuoChampions(role1, role2, patch, champion);
         }
     }
 
     public List<BestTrio> getBestTrioChampions(String role1,
                                                String role2,
                                                String role3,
-                                               String patch) {
+                                               String patch,
+                                               String champion1,
+                                               String champion2) {
         if (patch.equals("All patches")) {
 
-            return rankedRequests.getBestTrioChampions(role1, role2, role3, "%");
+            return rankedRequests.getBestTrioChampions(role1, role2, role3, "%",
+                    champion1, champion2);
         } else {
 
-            return rankedRequests.getBestTrioChampions(role1, role2, role3, patch);
+            return rankedRequests.getBestTrioChampions(role1, role2, role3, patch,
+                    champion1, champion2);
         }
     }
 
@@ -167,8 +171,8 @@ public class ClientAppSoloqService {
     }
 
     public List<CounterPick> getCounterPick(String champion1,
-                                      String lane,
-                                      String patch) {
+                                            String lane,
+                                            String patch) {
         if (patch.equals("All patches")) {
 
             return rankedRequests.getCounterPicks(champion1, lane, "%");

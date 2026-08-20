@@ -72,7 +72,7 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/best-duo] endpoint");
         addCommonAttributes(model);
         model.addAttribute("bestDuoChampions", clientAppSoloqService.getBestDuoChampions(
-                "MIDDLE", "JUNGLE", "%"));
+                "MIDDLE", "JUNGLE", "%", "Viktor"));
         return "ranked-soloq-page/stats-pages/best-duo";
     }
 
@@ -81,7 +81,8 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/best-trio] endpoint");
         addCommonAttributes(model);
         model.addAttribute("bestTrioChampions", clientAppSoloqService.getBestTrioChampions(
-                "TOP", "MIDDLE", "JUNGLE", "%"));
+                "TOP", "MIDDLE", "JUNGLE", "%",
+                "Jayce", "Viktor"));
         return "ranked-soloq-page/stats-pages/best-trio";
     }
 
@@ -121,9 +122,10 @@ public class ClientAppSoloqController {
     @ResponseBody
     public List<BestDuo> findBestDuo(@RequestParam String role1,
                                      @RequestParam String role2,
-                                     @RequestParam String patch) {
+                                     @RequestParam String patch,
+                                     @RequestParam String champion) {
         log.info("Entered [/ranked-soloq/find/best-duo] endpoint");
-        return clientAppSoloqService.getBestDuoChampions(role1, role2, patch);
+        return clientAppSoloqService.getBestDuoChampions(role1, role2, patch, champion);
     }
 
     @GetMapping("/find/win-pick")
@@ -139,9 +141,12 @@ public class ClientAppSoloqController {
     public List<BestTrio> findBestTrio(@RequestParam String role1,
                                        @RequestParam String role2,
                                        @RequestParam String role3,
-                                       @RequestParam String patch) {
+                                       @RequestParam String patch,
+                                       @RequestParam String champion1,
+                                       @RequestParam String champion2) {
         log.info("Entered [/ranked-soloq/find/best-trio] endpoint");
-        return clientAppSoloqService.getBestTrioChampions(role1, role2, role3, patch);
+        return clientAppSoloqService.getBestTrioChampions(role1, role2, role3, patch,
+                champion1, champion2);
     }
 
     @GetMapping("/find/champ-flex")
@@ -169,8 +174,8 @@ public class ClientAppSoloqController {
     @GetMapping("/get/counter-pick")
     @ResponseBody
     public List<CounterPick> findCounterPick(@RequestParam String champion1,
-                                       @RequestParam String lane,
-                                       @RequestParam String patch) {
+                                             @RequestParam String lane,
+                                             @RequestParam String patch) {
         log.info("Entered [/ranked-soloq/get/counter-pick] endpoint");
         return clientAppSoloqService.getCounterPick(champion1, lane, patch);
     }

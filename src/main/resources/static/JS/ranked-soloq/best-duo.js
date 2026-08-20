@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
+    const championSelect = document.getElementById('championSelect');
     const role1Select = document.getElementById('role1');
     const role2Select = document.getElementById('role2');
     const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
 
-    if (!role1Select || !role2Select || !patchSelect || !searchBtn) {
+    if (!championSelect || !role1Select || !role2Select || !patchSelect || !searchBtn) {
         console.error('Required DOM elements not found');
         return;
     }
@@ -19,7 +20,6 @@ function init() {
 function validateRoles() {
     const role1Select = document.getElementById('role1');
     const role2Select = document.getElementById('role2');
-
     if (role1Select.value === role2Select.value) {
         role2Select.setCustomValidity('Roles must be different');
         return false;
@@ -30,6 +30,14 @@ function validateRoles() {
 }
 
 async function handleSearch() {
+    const championSelect = document.getElementById('championSelect');
+    const champion = championSelect.value;
+
+    if (!champion) {
+        alert('Please select a champion');
+        return;
+    }
+
     if (!validateRoles()) {
         alert('Please select two different roles');
         return;
@@ -43,9 +51,9 @@ async function handleSearch() {
     setLoadingState(searchBtn, true);
 
     try {
-        const data = await fetchBestDuos(role1, role2, patch);
+        const data = await fetchBestDuos(champion, role1, role2, patch);
         renderTable(data);
-        updateSubtitle(role1, role2);
+        updateSubtitle(champion, role1, role2);
     } catch (err) {
         console.error('Search error:', err);
         alert('Failed to load data. Please try again.');
@@ -54,8 +62,9 @@ async function handleSearch() {
     }
 }
 
-async function fetchBestDuos(role1, role2, patch) {
+async function fetchBestDuos(champion, role1, role2, patch) {
     const params = new URLSearchParams({
+        champion: champion,
         role1: role1,
         role2: role2,
         patch: patch
@@ -111,12 +120,11 @@ function renderTable(duos) {
     `).join('');
 }
 
-function updateSubtitle(role1, role2) {
+function updateSubtitle(champion, role1, role2) {
     const cardSubtitle = document.querySelector('.card-subtitle');
     if (!cardSubtitle) return;
-
     const pretty = (r) => r.charAt(0) + r.slice(1).toLowerCase();
-    cardSubtitle.textContent = `${pretty(role1)} & ${pretty(role2)} synergies`;
+    cardSubtitle.textContent = `${escapeHtml(champion)} — ${pretty(role1)} & ${pretty(role2)} synergies`;
 }
 
 function setLoadingState(button, isLoading) {

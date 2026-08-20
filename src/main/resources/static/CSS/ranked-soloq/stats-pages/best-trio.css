@@ -169,3 +169,55 @@
         margin-top: 4px;
     }
 }
+
+/* ─── Champion Select ─── */
+.champion-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 10px 36px 10px 14px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b92a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    min-width: 160px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.champion-select:hover {
+    border-color: var(--border-hover);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.champion-select:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px var(--accent-gold-glow);
+}
+
+.champion-select option {
+    background-color: #1a2340;
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 8px;
+}
+
+.champion-select option:checked {
+    background: linear-gradient(135deg, var(--accent-gold), #a08050);
+    color: var(--bg-primary);
+}
+
+/* ─── Responsive (обновить существующий медиа-запрос) ─── */
+@media (max-width: 640px) {
+    .champion-select {
+        width: 100%;
+    }
+}

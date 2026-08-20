@@ -26,60 +26,9 @@
     letter-spacing: 0.5px;
 }
 
-/* ─── Role Select ─── */
-.role-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-sm);
-    padding: 10px 36px 10px 14px;
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b92a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    min-width: 130px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.role-select:hover {
-    border-color: var(--border-hover);
-    background-color: rgba(255, 255, 255, 0.06);
-}
-
-.role-select:focus {
-    outline: none;
-    border-color: var(--accent-gold);
-    box-shadow: 0 0 0 3px var(--accent-gold-glow);
-}
-
-.role-select option {
-    background-color: #1a2340;
-    color: var(--text-primary);
-    font-weight: 600;
-    padding: 8px;
-}
-
-.role-select option:checked {
-    background: linear-gradient(135deg, var(--accent-gold), #a08050);
-    color: var(--bg-primary);
-}
-
-/* ─── Role Divider ─── */
-.role-divider {
-    color: var(--accent-gold);
-    font-weight: 700;
-    font-size: 1rem;
-    user-select: none;
-}
-
-/* ─── Patch Select (внутри role-filter) ─── */
+/* ─── Champion / Role / Patch Select (единый стиль) ─── */
+.champion-select,
+.role-select,
 .patch-select {
     appearance: none;
     -webkit-appearance: none;
@@ -99,17 +48,53 @@
     min-width: 130px;
 }
 
+.champion-select {
+    text-transform: none;
+    letter-spacing: 0;
+    min-width: 160px;
+}
+
+.role-select {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.champion-select:hover,
+.role-select:hover {
+    border-color: var(--border-hover);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.champion-select:focus,
+.role-select:focus,
 .patch-select:focus {
     outline: none;
     border-color: var(--accent-gold);
     box-shadow: 0 0 0 3px var(--accent-gold-glow);
 }
 
+.champion-select option,
+.role-select option,
 .patch-select option {
     background-color: #1a2340;
     color: var(--text-primary);
     font-weight: 600;
     padding: 8px;
+}
+
+.champion-select option:checked,
+.role-select option:checked {
+    background: linear-gradient(135deg, var(--accent-gold), #a08050);
+    color: var(--bg-primary);
+}
+
+/* ─── Role Divider (жёлтая вертикальная линия) ─── */
+.role-divider {
+    color: var(--accent-gold);
+    font-weight: 700;
+    font-size: 1rem;
+    user-select: none;
+    padding: 0 4px;
 }
 
 /* ─── Search Button ─── */
@@ -153,16 +138,15 @@
         align-items: stretch;
         gap: 10px;
     }
-
-    .role-select {
+    .champion-select,
+    .role-select,
+    .patch-select {
         width: 100%;
     }
-
     .role-divider {
         text-align: center;
         margin: 4px 0;
     }
-
     .search-btn {
         margin-left: 0;
         width: 100%;

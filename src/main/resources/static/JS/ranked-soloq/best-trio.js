@@ -1,28 +1,45 @@
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
+    const champion1Select = document.getElementById('champion1Select');
+    const champion2Select = document.getElementById('champion2Select');
     const role1Select = document.getElementById('role1');
     const role2Select = document.getElementById('role2');
     const role3Select = document.getElementById('role3');
     const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
 
-    if (!role1Select || !role2Select || !role3Select || !patchSelect || !searchBtn) {
+    if (!champion1Select || !champion2Select || !role1Select || !role2Select || !role3Select || !patchSelect || !searchBtn) {
         console.error('Required DOM elements not found');
         return;
     }
 
+    champion1Select.addEventListener('change', validateChampions);
+    champion2Select.addEventListener('change', validateChampions);
     role1Select.addEventListener('change', validateRoles);
     role2Select.addEventListener('change', validateRoles);
     role3Select.addEventListener('change', validateRoles);
     searchBtn.addEventListener('click', handleSearch);
 }
 
+function validateChampions() {
+    const champion1Select = document.getElementById('champion1Select');
+    const champion2Select = document.getElementById('champion2Select');
+
+    if (champion1Select.value && champion2Select.value &&
+        champion1Select.value === champion2Select.value) {
+        champion2Select.setCustomValidity('Champions must be different');
+        return false;
+    } else {
+        champion2Select.setCustomValidity('');
+        return true;
+    }
+}
+
 function validateRoles() {
     const role1Select = document.getElementById('role1');
     const role2Select = document.getElementById('role2');
     const role3Select = document.getElementById('role3');
-
     const values = [role1Select.value, role2Select.value, role3Select.value];
     const unique = new Set(values);
 
@@ -36,11 +53,26 @@ function validateRoles() {
 }
 
 async function handleSearch() {
+    const champion1Select = document.getElementById('champion1Select');
+    const champion2Select = document.getElementById('champion2Select');
+
+    if (!champion1Select.value || !champion2Select.value) {
+        alert('Please select both champions');
+        return;
+    }
+
+    if (!validateChampions()) {
+        alert('Please select two different champions');
+        return;
+    }
+
     if (!validateRoles()) {
         alert('Please select three different roles');
         return;
     }
 
+    const champion1 = champion1Select.value;
+    const champion2 = champion2Select.value;
     const role1 = document.getElementById('role1').value;
     const role2 = document.getElementById('role2').value;
     const role3 = document.getElementById('role3').value;
@@ -50,9 +82,9 @@ async function handleSearch() {
     setLoadingState(searchBtn, true);
 
     try {
-        const data = await fetchBestTrios(role1, role2, role3, patch);
+        const data = await fetchBestTrios(champion1, champion2, role1, role2, role3, patch);
         renderTable(data);
-        updateSubtitle(role1, role2, role3);
+        updateSubtitle(champion1, champion2, role1, role2, role3);
     } catch (err) {
         console.error('Search error:', err);
         alert('Failed to load data. Please try again.');
@@ -61,8 +93,10 @@ async function handleSearch() {
     }
 }
 
-async function fetchBestTrios(role1, role2, role3, patch) {
+async function fetchBestTrios(champion1, champion2, role1, role2, role3, patch) {
     const params = new URLSearchParams({
+        champion1: champion1,
+        champion2: champion2,
         role1: role1,
         role2: role2,
         role3: role3,
@@ -125,12 +159,11 @@ function renderTable(trios) {
     `).join('');
 }
 
-function updateSubtitle(role1, role2, role3) {
+function updateSubtitle(champion1, champion2, role1, role2, role3) {
     const cardSubtitle = document.querySelector('.card-subtitle');
     if (!cardSubtitle) return;
-
     const pretty = (r) => r.charAt(0) + r.slice(1).toLowerCase();
-    cardSubtitle.textContent = `${pretty(role1)}, ${pretty(role2)} & ${pretty(role3)} synergies`;
+    cardSubtitle.textContent = `${escapeHtml(champion1)} & ${escapeHtml(champion2)} — ${pretty(role1)}, ${pretty(role2)} & ${pretty(role3)} synergies`;
 }
 
 function setLoadingState(button, isLoading) {
