@@ -1,6 +1,8 @@
 package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.Service;
 
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.CounterPick;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.RankedRequests;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
@@ -10,6 +12,7 @@ import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Part
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,7 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 public class DraftPredictService {
+
     private final MatchesRepository matchesRepository;
     private final ParticipantsRepository participantsRepository;
     private final BansRepository bansRepository;
@@ -29,7 +33,6 @@ public class DraftPredictService {
                                ParticipantsRepository participantsRepository,
                                BansRepository bansRepository,
                                RankedRequests rankedRequests) {
-
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
@@ -40,7 +43,6 @@ public class DraftPredictService {
                                               List<String> redSideBans,
                                               List<String> blueSidePicks,
                                               List<String> redSidePicks) {
-
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -53,12 +55,10 @@ public class DraftPredictService {
         return getTop3ChampionsForBans(excludedChampions, generalFreq);
     }
 
-
     public List<String> getBlueSidePickRecommendations(List<String> blueSideBans,
                                                        List<String> redSideBans,
                                                        List<String> blueSidePicks,
                                                        List<String> redSidePicks) {
-
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -72,12 +72,10 @@ public class DraftPredictService {
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
 
-
     public List<String> getRedSidePickRecommendations(List<String> blueSideBans,
                                                       List<String> redSideBans,
                                                       List<String> blueSidePicks,
                                                       List<String> redSidePicks) {
-
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -91,14 +89,10 @@ public class DraftPredictService {
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
 
-
     private List<String> getTop3ChampionsForBans(Set<String> excludedChampions,
                                                  Map<String, Integer> generalFrequencyMap) {
-
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
 
-        // Индивидуальная логика для банов (если нужна)
-        // Например: усилить вес банов
         bansRepository.getMostBannedChampions("%")
                 .forEach(b -> freq.merge(b.getChampion(), 1, Integer::sum));
 
@@ -116,13 +110,18 @@ public class DraftPredictService {
                                                           List<String> redSideBans,
                                                           List<String> blueSidePicks,
                                                           List<String> redSidePicks) {
-
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
 
-        //List<List<String>> counterPicksForBlueSide = getCounterPickList(blueSideBans);
+        // 1. Получаем контрпики и добавляем их в freq
+        List<String> counterPicksForBlueSide = getCounterPickList(blueSideBans);
 
-        participantsRepository.getTopPerformingChampionsByWinRate("%")
-                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+        for (String counterPickChamp : counterPicksForBlueSide) {
+
+            if (!excludedChampions.contains(counterPickChamp)) {
+                freq.merge(counterPickChamp, 1, Integer::sum);
+            }
+
+        }
 
         return freq.entrySet()
                 .stream()
@@ -138,13 +137,18 @@ public class DraftPredictService {
                                                          List<String> redSideBans,
                                                          List<String> blueSidePicks,
                                                          List<String> redSidePicks) {
-
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
 
-//        List<List<String>> counterPicksForBlueSide = getCounterPickList(redSideBans);
+        // 1. Получаем контрпики и добавляем их в freq
+        List<String> counterPicksForRedSide = getCounterPickList(redSideBans);
 
-        participantsRepository.getTopPerformingChampionsByPickRate("%")
-                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+        for (String counterPickChamp : counterPicksForRedSide) {
+
+            if (!excludedChampions.contains(counterPickChamp)) {
+                freq.merge(counterPickChamp, 1, Integer::sum);
+            }
+
+        }
 
         return freq.entrySet()
                 .stream()
@@ -154,47 +158,66 @@ public class DraftPredictService {
                 .toList();
     }
 
-
     private Map<String, Integer> getGeneralFrequencyMap(Set<String> excludedChampions) {
-
         List<String> draftPresence = rankedRequests.getChampionDraftPresence("%")
                 .stream()
                 .map(ChampionPresence::getChampion)
                 .toList();
-
         List<String> banRates = bansRepository.getMostBannedChampions("%")
                 .stream()
                 .map(MostBannedChampions::getChampion)
                 .toList();
-
         List<String> winRates = participantsRepository.getTopPerformingChampionsByWinRate("%")
                 .stream()
                 .map(TopPerformingChampions::getChampion)
                 .toList();
-
         List<String> pickRates = participantsRepository.getTopPerformingChampionsByPickRate("%")
                 .stream()
                 .map(TopPerformingChampions::getChampion)
                 .toList();
 
         Map<String, Integer> frequencyMap = new HashMap<>();
-
         Stream.of(draftPresence, banRates, winRates, pickRates)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
-
         return frequencyMap;
     }
 
-//    private List<List<String>> getCounterPickList(List<String> champions) {
-//
-//        champions.forEach(champion -> {
-//
-//            List<String> roles = rankedRequests.getChampionFlexibility(champion, "%");
-//
-//        });
-//
-//    }
+    private List<String> getCounterPickList(List<String> champions) {
 
+        List<String> allCounterPicks = new ArrayList<>();
+
+        for (String champion : champions) {
+
+            ChampionFlexibility flex = rankedRequests.getChampionFlexibility(champion, "%");
+
+            if (flex == null) {
+                continue;
+            }
+
+            List<String> validRoles = new ArrayList<>();
+
+            // Проверяем, что роль присутствует (не null) и её значение > 0
+            if (flex.getTop().isPresent() && flex.getTop().get() > 0) validRoles.add("TOP");
+            if (flex.getJungle().isPresent() && flex.getJungle().get() > 0) validRoles.add("JUNGLE");
+            if (flex.getMiddle().isPresent() && flex.getMiddle().get() > 0) validRoles.add("MIDDLE");
+            if (flex.getBottom().isPresent() && flex.getBottom().get() > 0) validRoles.add("BOTTOM");
+            if (flex.getUtility().isPresent() && flex.getUtility().get() > 0) validRoles.add("UTILITY");
+
+            // Для каждой валидной роли получаем контрпики
+            for (String role : validRoles) {
+
+                List<CounterPick> counterPicks = rankedRequests.getCounterPicks(champion, role, "%");
+
+                for (CounterPick cp : counterPicks) {
+                    // Добавляем чемпиона-контрпика (champion2) в общий список
+                    allCounterPicks.add(cp.getChampion2());
+                }
+
+            }
+        }
+
+        return allCounterPicks;
+    }
 }
