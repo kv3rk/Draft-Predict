@@ -1,22 +1,26 @@
 /* ─── Ban Recommendations ─── */
 .ban-recommendations {
     display: none;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
     gap: 6px;
-    margin-bottom: 8px;
-    min-height: 24px;
+    margin-bottom: 12px;
+    padding: 10px;
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-radius: var(--radius-sm);
+    width: 100%;
+    max-width: 180px;
 }
 
 .ban-rec-item {
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--accent-ban);
-    background: var(--accent-ban-dim);
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    border-radius: var(--radius-sm);
-    padding: 3px 10px;
-    letter-spacing: 0.3px;
+    text-align: center;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    border: 1px solid rgba(248, 113, 113, 0.2);
     cursor: pointer;
     user-select: none;
     transition: all 0.18s ease;
