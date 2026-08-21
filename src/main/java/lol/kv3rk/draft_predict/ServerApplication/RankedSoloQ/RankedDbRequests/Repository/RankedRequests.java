@@ -372,7 +372,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                         tm.total_matches
                     order by
                         presence desc
-                    limit 20;
+                    limit 30;
                     """
     )
     List<ChampionPresence> getChampionDraftPresence(

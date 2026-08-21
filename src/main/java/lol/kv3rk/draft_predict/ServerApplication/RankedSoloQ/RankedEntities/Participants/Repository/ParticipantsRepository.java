@@ -37,7 +37,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	tm.total
                     order by
                     	pick_rate desc
-                    limit 20;
+                    limit 30;
                     """
     )
     List<TopPerformingChampions> getTopPerformingChampionsByPickRate(String patch);
@@ -66,7 +66,7 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	tm.total
                     order by
                     	win_rate desc
-                    limit 20;
+                    limit 30;
                     """
     )
     List<TopPerformingChampions> getTopPerformingChampionsByWinRate(String patch);
