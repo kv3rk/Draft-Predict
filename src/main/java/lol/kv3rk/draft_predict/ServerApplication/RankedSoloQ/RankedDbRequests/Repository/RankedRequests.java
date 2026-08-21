@@ -436,8 +436,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     order by
                     	gold desc,
                     	xp desc,
-                    	farm desc
-                    limit 20;
+                    	farm desc;
                     """
     )
     List<CounterPick> getCounterPicks(
