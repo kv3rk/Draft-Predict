@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,10 +31,10 @@ public class DraftPredictService {
     private final BansRepository bansRepository;
     private final RankedRequests rankedRequests;
 
-    // Поля для хранения занятых позиций (теперь это Set для быстрого поиска) и кэша гибкости
-    private Set<String> blueSideOccupiedPositions = new HashSet<>();
-    private Set<String> redSideOccupiedPositions = new HashSet<>();
-    private Map<String, ChampionFlexibility> flexibilityCache = new HashMap<>();
+    // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: ConcurrentHashMap вместо HashMap
+    private Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
+    private Set<String> redSideOccupiedPositions = ConcurrentHashMap.newKeySet();
+    private Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
 
     public DraftPredictService(MatchesRepository matchesRepository,
                                ParticipantsRepository participantsRepository,
@@ -235,12 +236,10 @@ public class DraftPredictService {
         redSideOccupiedPositions = calculateOccupiedPositions(redSidePicks);
     }
 
-    /**
-     * Алгоритм вычисления гарантированно занятых позиций с учетом цепочек вытеснения.
-     */
     private Set<String> calculateOccupiedPositions(List<String> picks) {
-        // Собираем возможные роли для каждого пикнутого чемпиона
+
         Map<String, List<String>> champRoles = new HashMap<>();
+
         for (String champ : picks) {
             ChampionFlexibility flex = getFlexibility(champ);
             if (flex != null) {
@@ -254,11 +253,10 @@ public class DraftPredictService {
         Set<String> occupied = new HashSet<>();
         boolean changed = true;
 
-        // Цикл продолжается до тех пор, пока мы находим новые гарантированные позиции
         while (changed) {
             changed = false;
             for (List<String> roles : champRoles.values()) {
-                // Считаем, сколько ролей этого чемпиона еще не заняты
+
                 List<String> freeRoles = new ArrayList<>();
                 for (String role : roles) {
                     if (!occupied.contains(role)) {
@@ -266,11 +264,10 @@ public class DraftPredictService {
                     }
                 }
 
-                // Если осталась ровно 1 свободная роль, значит чемпион гарантированно идет на неё
                 if (freeRoles.size() == 1) {
                     String forcedRole = freeRoles.get(0);
                     if (occupied.add(forcedRole)) {
-                        changed = true; // Запускаем новый круг проверки, так как пул занятых ролей расширился
+                        changed = true;
                     }
                 }
             }
@@ -308,7 +305,6 @@ public class DraftPredictService {
             return false;
         }
 
-        // Если ВСЕ возможные роли чемпиона уже заняты, то он заблокирован
         return occupiedPositions.containsAll(champRoles);
     }
 }
