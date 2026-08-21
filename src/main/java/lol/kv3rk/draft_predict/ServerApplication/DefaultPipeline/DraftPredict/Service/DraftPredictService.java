@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +30,11 @@ public class DraftPredictService {
     private final BansRepository bansRepository;
     private final RankedRequests rankedRequests;
 
+    // Поля для хранения занятых позиций (теперь это Set для быстрого поиска) и кэша гибкости
+    private Set<String> blueSideOccupiedPositions = new HashSet<>();
+    private Set<String> redSideOccupiedPositions = new HashSet<>();
+    private Map<String, ChampionFlexibility> flexibilityCache = new HashMap<>();
+
     public DraftPredictService(MatchesRepository matchesRepository,
                                ParticipantsRepository participantsRepository,
                                BansRepository bansRepository,
@@ -43,6 +49,9 @@ public class DraftPredictService {
                                               List<String> redSideBans,
                                               List<String> blueSidePicks,
                                               List<String> redSidePicks) {
+        flexibilityCache.clear();
+        updateOccupiedPositions(blueSidePicks, redSidePicks);
+
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -51,7 +60,6 @@ public class DraftPredictService {
         ).flatMap(s -> s).collect(Collectors.toSet());
 
         Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
-
         return getTop3ChampionsForBans(excludedChampions, generalFreq);
     }
 
@@ -59,6 +67,9 @@ public class DraftPredictService {
                                                        List<String> redSideBans,
                                                        List<String> blueSidePicks,
                                                        List<String> redSidePicks) {
+        flexibilityCache.clear();
+        updateOccupiedPositions(blueSidePicks, redSidePicks);
+
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -67,7 +78,6 @@ public class DraftPredictService {
         ).flatMap(s -> s).collect(Collectors.toSet());
 
         Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
-
         return getTop3ChampionsForBlueSidePicks(excludedChampions, generalFreq,
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
@@ -76,6 +86,9 @@ public class DraftPredictService {
                                                       List<String> redSideBans,
                                                       List<String> blueSidePicks,
                                                       List<String> redSidePicks) {
+        flexibilityCache.clear();
+        updateOccupiedPositions(blueSidePicks, redSidePicks);
+
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -84,7 +97,6 @@ public class DraftPredictService {
         ).flatMap(s -> s).collect(Collectors.toSet());
 
         Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
-
         return getTop3ChampionsForRedSidePicks(excludedChampions, generalFreq,
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
@@ -95,6 +107,12 @@ public class DraftPredictService {
 
         bansRepository.getMostBannedChampions("%")
                 .forEach(b -> freq.merge(b.getChampion(), 1, Integer::sum));
+
+        // Для банов объединяем занятые позиции обеих команд
+        Set<String> allOccupiedPositions = new HashSet<>(blueSideOccupiedPositions);
+        allOccupiedPositions.addAll(redSideOccupiedPositions);
+
+        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), allOccupiedPositions));
 
         return freq.entrySet()
                 .stream()
@@ -112,16 +130,18 @@ public class DraftPredictService {
                                                           List<String> redSidePicks) {
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
 
-        // 1. Получаем контрпики и добавляем их в freq
         List<String> counterPicksForBlueSide = getCounterPickList(blueSideBans);
-
         for (String counterPickChamp : counterPicksForBlueSide) {
-
             if (!excludedChampions.contains(counterPickChamp)) {
                 freq.merge(counterPickChamp, 1, Integer::sum);
             }
-
         }
+
+        participantsRepository.getTopPerformingChampionsByWinRate("%")
+                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+
+        // Исключаем чемпионов, чьи позиции уже заняты Blue Side
+        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
         return freq.entrySet()
                 .stream()
@@ -139,16 +159,18 @@ public class DraftPredictService {
                                                          List<String> redSidePicks) {
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
 
-        // 1. Получаем контрпики и добавляем их в freq
         List<String> counterPicksForRedSide = getCounterPickList(redSideBans);
-
         for (String counterPickChamp : counterPicksForRedSide) {
-
             if (!excludedChampions.contains(counterPickChamp)) {
                 freq.merge(counterPickChamp, 1, Integer::sum);
             }
-
         }
+
+        participantsRepository.getTopPerformingChampionsByPickRate("%")
+                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+
+        // Исключаем чемпионов, чьи позиции уже заняты Red Side
+        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
 
         return freq.entrySet()
                 .stream()
@@ -185,39 +207,108 @@ public class DraftPredictService {
     }
 
     private List<String> getCounterPickList(List<String> champions) {
-
         List<String> allCounterPicks = new ArrayList<>();
 
         for (String champion : champions) {
-
-            ChampionFlexibility flex = rankedRequests.getChampionFlexibility(champion, "%");
-
+            ChampionFlexibility flex = getFlexibility(champion);
             if (flex == null) {
                 continue;
             }
 
-            List<String> validRoles = new ArrayList<>();
+            List<String> validRoles = getRoles(flex);
 
-            // Проверяем, что роль присутствует (не null) и её значение > 0
-            if (flex.getTop().isPresent() && flex.getTop().get() > 0) validRoles.add("TOP");
-            if (flex.getJungle().isPresent() && flex.getJungle().get() > 0) validRoles.add("JUNGLE");
-            if (flex.getMiddle().isPresent() && flex.getMiddle().get() > 0) validRoles.add("MIDDLE");
-            if (flex.getBottom().isPresent() && flex.getBottom().get() > 0) validRoles.add("BOTTOM");
-            if (flex.getUtility().isPresent() && flex.getUtility().get() > 0) validRoles.add("UTILITY");
-
-            // Для каждой валидной роли получаем контрпики
             for (String role : validRoles) {
-
                 List<CounterPick> counterPicks = rankedRequests.getCounterPicks(champion, role, "%");
-
                 for (CounterPick cp : counterPicks) {
-                    // Добавляем чемпиона-контрпика (champion2) в общий список
                     allCounterPicks.add(cp.getChampion2());
                 }
-
             }
         }
 
         return allCounterPicks;
+    }
+
+    // --- Методы для работы с занятыми позициями и гибкостью ---
+
+    private void updateOccupiedPositions(List<String> blueSidePicks, List<String> redSidePicks) {
+        blueSideOccupiedPositions = calculateOccupiedPositions(blueSidePicks);
+        redSideOccupiedPositions = calculateOccupiedPositions(redSidePicks);
+    }
+
+    /**
+     * Алгоритм вычисления гарантированно занятых позиций с учетом цепочек вытеснения.
+     */
+    private Set<String> calculateOccupiedPositions(List<String> picks) {
+        // Собираем возможные роли для каждого пикнутого чемпиона
+        Map<String, List<String>> champRoles = new HashMap<>();
+        for (String champ : picks) {
+            ChampionFlexibility flex = getFlexibility(champ);
+            if (flex != null) {
+                List<String> roles = getRoles(flex);
+                if (!roles.isEmpty()) {
+                    champRoles.put(champ, roles);
+                }
+            }
+        }
+
+        Set<String> occupied = new HashSet<>();
+        boolean changed = true;
+
+        // Цикл продолжается до тех пор, пока мы находим новые гарантированные позиции
+        while (changed) {
+            changed = false;
+            for (List<String> roles : champRoles.values()) {
+                // Считаем, сколько ролей этого чемпиона еще не заняты
+                List<String> freeRoles = new ArrayList<>();
+                for (String role : roles) {
+                    if (!occupied.contains(role)) {
+                        freeRoles.add(role);
+                    }
+                }
+
+                // Если осталась ровно 1 свободная роль, значит чемпион гарантированно идет на неё
+                if (freeRoles.size() == 1) {
+                    String forcedRole = freeRoles.get(0);
+                    if (occupied.add(forcedRole)) {
+                        changed = true; // Запускаем новый круг проверки, так как пул занятых ролей расширился
+                    }
+                }
+            }
+        }
+
+        return occupied;
+    }
+
+    private ChampionFlexibility getFlexibility(String champion) {
+        return flexibilityCache.computeIfAbsent(champion, c -> rankedRequests.getChampionFlexibility(c, "%"));
+    }
+
+    private List<String> getRoles(ChampionFlexibility flex) {
+        List<String> roles = new ArrayList<>();
+        if (flex.getTop().isPresent() && flex.getTop().get() > 0) roles.add("TOP");
+        if (flex.getJungle().isPresent() && flex.getJungle().get() > 0) roles.add("JUNGLE");
+        if (flex.getMiddle().isPresent() && flex.getMiddle().get() > 0) roles.add("MIDDLE");
+        if (flex.getBottom().isPresent() && flex.getBottom().get() > 0) roles.add("BOTTOM");
+        if (flex.getUtility().isPresent() && flex.getUtility().get() > 0) roles.add("UTILITY");
+        return roles;
+    }
+
+    private boolean isChampionBlockedByOccupiedPositions(String champion, Set<String> occupiedPositions) {
+        if (occupiedPositions.isEmpty()) {
+            return false;
+        }
+
+        ChampionFlexibility flex = getFlexibility(champion);
+        if (flex == null) {
+            return false;
+        }
+
+        List<String> champRoles = getRoles(flex);
+        if (champRoles.isEmpty()) {
+            return false;
+        }
+
+        // Если ВСЕ возможные роли чемпиона уже заняты, то он заблокирован
+        return occupiedPositions.containsAll(champRoles);
     }
 }
