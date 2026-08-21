@@ -1,5 +1,6 @@
 package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.Service;
 
+import jakarta.annotation.PostConstruct; // Для Spring Boot 3+. Если у тебя 2.x, используй javax.annotation.PostConstruct
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.CounterPick;
@@ -31,10 +32,15 @@ public class DraftPredictService {
     private final BansRepository bansRepository;
     private final RankedRequests rankedRequests;
 
-    // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: ConcurrentHashMap вместо HashMap
-    private Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
-    private Set<String> redSideOccupiedPositions = ConcurrentHashMap.newKeySet();
-    private Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
+    // Кэши для хранения данных, которые не меняются в течение дня
+    private List<String> cachedDraftPresence;
+    private List<String> cachedBanRates;
+    private List<String> cachedWinRates;
+    private List<String> cachedPickRates;
+
+    private final Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
+    private final Set<String> redSideOccupiedPositions = ConcurrentHashMap.newKeySet();
+    private final Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
 
     public DraftPredictService(MatchesRepository matchesRepository,
                                ParticipantsRepository participantsRepository,
@@ -46,13 +52,26 @@ public class DraftPredictService {
         this.rankedRequests = rankedRequests;
     }
 
+    @PostConstruct
+    public void initCache() {
+        log.info("Loading draft predict statistics into cache...");
+        cachedDraftPresence = rankedRequests.getChampionDraftPresence("%")
+                .stream().map(ChampionPresence::getChampion).toList();
+        cachedBanRates = bansRepository.getMostBannedChampions("%")
+                .stream().map(MostBannedChampions::getChampion).toList();
+        cachedWinRates = participantsRepository.getTopPerformingChampionsByWinRate("%")
+                .stream().map(TopPerformingChampions::getChampion).toList();
+        cachedPickRates = participantsRepository.getTopPerformingChampionsByPickRate("%")
+                .stream().map(TopPerformingChampions::getChampion).toList();
+        log.info("Draft predict cache loaded successfully.");
+    }
+
     public List<String> getBanRecommendations(List<String> blueSideBans,
                                               List<String> redSideBans,
                                               List<String> blueSidePicks,
                                               List<String> redSidePicks) {
         flexibilityCache.clear();
         updateOccupiedPositions(blueSidePicks, redSidePicks);
-
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -70,7 +89,6 @@ public class DraftPredictService {
                                                        List<String> redSidePicks) {
         flexibilityCache.clear();
         updateOccupiedPositions(blueSidePicks, redSidePicks);
-
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -89,7 +107,6 @@ public class DraftPredictService {
                                                       List<String> redSidePicks) {
         flexibilityCache.clear();
         updateOccupiedPositions(blueSidePicks, redSidePicks);
-
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
                 redSideBans.stream(),
@@ -105,11 +122,9 @@ public class DraftPredictService {
     private List<String> getTop3ChampionsForBans(Set<String> excludedChampions,
                                                  Map<String, Integer> generalFrequencyMap) {
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
-
         bansRepository.getMostBannedChampions("%")
                 .forEach(b -> freq.merge(b.getChampion(), 1, Integer::sum));
 
-        // Для банов объединяем занятые позиции обеих команд
         Set<String> allOccupiedPositions = new HashSet<>(blueSideOccupiedPositions);
         allOccupiedPositions.addAll(redSideOccupiedPositions);
 
@@ -141,7 +156,6 @@ public class DraftPredictService {
         participantsRepository.getTopPerformingChampionsByWinRate("%")
                 .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
 
-        // Исключаем чемпионов, чьи позиции уже заняты Blue Side
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
         return freq.entrySet()
@@ -170,7 +184,6 @@ public class DraftPredictService {
         participantsRepository.getTopPerformingChampionsByPickRate("%")
                 .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
 
-        // Исключаем чемпионов, чьи позиции уже заняты Red Side
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
 
         return freq.entrySet()
@@ -181,26 +194,12 @@ public class DraftPredictService {
                 .toList();
     }
 
+    /**
+     * Теперь использует кэшированные данные вместо запросов к БД.
+     */
     private Map<String, Integer> getGeneralFrequencyMap(Set<String> excludedChampions) {
-        List<String> draftPresence = rankedRequests.getChampionDraftPresence("%")
-                .stream()
-                .map(ChampionPresence::getChampion)
-                .toList();
-        List<String> banRates = bansRepository.getMostBannedChampions("%")
-                .stream()
-                .map(MostBannedChampions::getChampion)
-                .toList();
-        List<String> winRates = participantsRepository.getTopPerformingChampionsByWinRate("%")
-                .stream()
-                .map(TopPerformingChampions::getChampion)
-                .toList();
-        List<String> pickRates = participantsRepository.getTopPerformingChampionsByPickRate("%")
-                .stream()
-                .map(TopPerformingChampions::getChampion)
-                .toList();
-
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(draftPresence, banRates, winRates, pickRates)
+        Stream.of(cachedDraftPresence, cachedBanRates, cachedWinRates, cachedPickRates)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
@@ -232,48 +231,28 @@ public class DraftPredictService {
     // --- Методы для работы с занятыми позициями и гибкостью ---
 
     private void updateOccupiedPositions(List<String> blueSidePicks, List<String> redSidePicks) {
-        blueSideOccupiedPositions = calculateOccupiedPositions(blueSidePicks);
-        redSideOccupiedPositions = calculateOccupiedPositions(redSidePicks);
-    }
+        blueSideOccupiedPositions.clear();
+        redSideOccupiedPositions.clear();
 
-    private Set<String> calculateOccupiedPositions(List<String> picks) {
-
-        Map<String, List<String>> champRoles = new HashMap<>();
-
-        for (String champ : picks) {
+        for (String champ : blueSidePicks) {
             ChampionFlexibility flex = getFlexibility(champ);
             if (flex != null) {
-                List<String> roles = getRoles(flex);
-                if (!roles.isEmpty()) {
-                    champRoles.put(champ, roles);
+                String singleRole = getSingleRoleIfStrict(flex);
+                if (singleRole != null) {
+                    blueSideOccupiedPositions.add(singleRole);
                 }
             }
         }
 
-        Set<String> occupied = new HashSet<>();
-        boolean changed = true;
-
-        while (changed) {
-            changed = false;
-            for (List<String> roles : champRoles.values()) {
-
-                List<String> freeRoles = new ArrayList<>();
-                for (String role : roles) {
-                    if (!occupied.contains(role)) {
-                        freeRoles.add(role);
-                    }
-                }
-
-                if (freeRoles.size() == 1) {
-                    String forcedRole = freeRoles.get(0);
-                    if (occupied.add(forcedRole)) {
-                        changed = true;
-                    }
+        for (String champ : redSidePicks) {
+            ChampionFlexibility flex = getFlexibility(champ);
+            if (flex != null) {
+                String singleRole = getSingleRoleIfStrict(flex);
+                if (singleRole != null) {
+                    redSideOccupiedPositions.add(singleRole);
                 }
             }
         }
-
-        return occupied;
     }
 
     private ChampionFlexibility getFlexibility(String champion) {
@@ -288,6 +267,14 @@ public class DraftPredictService {
         if (flex.getBottom().isPresent() && flex.getBottom().get() > 0) roles.add("BOTTOM");
         if (flex.getUtility().isPresent() && flex.getUtility().get() > 0) roles.add("UTILITY");
         return roles;
+    }
+
+    private String getSingleRoleIfStrict(ChampionFlexibility flex) {
+        List<String> roles = getRoles(flex);
+        if (roles.size() == 1) {
+            return roles.get(0);
+        }
+        return null;
     }
 
     private boolean isChampionBlockedByOccupiedPositions(String champion, Set<String> occupiedPositions) {

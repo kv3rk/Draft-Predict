@@ -166,146 +166,48 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
     @Query(
             nativeQuery = true,
             value = """
-                    with top_flex as(
+                    with grouped as (
                         select
                             p.champion,
-                            count(p.champion) as total_t
-                        from
-                            participants p
+                            p.position,
+                            count(*) as total
+                        from participants p
                         join matches m on m.match_id = p.match_id
-                        where
-                            p.position = 'TOP'
-                            and m.patch like :patch
-                        group by
-                            p.champion
+                        where m.patch like :patch
+                        group by p.champion, p.position
                     ),
-                    jungle_flex as(
+                    flex as (
                         select
-                            p.champion,
-                            count(p.champion) as total_j
-                        from
-                            participants p
-                        join matches m on m.match_id = p.match_id
-                        where
-                            p.position = 'JUNGLE'
-                            and m.patch like :patch
-                        group by
-                            p.champion
+                            champion,
+                            sum(case when position = 'TOP' then total end) as total_t,
+                            sum(case when position = 'JUNGLE' then total end) as total_j,
+                            sum(case when position = 'MIDDLE' then total end) as total_m,
+                            sum(case when position = 'BOTTOM' then total end) as total_b,
+                            sum(case when position = 'UTILITY' then total end) as total_u,
+                            sum(total) as total_matches
+                        from grouped
+                        group by champion
                     ),
-                    middle_flex as(
+                    avg_flex as (
                         select
-                            p.champion,
-                            count(p.champion) as total_m
-                        from
-                            participants p
-                        join matches m on m.match_id = p.match_id
-                        where
-                            p.position = 'MIDDLE'
-                            and m.patch like :patch
-                        group by
-                            p.champion
-                    ),
-                    bottom_flex as(
-                        select
-                            p.champion,
-                            count(p.champion) as total_b
-                        from
-                            participants p
-                        join matches m on m.match_id = p.match_id
-                        where
-                            p.position = 'BOTTOM'
-                            and m.patch like :patch
-                        group by
-                            p.champion
-                    ),
-                    utility_flex as(
-                        select
-                            p.champion,
-                            count(p.champion) as total_u
-                        from
-                            participants p
-                        join matches m on m.match_id = p.match_id
-                        where
-                            p.position = 'UTILITY'
-                            and m.patch like :patch
-                        group by
-                            p.champion
-                    ),
-                    total_matches as (
-                        select
-                            p.champion,
-                            count(p.champion) as total
-                        from
-                            participants p
-                        join matches m on m.match_id = p.match_id
-                        where
-                            m.patch like :patch
-                        group by
-                            p.champion
-                    ),
-                    result_table as (
-                        select
-                            tm.champion,
-                            case
-                                when (tf.total_t * 100.0 / tm.total) > 0 then round(tf.total_t * 100.0 / tm.total, 1)
-                                else 0
-                            end as flexibility_top,
-                            case
-                                when (jf.total_j * 100.0 / tm.total) > 0 then round(jf.total_j * 100.0 / tm.total, 1)
-                                else 0
-                            end as flexibility_jungle,
-                            case
-                                when (mf.total_m * 100.0 / tm.total) > 0 then round(mf.total_m * 100.0 / tm.total, 1)
-                                else 0
-                            end as flexibility_middle,
-                            case
-                                when (bf.total_b * 100.0 / tm.total) > 0 then round(bf.total_b * 100.0 / tm.total, 1)
-                                else 0
-                            end as flexibility_bottom,
-                            case
-                                when (uf.total_u * 100.0 / tm.total) > 0 then round(uf.total_u * 100.0 / tm.total, 1)
-                                else 0
-                            end as flexibility_utility
-                        from
-                            total_matches tm
-                        left join top_flex tf on tf.champion = tm.champion
-                        left join jungle_flex jf on jf.champion = tm.champion
-                        left join middle_flex mf on mf.champion = tm.champion
-                        left join bottom_flex bf on bf.champion = tm.champion
-                        left join utility_flex uf on uf.champion = tm.champion
-                    ),
-                    avg_flexibility as (
-                        select
-                            round(avg(rt.flexibility_top), 1) avg_top,
-                            round(avg(rt.flexibility_jungle), 1) avg_jungle,
-                            round(avg(rt.flexibility_middle), 1) avg_middle,
-                            round(avg(rt.flexibility_bottom), 1) avg_bottom,
-                            round(avg(rt.flexibility_utility), 1) avg_utility
-                        from
-                            result_table rt
+                            round(avg(total_t * 100.0 / total_matches), 1) as avg_top,
+                            round(avg(total_j * 100.0 / total_matches), 1) as avg_jungle,
+                            round(avg(total_m * 100.0 / total_matches), 1) as avg_middle,
+                            round(avg(total_b * 100.0 / total_matches), 1) as avg_bottom,
+                            round(avg(total_u * 100.0 / total_matches), 1) as avg_utility
+                        from flex
                     )
                     select
-                        rt.champion as champion,
-                        case
-                            when rt.flexibility_top > avg_flex.avg_top then rt.flexibility_top
-                        end as top,
-                        case
-                            when rt.flexibility_jungle > avg_flex.avg_jungle then rt.flexibility_jungle
-                        end as jungle,
-                        case
-                            when rt.flexibility_middle > avg_flex.avg_middle then rt.flexibility_middle
-                        end as middle,
-                        case
-                            when rt.flexibility_bottom > avg_flex.avg_bottom then rt.flexibility_bottom
-                        end as bottom,
-                        case
-                            when rt.flexibility_utility > avg_flex.avg_utility then rt.flexibility_utility
-                        end as utility
-                    from
-                        result_table rt
-                    cross join avg_flexibility avg_flex
-                    where
-                        champion = :name;
+                        f.champion,
+                        case when (f.total_t * 100.0 / f.total_matches) > a.avg_top then round(f.total_t * 100.0 / f.total_matches, 1) end as top,
+                        case when (f.total_j * 100.0 / f.total_matches) > a.avg_jungle then round(f.total_j * 100.0 / f.total_matches, 1) end as jungle,
+                        case when (f.total_m * 100.0 / f.total_matches) > a.avg_middle then round(f.total_m * 100.0 / f.total_matches, 1) end as middle,
+                        case when (f.total_b * 100.0 / f.total_matches) > a.avg_bottom then round(f.total_b * 100.0 / f.total_matches, 1) end as bottom,
+                        case when (f.total_u * 100.0 / f.total_matches) > a.avg_utility then round(f.total_u * 100.0 / f.total_matches, 1) end as utility
+                    from flex f
+                    cross join avg_flex a
+                    where f.champion = :name;
+                    
                     """
     )
     ChampionFlexibility getChampionFlexibility(
