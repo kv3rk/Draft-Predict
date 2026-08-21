@@ -431,6 +431,8 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     group by
                     	p.champion,
                     	p2.champion
+                    having
+                    	round(avg(p.gold - p2.gold), 1) >= 0
                     order by
                     	gold desc,
                     	xp desc,

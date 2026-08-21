@@ -68,7 +68,8 @@ public class DraftPredictService {
 
         Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
 
-        return getTop3ChampionsForBlueSidePicks(excludedChampions, generalFreq);
+        return getTop3ChampionsForBlueSidePicks(excludedChampions, generalFreq,
+                blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
 
 
@@ -86,7 +87,8 @@ public class DraftPredictService {
 
         Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
 
-        return getTop3ChampionsForRedSidePicks(excludedChampions, generalFreq);
+        return getTop3ChampionsForRedSidePicks(excludedChampions, generalFreq,
+                blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
 
 
@@ -109,12 +111,16 @@ public class DraftPredictService {
     }
 
     private List<String> getTop3ChampionsForBlueSidePicks(Set<String> excludedChampions,
-                                                          Map<String, Integer> generalFrequencyMap) {
+                                                          Map<String, Integer> generalFrequencyMap,
+                                                          List<String> blueSideBans,
+                                                          List<String> redSideBans,
+                                                          List<String> blueSidePicks,
+                                                          List<String> redSidePicks) {
 
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
 
-        // Индивидуальная логика для Blue Side picks
-        // Например: усилить вес win rate
+        //List<List<String>> counterPicksForBlueSide = getCounterPickList(blueSideBans);
+
         participantsRepository.getTopPerformingChampionsByWinRate("%")
                 .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
 
@@ -127,12 +133,16 @@ public class DraftPredictService {
     }
 
     private List<String> getTop3ChampionsForRedSidePicks(Set<String> excludedChampions,
-                                                         Map<String, Integer> generalFrequencyMap) {
+                                                         Map<String, Integer> generalFrequencyMap,
+                                                         List<String> blueSideBans,
+                                                         List<String> redSideBans,
+                                                         List<String> blueSidePicks,
+                                                         List<String> redSidePicks) {
 
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
 
-        // Индивидуальная логика для Red Side picks
-        // Например: усилить вес pick rate
+//        List<List<String>> counterPicksForBlueSide = getCounterPickList(redSideBans);
+
         participantsRepository.getTopPerformingChampionsByPickRate("%")
                 .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
 
@@ -176,5 +186,15 @@ public class DraftPredictService {
 
         return frequencyMap;
     }
+
+//    private List<List<String>> getCounterPickList(List<String> champions) {
+//
+//        champions.forEach(champion -> {
+//
+//            List<String> roles = rankedRequests.getChampionFlexibility(champion, "%");
+//
+//        });
+//
+//    }
 
 }
