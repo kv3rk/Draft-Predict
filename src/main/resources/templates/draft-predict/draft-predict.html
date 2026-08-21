@@ -165,6 +165,14 @@
                         <!-- Center Info -->
                         <div class="draft-center">
 
+                            <div class="champion-select-wrapper" id="championSelectWrapper">
+                                <select id="championSelect" class="champion-select">
+                                    <option value="" disabled selected>Select champion</option>
+                                    <option th:each="c : ${championList}" th:value="${c.champion}"
+                                            th:text="${c.champion}"></option>
+                                </select>
+                            </div>
+
                             <div class="ban-recommendations" id="banRecommendations"></div>
 
                             <div class="pick-recommendations" id="pickRecommendations"></div>
@@ -174,14 +182,6 @@
                             <div class="draft-vs">VS</div>
 
                             <div class="draft-first-pick" id="draftFirstPick">First Pick: Blue</div>
-
-                            <div class="champion-select-wrapper" id="championSelectWrapper">
-                                <select id="championSelect" class="champion-select">
-                                    <option value="" disabled selected>Select champion</option>
-                                    <option th:each="c : ${championList}" th:value="${c.champion}"
-                                            th:text="${c.champion}"></option>
-                                </select>
-                            </div>
 
                         </div>
 
