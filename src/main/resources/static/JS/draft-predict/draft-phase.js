@@ -22,8 +22,8 @@ let isBanPhaseActive = false;
 let currentPickIndex = 0;
 let currentPickOrder = [];
 let isPickPhaseActive = false;
-let currentFirstPickSide = 'BLUE';
 
+let currentFirstPickSide = 'BLUE';
 let isDraftFinished = false; // флаг полного окончания драфта
 
 function init() {
@@ -79,6 +79,7 @@ function handleDraftSetup(event) {
         slot.classList.remove('active-ban', 'ban-completed');
         slot.innerHTML = '';
     });
+
     document.querySelectorAll('.pick-slot').forEach(slot => {
         slot.classList.remove('active-pick', 'pick-completed', 'blue-pick', 'red-pick');
         const pickNum = slot.dataset.pick.split('-')[1];
@@ -91,7 +92,6 @@ function handleDraftSetup(event) {
     }
 
     currentBanOrder = currentFirstPickSide === 'BLUE' ? [...BAN_ORDER_BLUE_FIRST] : [...BAN_ORDER_RED_FIRST];
-
     highlightCurrentBan();
     fetchBanRecommendations();
 }
@@ -117,10 +117,12 @@ function highlightCurrentBan() {
 async function fetchBanRecommendations() {
     if (!isBanPhaseActive || isDraftFinished) return;
 
+    // Показываем красный спиннер перед запросом
+    renderBanLoading();
+
     const bans = typeof window.getBannedChampionsBySide === 'function'
         ? window.getBannedChampionsBySide()
         : { blueSideBans: [], redSideBans: [] };
-
     const picks = typeof window.getPickedChampionsBySide === 'function'
         ? window.getPickedChampionsBySide()
         : { blueSidePicks: [], redSidePicks: [] };
@@ -144,20 +146,30 @@ async function fetchBanRecommendations() {
     }
 }
 
+function renderBanLoading() {
+    const container = document.getElementById('banRecommendations');
+    if (!container) return;
+    container.innerHTML = '<div class="loading-spinner ban-spinner"></div>';
+    container.style.display = 'flex';
+}
+
 function renderBanRecommendations(champions) {
     const container = document.getElementById('banRecommendations');
     if (!container) return;
+
     if (!champions || champions.length === 0 || isDraftFinished) {
         container.innerHTML = '';
         container.style.display = 'none';
         return;
     }
+
     container.innerHTML = champions.map(name => `<span class="ban-rec-item">${name}</span>`).join('');
     container.style.display = 'flex';
 }
 
 function advanceBan(championName) {
     if (!isBanPhaseActive || isDraftFinished) return;
+
     const currentSlotId = currentBanOrder[currentBanIndex];
     const side = getCurrentBanSide();
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
@@ -169,6 +181,7 @@ function advanceBan(championName) {
     }
 
     if (typeof window.addBannedChampion === 'function') window.addBannedChampion(championName, side);
+
     currentBanIndex++;
 
     if (currentBanIndex < currentBanOrder.length) {
@@ -192,14 +205,11 @@ function advanceBan(championName) {
 
 function startSecondPickPhase() {
     console.log('[Draft] Starting second pick phase');
-
     currentPickIndex = 0;
     isPickPhaseActive = true;
-
     currentPickOrder = currentFirstPickSide === 'BLUE'
         ? [...PICK_ORDER_SECOND_BLUE_FIRST]
         : [...PICK_ORDER_SECOND_RED_FIRST];
-
     highlightCurrentPick();
     fetchPickRecommendations();
 }
@@ -210,22 +220,18 @@ function startPickPhase() {
     currentPickIndex = 0;
     isPickPhaseActive = true;
     currentPickOrder = currentFirstPickSide === 'BLUE' ? [...PICK_ORDER_BLUE_FIRST] : [...PICK_ORDER_RED_FIRST];
-
     highlightCurrentPick();
     fetchPickRecommendations();
 }
 
 function startSecondBanPhase() {
     console.log('[Draft] Starting second ban phase');
-
     currentBanIndex = 0;
     isBanPhaseActive = true;
     isPickPhaseActive = false;
-
     currentBanOrder = currentFirstPickSide === 'BLUE'
         ? [...BAN_ORDER_SECOND_BLUE_FIRST]
         : [...BAN_ORDER_SECOND_RED_FIRST];
-
     highlightCurrentBan();
     fetchBanRecommendations();
 }
@@ -257,6 +263,9 @@ function highlightCurrentPick() {
 async function fetchPickRecommendations() {
     if (!isPickPhaseActive || isDraftFinished) return;
 
+    // Показываем золотой спиннер перед запросом
+    renderPickLoading();
+
     const side = getCurrentPickSide();
     const bans = typeof window.getBannedChampionsBySide === 'function' ? window.getBannedChampionsBySide() : { blueSideBans: [], redSideBans: [] };
     const picks = typeof window.getPickedChampionsBySide === 'function' ? window.getPickedChampionsBySide() : { blueSidePicks: [], redSidePicks: [] };
@@ -284,14 +293,23 @@ async function fetchPickRecommendations() {
     }
 }
 
+function renderPickLoading() {
+    const container = document.getElementById('pickRecommendations');
+    if (!container) return;
+    container.innerHTML = '<div class="loading-spinner pick-spinner"></div>';
+    container.style.display = 'flex';
+}
+
 function renderPickRecommendations(champions) {
     const container = document.getElementById('pickRecommendations');
     if (!container) return;
+
     if (!champions || champions.length === 0 || isDraftFinished) {
         container.innerHTML = '';
         container.style.display = 'none';
         return;
     }
+
     container.innerHTML = champions.map(name => `<span class="pick-rec-item">${name}</span>`).join('');
     container.style.display = 'flex';
 }
@@ -306,6 +324,7 @@ function advancePick(championName) {
     if (slot) {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
         slot.classList.add('pick-completed');
+
         // добавляем класс по сайду
         const sideClass = side === 'blue' ? 'blue-picked' : 'red-picked';
         slot.innerHTML = `<span class="pick-champion-name picked ${sideClass}">${championName}</span>`;
@@ -339,7 +358,6 @@ function advancePick(championName) {
 
 function finishDraft() {
     console.log('[Draft] Finished');
-
     isDraftFinished = true;
     isBanPhaseActive = false;
     isPickPhaseActive = false;
