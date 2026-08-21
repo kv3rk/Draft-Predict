@@ -207,7 +207,6 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     from flex f
                     cross join avg_flex a
                     where f.champion = :name;
-                    
                     """
     )
     ChampionFlexibility getChampionFlexibility(

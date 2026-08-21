@@ -1,6 +1,6 @@
 package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.Service;
 
-import jakarta.annotation.PostConstruct; // Для Spring Boot 3+. Если у тебя 2.x, используй javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.CounterPick;
@@ -32,15 +32,19 @@ public class DraftPredictService {
     private final BansRepository bansRepository;
     private final RankedRequests rankedRequests;
 
-    // Кэши для хранения данных, которые не меняются в течение дня
+    // Кэши данных, загружаемые один раз при старте приложения
     private List<String> cachedDraftPresence;
     private List<String> cachedBanRates;
     private List<String> cachedWinRates;
     private List<String> cachedPickRates;
 
+    // Кэши, накапливающиеся во время работы (потокобезопасные)
+    private final Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> counterPicksCache = new ConcurrentHashMap<>();
+
+    // Занятые позиции для каждой стороны
     private final Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
     private final Set<String> redSideOccupiedPositions = ConcurrentHashMap.newKeySet();
-    private final Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
 
     public DraftPredictService(MatchesRepository matchesRepository,
                                ParticipantsRepository participantsRepository,
@@ -63,14 +67,15 @@ public class DraftPredictService {
                 .stream().map(TopPerformingChampions::getChampion).toList();
         cachedPickRates = participantsRepository.getTopPerformingChampionsByPickRate("%")
                 .stream().map(TopPerformingChampions::getChampion).toList();
-        log.info("Draft predict cache loaded successfully.");
+        log.info("Draft predict cache loaded successfully. Draft presence: {}, Ban rates: {}, Win rates: {}, Pick rates: {}",
+                cachedDraftPresence.size(), cachedBanRates.size(), cachedWinRates.size(), cachedPickRates.size());
     }
 
     public List<String> getBanRecommendations(List<String> blueSideBans,
                                               List<String> redSideBans,
                                               List<String> blueSidePicks,
                                               List<String> redSidePicks) {
-        flexibilityCache.clear();
+        // НЕ очищаем кэши — они должны накапливаться между запросами
         updateOccupiedPositions(blueSidePicks, redSidePicks);
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
@@ -87,7 +92,6 @@ public class DraftPredictService {
                                                        List<String> redSideBans,
                                                        List<String> blueSidePicks,
                                                        List<String> redSidePicks) {
-        flexibilityCache.clear();
         updateOccupiedPositions(blueSidePicks, redSidePicks);
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
@@ -105,7 +109,6 @@ public class DraftPredictService {
                                                       List<String> redSideBans,
                                                       List<String> blueSidePicks,
                                                       List<String> redSidePicks) {
-        flexibilityCache.clear();
         updateOccupiedPositions(blueSidePicks, redSidePicks);
         Set<String> excludedChampions = Stream.of(
                 blueSideBans.stream(),
@@ -122,9 +125,15 @@ public class DraftPredictService {
     private List<String> getTop3ChampionsForBans(Set<String> excludedChampions,
                                                  Map<String, Integer> generalFrequencyMap) {
         Map<String, Integer> freq = new HashMap<>(generalFrequencyMap);
-        bansRepository.getMostBannedChampions("%")
-                .forEach(b -> freq.merge(b.getChampion(), 1, Integer::sum));
 
+        // Используем кэшированные данные вместо запроса к БД
+        for (String champion : cachedBanRates) {
+            if (!excludedChampions.contains(champion)) {
+                freq.merge(champion, 1, Integer::sum);
+            }
+        }
+
+        // Для банов объединяем занятые позиции обеих команд
         Set<String> allOccupiedPositions = new HashSet<>(blueSideOccupiedPositions);
         allOccupiedPositions.addAll(redSideOccupiedPositions);
 
@@ -153,9 +162,14 @@ public class DraftPredictService {
             }
         }
 
-        participantsRepository.getTopPerformingChampionsByWinRate("%")
-                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+        // Используем кэшированные данные вместо запроса к БД
+        for (String champion : cachedWinRates) {
+            if (!excludedChampions.contains(champion)) {
+                freq.merge(champion, 1, Integer::sum);
+            }
+        }
 
+        // Исключаем чемпионов, чьи позиции уже заняты Blue Side
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
         return freq.entrySet()
@@ -181,9 +195,14 @@ public class DraftPredictService {
             }
         }
 
-        participantsRepository.getTopPerformingChampionsByPickRate("%")
-                .forEach(c -> freq.merge(c.getChampion(), 1, Integer::sum));
+        // Используем кэшированные данные вместо запроса к БД
+        for (String champion : cachedPickRates) {
+            if (!excludedChampions.contains(champion)) {
+                freq.merge(champion, 1, Integer::sum);
+            }
+        }
 
+        // Исключаем чемпионов, чьи позиции уже заняты Red Side
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
 
         return freq.entrySet()
@@ -194,9 +213,6 @@ public class DraftPredictService {
                 .toList();
     }
 
-    /**
-     * Теперь использует кэшированные данные вместо запросов к БД.
-     */
     private Map<String, Integer> getGeneralFrequencyMap(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
         Stream.of(cachedDraftPresence, cachedBanRates, cachedWinRates, cachedPickRates)
@@ -218,10 +234,15 @@ public class DraftPredictService {
             List<String> validRoles = getRoles(flex);
 
             for (String role : validRoles) {
-                List<CounterPick> counterPicks = rankedRequests.getCounterPicks(champion, role, "%");
-                for (CounterPick cp : counterPicks) {
-                    allCounterPicks.add(cp.getChampion2());
-                }
+                // Кэшируем результаты getCounterPicks
+                String cacheKey = champion + ":" + role;
+                List<String> counters = counterPicksCache.computeIfAbsent(cacheKey,
+                        key -> rankedRequests.getCounterPicks(champion, role, "%")
+                                .stream()
+                                .map(CounterPick::getChampion2)
+                                .toList()
+                );
+                allCounterPicks.addAll(counters);
             }
         }
 
@@ -234,25 +255,49 @@ public class DraftPredictService {
         blueSideOccupiedPositions.clear();
         redSideOccupiedPositions.clear();
 
-        for (String champ : blueSidePicks) {
+        blueSideOccupiedPositions.addAll(calculateOccupiedPositions(blueSidePicks));
+        redSideOccupiedPositions.addAll(calculateOccupiedPositions(redSidePicks));
+    }
+
+    /**
+     * Полный алгоритм вычисления гарантированно занятых позиций с учётом цепочек вытеснения.
+     * Обрабатывает случаи, когда пикнуты два чемпиона с пересекающимися ролями
+     * (например, Ли Син в джангл + Амбесса топ/джангл → Амбесса гарантированно идёт на топ).
+     */
+    private Set<String> calculateOccupiedPositions(List<String> picks) {
+        Map<String, List<String>> champRoles = new HashMap<>();
+        for (String champ : picks) {
             ChampionFlexibility flex = getFlexibility(champ);
             if (flex != null) {
-                String singleRole = getSingleRoleIfStrict(flex);
-                if (singleRole != null) {
-                    blueSideOccupiedPositions.add(singleRole);
+                List<String> roles = getRoles(flex);
+                if (!roles.isEmpty()) {
+                    champRoles.put(champ, roles);
                 }
             }
         }
 
-        for (String champ : redSidePicks) {
-            ChampionFlexibility flex = getFlexibility(champ);
-            if (flex != null) {
-                String singleRole = getSingleRoleIfStrict(flex);
-                if (singleRole != null) {
-                    redSideOccupiedPositions.add(singleRole);
+        Set<String> occupied = new HashSet<>();
+        boolean changed = true;
+
+        // Цикл продолжается до тех пор, пока мы находим новые гарантированные позиции
+        while (changed) {
+            changed = false;
+            for (List<String> roles : champRoles.values()) {
+                List<String> freeRoles = roles.stream()
+                        .filter(role -> !occupied.contains(role))
+                        .toList();
+
+                // Если осталась ровно 1 свободная роль, значит чемпион гарантированно идёт на неё
+                if (freeRoles.size() == 1) {
+                    String forcedRole = freeRoles.get(0);
+                    if (occupied.add(forcedRole)) {
+                        changed = true;
+                    }
                 }
             }
         }
+
+        return occupied;
     }
 
     private ChampionFlexibility getFlexibility(String champion) {
@@ -267,14 +312,6 @@ public class DraftPredictService {
         if (flex.getBottom().isPresent() && flex.getBottom().get() > 0) roles.add("BOTTOM");
         if (flex.getUtility().isPresent() && flex.getUtility().get() > 0) roles.add("UTILITY");
         return roles;
-    }
-
-    private String getSingleRoleIfStrict(ChampionFlexibility flex) {
-        List<String> roles = getRoles(flex);
-        if (roles.size() == 1) {
-            return roles.get(0);
-        }
-        return null;
     }
 
     private boolean isChampionBlockedByOccupiedPositions(String champion, Set<String> occupiedPositions) {
@@ -292,6 +329,7 @@ public class DraftPredictService {
             return false;
         }
 
+        // Если ВСЕ возможные роли чемпиона уже заняты, то он заблокирован
         return occupiedPositions.containsAll(champRoles);
     }
 }
