@@ -146,12 +146,11 @@ public class ClientAppSoloqService {
         }
     }
 
-    public ChampionFlexibility getChampionFlexibility(String name, String patch) {
-        if (patch.equals("All patches")) {
-            return rankedRequests.getChampionFlexibility(name, "%");
-        } else {
-            return rankedRequests.getChampionFlexibility(name, patch);
-        }
+    public ChampionFlexibility getChampionFlexibility(String name) {
+
+        return rankedRequests.getChampionFlexibility(name);
+
+
     }
 
     public List<Champion> getChampionList() {

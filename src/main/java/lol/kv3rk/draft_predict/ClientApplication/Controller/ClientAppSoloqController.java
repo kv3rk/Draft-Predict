@@ -91,7 +91,7 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/champ-flex] endpoint");
         addCommonAttributes(model);
         model.addAttribute("championFlexibility", clientAppSoloqService.getChampionFlexibility(
-                "Aatrox", "%"));
+                "Aatrox"));
         return "ranked-soloq-page/stats-pages/champ-flex";
     }
 
@@ -154,7 +154,7 @@ public class ClientAppSoloqController {
     public ChampionFlexibility findChampFlex(@RequestParam String name,
                                              @RequestParam String patch) {
         log.info("Entered [/ranked-soloq/find/champ-flex] endpoint");
-        return clientAppSoloqService.getChampionFlexibility(name, patch);
+        return clientAppSoloqService.getChampionFlexibility(name);
     }
 
     @GetMapping("/find/draft-presence")

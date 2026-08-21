@@ -301,7 +301,7 @@ public class DraftPredictService {
     }
 
     private ChampionFlexibility getFlexibility(String champion) {
-        return flexibilityCache.computeIfAbsent(champion, c -> rankedRequests.getChampionFlexibility(c, "%"));
+        return flexibilityCache.computeIfAbsent(champion, c -> rankedRequests.getChampionFlexibility(c));
     }
 
     private List<String> getRoles(ChampionFlexibility flex) {
