@@ -21,4 +21,20 @@
     background: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
     border: 1px solid rgba(201, 169, 110, 0.2);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.18s ease;
+}
+
+.pick-rec-item:hover {
+    background: rgba(201, 169, 110, 0.25);
+    border-color: rgba(201, 169, 110, 0.7);
+    color: #fde68a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(201, 169, 110, 0.2);
+}
+
+.pick-rec-item:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(201, 169, 110, 0.15);
 }
