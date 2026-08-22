@@ -6,6 +6,7 @@ import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DT
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.CounterPick;
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.CounterPickRequests;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.RankedRequests;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
@@ -33,6 +34,7 @@ public class DraftPredictService {
     private final ParticipantsRepository participantsRepository;
     private final BansRepository bansRepository;
     private final RankedRequests rankedRequests;
+    private final CounterPickRequests counterPickRequests;
 
 
     // ================= INITIATE VARIABLES =================
@@ -56,11 +58,14 @@ public class DraftPredictService {
     public DraftPredictService(MatchesRepository matchesRepository,
                                ParticipantsRepository participantsRepository,
                                BansRepository bansRepository,
-                               RankedRequests rankedRequests) {
+                               RankedRequests rankedRequests,
+                               CounterPickRequests counterPickRequests) {
+
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
         this.rankedRequests = rankedRequests;
+        this.counterPickRequests = counterPickRequests;
     }
 
     @PostConstruct
@@ -113,11 +118,6 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(context.generalFreq());
 
-        for (String champion : cachedBanRates) {
-            if (!context.excludedChampions().contains(champion)) {
-                freq.merge(champion, 1, Integer::sum);
-            }
-        }
 
         Set<String> allOccupiedPositions = new HashSet<>(blueSideOccupiedPositions);
         allOccupiedPositions.addAll(redSideOccupiedPositions);
@@ -138,18 +138,20 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(context.generalFreq());
 
-        List<String> counterPicksForBlueSide = getCounterPickList(blueSideBans);
+        List<String> counterPicksForBlueSide = getCounterPickListForBans(blueSideBans);
         for (String counterPickChamp : counterPicksForBlueSide) {
             if (!context.excludedChampions().contains(counterPickChamp)) {
                 freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
 
-        for (String champion : cachedWinRates) {
-            if (!context.excludedChampions().contains(champion)) {
-                freq.merge(champion, 1, Integer::sum);
+        List<String> counterPicksForBlueSideOppositePicks = getCounterPickListForOppositePicks(redSidePicks);
+        for (String counterPickChamp : counterPicksForBlueSideOppositePicks) {
+            if (!context.excludedChampions().contains(counterPickChamp)) {
+                freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
+
 
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
@@ -168,16 +170,17 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(context.generalFreq());
 
-        List<String> counterPicksForRedSide = getCounterPickList(redSideBans);
+        List<String> counterPicksForRedSide = getCounterPickListForBans(redSideBans);
         for (String counterPickChamp : counterPicksForRedSide) {
             if (!context.excludedChampions().contains(counterPickChamp)) {
                 freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
 
-        for (String champion : cachedPickRates) {
-            if (!context.excludedChampions().contains(champion)) {
-                freq.merge(champion, 1, Integer::sum);
+        List<String> counterPicksForRedSideOppositePicks = getCounterPickListForOppositePicks(blueSidePicks);
+        for (String counterPickChamp : counterPicksForRedSideOppositePicks) {
+            if (!context.excludedChampions().contains(counterPickChamp)) {
+                freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
 
@@ -201,12 +204,6 @@ public class DraftPredictService {
                                                             List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(context.generalFreq());
-
-        for (String champion : cachedBanRates) {
-            if (!context.excludedChampions().contains(champion)) {
-                freq.merge(champion, 1, Integer::sum);
-            }
-        }
 
         // Late phase: учитываем весь пул чемпионов
         for (String champion : cachedChampionList) {
@@ -234,16 +231,17 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(context.generalFreq());
 
-        List<String> counterPicksForBlueSide = getCounterPickList(blueSideBans);
+        List<String> counterPicksForBlueSide = getCounterPickListForBans(blueSideBans);
         for (String counterPickChamp : counterPicksForBlueSide) {
             if (!context.excludedChampions().contains(counterPickChamp)) {
                 freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
 
-        for (String champion : cachedWinRates) {
-            if (!context.excludedChampions().contains(champion)) {
-                freq.merge(champion, 1, Integer::sum);
+        List<String> counterPicksForBlueSideOppositePicks = getCounterPickListForOppositePicks(redSidePicks);
+        for (String counterPickChamp : counterPicksForBlueSideOppositePicks) {
+            if (!context.excludedChampions().contains(counterPickChamp)) {
+                freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
 
@@ -271,16 +269,17 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(context.generalFreq());
 
-        List<String> counterPicksForRedSide = getCounterPickList(redSideBans);
+        List<String> counterPicksForRedSide = getCounterPickListForBans(redSideBans);
         for (String counterPickChamp : counterPicksForRedSide) {
             if (!context.excludedChampions().contains(counterPickChamp)) {
                 freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
 
-        for (String champion : cachedPickRates) {
-            if (!context.excludedChampions().contains(champion)) {
-                freq.merge(champion, 1, Integer::sum);
+        List<String> counterPicksForRedSideOppositePicks = getCounterPickListForOppositePicks(blueSidePicks);
+        for (String counterPickChamp : counterPicksForRedSideOppositePicks) {
+            if (!context.excludedChampions().contains(counterPickChamp)) {
+                freq.merge(counterPickChamp, 1, Integer::sum);
             }
         }
 
@@ -314,7 +313,7 @@ public class DraftPredictService {
         return frequencyMap;
     }
 
-    private List<String> getCounterPickList(List<String> champions) {
+    private List<String> getCounterPickListForBans(List<String> champions) {
         List<String> allCounterPicks = new ArrayList<>();
         for (String champion : champions) {
             ChampionFlexibility flex = getFlexibility(champion);
@@ -325,7 +324,29 @@ public class DraftPredictService {
             for (String role : validRoles) {
                 String cacheKey = champion + ":" + role;
                 List<String> counters = counterPicksCache.computeIfAbsent(cacheKey,
-                        key -> rankedRequests.getCounterPicks(champion, role, "%")
+                        key -> counterPickRequests.getBestMatchups(champion, role, "%")
+                                .stream()
+                                .map(CounterPick::getChampion2)
+                                .toList()
+                );
+                allCounterPicks.addAll(counters);
+            }
+        }
+        return allCounterPicks;
+    }
+
+    private List<String> getCounterPickListForOppositePicks(List<String> champions) {
+        List<String> allCounterPicks = new ArrayList<>();
+        for (String champion : champions) {
+            ChampionFlexibility flex = getFlexibility(champion);
+            if (flex == null) {
+                continue;
+            }
+            List<String> validRoles = getRoles(flex);
+            for (String role : validRoles) {
+                String cacheKey = champion + ":" + role;
+                List<String> counters = counterPicksCache.computeIfAbsent(cacheKey,
+                        key -> counterPickRequests.getWorstMatchups(champion, role, "%")
                                 .stream()
                                 .map(CounterPick::getChampion2)
                                 .toList()

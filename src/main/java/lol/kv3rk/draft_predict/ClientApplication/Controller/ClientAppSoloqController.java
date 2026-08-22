@@ -108,7 +108,7 @@ public class ClientAppSoloqController {
     public String getCounterPick(Model model) {
         log.info("Entered [/ranked-soloq/counter-pick] endpoint");
         addCommonAttributes(model);
-        model.addAttribute("championCounterPick", clientAppSoloqService.getCounterPick(
+        model.addAttribute("championCounterPick", clientAppSoloqService.getBestMatchUps(
                 "Aatrox", "MIDDLE", "%"
         ));
         return "ranked-soloq-page/stats-pages/counter-pick";
@@ -177,7 +177,7 @@ public class ClientAppSoloqController {
                                              @RequestParam String lane,
                                              @RequestParam String patch) {
         log.info("Entered [/ranked-soloq/get/counter-pick] endpoint");
-        return clientAppSoloqService.getCounterPick(champion1, lane, patch);
+        return clientAppSoloqService.getBestMatchUps(champion1, lane, patch);
     }
 
     @GetMapping("/get/patch-list")

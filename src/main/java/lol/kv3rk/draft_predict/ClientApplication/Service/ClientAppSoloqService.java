@@ -1,5 +1,6 @@
 package lol.kv3rk.draft_predict.ClientApplication.Service;
 
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.CounterPickRequests;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.*;
@@ -25,18 +26,21 @@ public class ClientAppSoloqService {
     private final BansRepository bansRepository;
     private final RiotRequestParameters riotRequestParameters;
     private final RankedRequests rankedRequests;
+    private final CounterPickRequests counterPickRequests;
 
     public ClientAppSoloqService(MatchesRepository matchesRepository,
                                  ParticipantsRepository participantsRepository,
                                  BansRepository bansRepository,
                                  RiotRequestParameters riotRequestParameters,
-                                 RankedRequests rankedRequests) {
+                                 RankedRequests rankedRequests,
+                                 CounterPickRequests counterPickRequests) {
 
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
         this.riotRequestParameters = riotRequestParameters;
         this.rankedRequests = rankedRequests;
+        this.counterPickRequests = counterPickRequests;
     }
 
 
@@ -169,15 +173,15 @@ public class ClientAppSoloqService {
 
     }
 
-    public List<CounterPick> getCounterPick(String champion1,
-                                            String lane,
-                                            String patch) {
+    public List<CounterPick> getBestMatchUps(String champion1,
+                                             String lane,
+                                             String patch) {
         if (patch.equals("All patches")) {
 
-            return rankedRequests.getCounterPicks(champion1, lane, "%");
+            return counterPickRequests.getBestMatchups(champion1, lane, "%");
         } else {
 
-            return rankedRequests.getCounterPicks(champion1, lane, patch);
+            return counterPickRequests.getBestMatchups(champion1, lane, patch);
         }
 
     }
