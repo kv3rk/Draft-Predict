@@ -81,7 +81,7 @@ public class DraftPredictService {
 
     @PostConstruct
     public void initCache() {
-        log.info("Loading draft predict statistics into cache...");
+        log.info("Loading draft predict statistics into cache");
 
         //Early draft phase cache
         cachedDraftPresenceEarlyDraftPhase = draftPresenceRequests.getChampionDraftPresenceEarlyDraftPhase("%")
@@ -106,15 +106,8 @@ public class DraftPredictService {
         //Champion list cache
         cachedChampionList = participantsRepository.getChampionList()
                 .stream().map(Champion::getChampion).toList();
-        log.info("""
-                        Draft predict cache loaded successfully.
-                        Draft presence: {},
-                        Ban rates: {},
-                        Win rates: {},
-                        Pick rates: {},
-                        Champion list: {}
-                        """,
-                cachedDraftPresenceEarlyDraftPhase.size(), cachedBanRatesEarlyDraftPhase.size(), cachedWinRatesEarlyDraftPhase.size(), cachedPickRatesEarlyDraftPhase.size(), cachedChampionList.size());
+
+        log.info("Loaded draft predict statistics into cache");
     }
 
     private DraftContext prepareDraftContext(List<String> blueSideBans,
