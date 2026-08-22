@@ -2,13 +2,11 @@ document.addEventListener('DOMContentLoaded', init);
 
 const BAN_ORDER_BLUE_FIRST = ['blue-1', 'red-1', 'blue-2', 'red-2', 'blue-3', 'red-3'];
 const BAN_ORDER_RED_FIRST = ['red-1', 'blue-1', 'red-2', 'blue-2', 'red-3', 'blue-3'];
-
 const PICK_ORDER_BLUE_FIRST = ['blue-1', 'red-1', 'red-2', 'blue-2', 'blue-3', 'red-3'];
 const PICK_ORDER_RED_FIRST = ['red-1', 'blue-1', 'blue-2', 'red-2', 'red-3', 'blue-3'];
 
 const BAN_ORDER_SECOND_BLUE_FIRST = ['red-4', 'blue-4', 'red-5', 'blue-5'];
 const BAN_ORDER_SECOND_RED_FIRST  = ['blue-4', 'red-4', 'blue-5', 'red-5'];
-
 const PICK_ORDER_SECOND_BLUE_FIRST = ['red-4', 'blue-4', 'blue-5', 'red-5'];
 const PICK_ORDER_SECOND_RED_FIRST  = ['blue-4', 'red-4', 'red-5', 'blue-5'];
 
@@ -148,7 +146,6 @@ function highlightCurrentBan() {
 
 async function fetchBanRecommendations() {
     if (!isBanPhaseActive || isDraftFinished) return;
-
     renderBanLoading();
 
     const bans = typeof window.getBannedChampionsBySide === 'function'
@@ -158,8 +155,13 @@ async function fetchBanRecommendations() {
         ? window.getPickedChampionsBySide()
         : { blueSidePicks: [], redSidePicks: [] };
 
+    // Определяем стадию драфта по номеру текущего слота (1-3 = early, 4-5 = late)
+    const currentSlotId = currentBanOrder[currentBanIndex];
+    const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
+    const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
+
     try {
-        const response = await fetch('/draft-predict/ban/recommendations', {
+        const response = await fetch(`/draft-predict/ban/recommendations/${phaseEndpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
@@ -202,11 +204,10 @@ function renderBanRecommendations(champions) {
 
 function advanceBan(championName) {
     if (!isBanPhaseActive || isDraftFinished) return;
-
     const currentSlotId = currentBanOrder[currentBanIndex];
+
     const side = getCurrentBanSide();
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
-
     if (slot) {
         slot.classList.remove('active-ban');
         slot.classList.add('ban-completed');
@@ -216,7 +217,6 @@ function advanceBan(championName) {
     if (typeof window.addBannedChampion === 'function') window.addBannedChampion(championName, side);
 
     currentBanIndex++;
-
     if (currentBanIndex < currentBanOrder.length) {
         highlightCurrentBan();
         fetchBanRecommendations();
@@ -224,7 +224,6 @@ function advanceBan(championName) {
         isBanPhaseActive = false;
         document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
         renderBanRecommendations([]);
-
         if (currentBanOrder.length === 6) {
             startPickPhase();
         } else {
@@ -275,13 +274,11 @@ function highlightCurrentPick() {
     document.querySelectorAll('.pick-slot').forEach(slot => {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
     });
-
     if (currentPickIndex >= currentPickOrder.length || isDraftFinished) {
         isPickPhaseActive = false;
         renderPickRecommendations([]);
         return;
     }
-
     const currentSlotId = currentPickOrder[currentPickIndex];
     const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
     if (slot) {
@@ -292,16 +289,20 @@ function highlightCurrentPick() {
 
 async function fetchPickRecommendations() {
     if (!isPickPhaseActive || isDraftFinished) return;
-
     renderPickLoading();
 
     const side = getCurrentPickSide();
     const bans = typeof window.getBannedChampionsBySide === 'function' ? window.getBannedChampionsBySide() : { blueSideBans: [], redSideBans: [] };
     const picks = typeof window.getPickedChampionsBySide === 'function' ? window.getPickedChampionsBySide() : { blueSidePicks: [], redSidePicks: [] };
 
+    // Определяем стадию драфта по номеру текущего слота (1-3 = early, 4-5 = late)
+    const currentSlotId = currentPickOrder[currentPickIndex];
+    const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
+    const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
+
     const endpoint = side === 'blue'
-        ? '/draft-predict/blue-side-pick/recommendations'
-        : '/draft-predict/red-side-pick/recommendations';
+        ? `/draft-predict/blue-side-pick/recommendations/${phaseEndpoint}`
+        : `/draft-predict/red-side-pick/recommendations/${phaseEndpoint}`;
 
     try {
         const response = await fetch(endpoint, {
@@ -347,15 +348,13 @@ function renderPickRecommendations(champions) {
 
 function advancePick(championName) {
     if (!isPickPhaseActive || isDraftFinished) return;
-
     const currentSlotId = currentPickOrder[currentPickIndex];
+
     const side = getCurrentPickSide();
     const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
-
     if (slot) {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
         slot.classList.add('pick-completed');
-
         const sideClass = side === 'blue' ? 'blue-picked' : 'red-picked';
         slot.innerHTML = `<span class="pick-champion-name picked ${sideClass}">${championName}</span>`;
     }
@@ -365,7 +364,6 @@ function advancePick(championName) {
     }
 
     currentPickIndex++;
-
     if (currentPickIndex < currentPickOrder.length) {
         highlightCurrentPick();
         fetchPickRecommendations();
@@ -373,7 +371,6 @@ function advancePick(championName) {
         isPickPhaseActive = false;
         document.querySelectorAll('.pick-slot').forEach(s => s.classList.remove('active-pick', 'blue-pick', 'red-pick'));
         renderPickRecommendations([]);
-
         if (currentPickOrder.length === 6) {
             startSecondBanPhase();
         } else {
@@ -383,11 +380,9 @@ function advancePick(championName) {
 }
 
 function finishDraft() {
-    console.log('[Draft] Finished');
     isDraftFinished = true;
     isBanPhaseActive = false;
     isPickPhaseActive = false;
-
     renderBanRecommendations([]);
     renderPickRecommendations([]);
 
