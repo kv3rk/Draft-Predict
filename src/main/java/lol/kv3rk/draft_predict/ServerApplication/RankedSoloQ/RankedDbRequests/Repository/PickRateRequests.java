@@ -1,17 +1,14 @@
-package lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Repository;
+package lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository;
 
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.Champion;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Entity.ParticipantsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
 
-@Repository
-public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity, UUID> {
+public interface PickRateRequests extends JpaRepository<ParticipantsEntity, UUID> {
 
     @Query(
             nativeQuery = true,
@@ -37,20 +34,20 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	tm.total
                     order by
                     	pick_rate desc
-                    limit 10;
+                    limit 30;
                     """
     )
-    List<TopPerformingChampions> getTopPerformingChampionsByPickRate(String patch);
+    List<TopPerformingChampions> getTopPerformingChampionsByPickRateEarlyDraftPhase(String patch);
 
     @Query(
             nativeQuery = true,
             value = """
                     with total_matches as (
-                        select
-                    	    COUNT(*) as total
-                        from
-                    	    matches as m
-                        where m.patch like :patch
+                    select
+                    	COUNT(*) as total
+                    from
+                    	matches as m
+                    where m.patch like :patch
                     )
                     select
                     	p.champion as champion,
@@ -65,25 +62,9 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	champion,
                     	tm.total
                     order by
-                    	win_rate desc
-                    limit 10;
+                    	pick_rate desc
+                    limit 100;
                     """
     )
-    List<TopPerformingChampions> getTopPerformingChampionsByWinRate(String patch);
-
-    @Query(
-            nativeQuery = true,
-            value = """
-                    select
-                    	p.champion as champion
-                    from
-                    	participants p
-                    group by
-                    	champion
-                    order by
-                    	champion;
-                    """
-    )
-    List<Champion> getChampionList();
-
+    List<TopPerformingChampions> getTopPerformingChampionsByPickRateLateDraftPhase(String patch);
 }

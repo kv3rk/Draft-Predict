@@ -1,46 +1,14 @@
-package lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Repository;
+package lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository;
 
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.Champion;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Entity.ParticipantsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
 
-@Repository
-public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity, UUID> {
-
-    @Query(
-            nativeQuery = true,
-            value = """
-                    with total_matches as (
-                    select
-                    	COUNT(*) as total
-                    from
-                    	matches as m
-                    where m.patch like :patch
-                    )
-                    select
-                    	p.champion as champion,
-                    	COUNT(*) * 100.0 / tm.total as pick_rate,
-                    	AVG(case when p.win then 1.0 else 0.0 end) * 100 as win_rate
-                    from
-                    	participants p
-                    join matches m on m.match_id = p.match_id
-                    cross join total_matches tm
-                    where m.patch like :patch
-                    group by
-                    	champion,
-                    	tm.total
-                    order by
-                    	pick_rate desc
-                    limit 10;
-                    """
-    )
-    List<TopPerformingChampions> getTopPerformingChampionsByPickRate(String patch);
+public interface WinRateRequests extends JpaRepository<ParticipantsEntity, UUID> {
 
     @Query(
             nativeQuery = true,
@@ -66,24 +34,37 @@ public interface ParticipantsRepository extends JpaRepository<ParticipantsEntity
                     	tm.total
                     order by
                     	win_rate desc
-                    limit 10;
+                    limit 30;
                     """
     )
-    List<TopPerformingChampions> getTopPerformingChampionsByWinRate(String patch);
+    List<TopPerformingChampions> getTopPerformingChampionsByWinRateEarlyDraftPhase(String patch);
 
     @Query(
             nativeQuery = true,
             value = """
+                    with total_matches as (
+                        select
+                    	    COUNT(*) as total
+                        from
+                    	    matches as m
+                        where m.patch like :patch
+                    )
                     select
-                    	p.champion as champion
+                    	p.champion as champion,
+                    	COUNT(*) * 100.0 / tm.total as pick_rate,
+                    	AVG(case when p.win then 1.0 else 0.0 end) * 100 as win_rate
                     from
                     	participants p
+                    join matches m on m.match_id = p.match_id
+                    cross join total_matches tm
+                    where m.patch like :patch
                     group by
-                    	champion
+                    	champion,
+                    	tm.total
                     order by
-                    	champion;
+                    	win_rate desc
+                    limit 100;
                     """
     )
-    List<Champion> getChampionList();
-
+    List<TopPerformingChampions> getTopPerformingChampionsByWinRateLateDraftPhase(String patch);
 }

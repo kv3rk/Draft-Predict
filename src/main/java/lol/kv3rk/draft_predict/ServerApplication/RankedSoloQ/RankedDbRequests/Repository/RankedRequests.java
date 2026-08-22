@@ -73,7 +73,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     order by
                     	pick_rate desc,
                     	win_rate desc
-                    limit 20;
+                    limit 10;
                     """
     )
     List<BestDuo> getBestDuoChampions(
@@ -150,7 +150,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                     order by
                     	pick_rate desc,
                     	win_rate desc
-                    limit 20;
+                    limit 10;
                     """
     )
     List<BestTrio> getBestTrioChampions(
@@ -241,7 +241,7 @@ public interface RankedRequests extends JpaRepository<MatchesEntity, String> {
                         tm.total_matches
                     order by
                         presence desc
-                    limit 30;
+                    limit 10;
                     """
     )
     List<ChampionPresence> getChampionDraftPresence(

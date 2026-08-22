@@ -6,10 +6,8 @@ import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DT
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.CounterPick;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.CounterPickRequests;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.RankedRequests;
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.*;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Repository.ParticipantsRepository;
@@ -32,19 +30,26 @@ public class DraftPredictService {
 
     private final MatchesRepository matchesRepository;
     private final ParticipantsRepository participantsRepository;
-    private final BansRepository bansRepository;
     private final RankedRequests rankedRequests;
     private final CounterPickRequests counterPickRequests;
+    private final WinRateRequests winRateRequests;
+    private final PickRateRequests pickRateRequests;
+    private final BanRateRequests banRateRequests;
+    private final DraftPresenceRequests draftPresenceRequests;
 
 
     // ================= INITIATE VARIABLES =================
 
 
     // Initiate cache, once at app startup
-    private List<String> cachedDraftPresence;
-    private List<String> cachedBanRates;
-    private List<String> cachedWinRates;
-    private List<String> cachedPickRates;
+    private List<String> cachedDraftPresenceEarlyDraftPhase;
+    private List<String> cachedBanRatesEarlyDraftPhase;
+    private List<String> cachedWinRatesEarlyDraftPhase;
+    private List<String> cachedPickRatesEarlyDraftPhase;
+    private List<String> cachedDraftPresenceLateDraftPhase;
+    private List<String> cachedBanRatesLateDraftPhase;
+    private List<String> cachedWinRatesLateDraftPhase;
+    private List<String> cachedPickRatesLateDraftPhase;
     private List<String> cachedChampionList;
 
     // Caches, populated while app run (safe thread)
@@ -57,28 +62,48 @@ public class DraftPredictService {
 
     public DraftPredictService(MatchesRepository matchesRepository,
                                ParticipantsRepository participantsRepository,
-                               BansRepository bansRepository,
                                RankedRequests rankedRequests,
-                               CounterPickRequests counterPickRequests) {
+                               CounterPickRequests counterPickRequests,
+                               WinRateRequests winRateRequests,
+                               PickRateRequests pickRateRequests,
+                               BanRateRequests banRateRequests,
+                               DraftPresenceRequests draftPresenceRequests) {
 
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
-        this.bansRepository = bansRepository;
         this.rankedRequests = rankedRequests;
         this.counterPickRequests = counterPickRequests;
+        this.winRateRequests = winRateRequests;
+        this.pickRateRequests = pickRateRequests;
+        this.banRateRequests = banRateRequests;
+        this.draftPresenceRequests = draftPresenceRequests;
     }
 
     @PostConstruct
     public void initCache() {
         log.info("Loading draft predict statistics into cache...");
-        cachedDraftPresence = rankedRequests.getChampionDraftPresence("%")
+
+        //Early draft phase cache
+        cachedDraftPresenceEarlyDraftPhase = draftPresenceRequests.getChampionDraftPresenceEarlyDraftPhase("%")
                 .stream().map(ChampionPresence::getChampion).toList();
-        cachedBanRates = bansRepository.getMostBannedChampions("%")
+        cachedBanRatesEarlyDraftPhase = banRateRequests.getMostBannedChampionsEarlyDraftPhase("%")
                 .stream().map(MostBannedChampions::getChampion).toList();
-        cachedWinRates = participantsRepository.getTopPerformingChampionsByWinRate("%")
+        cachedWinRatesEarlyDraftPhase = winRateRequests.getTopPerformingChampionsByWinRateEarlyDraftPhase("%")
                 .stream().map(TopPerformingChampions::getChampion).toList();
-        cachedPickRates = participantsRepository.getTopPerformingChampionsByPickRate("%")
+        cachedPickRatesEarlyDraftPhase = pickRateRequests.getTopPerformingChampionsByPickRateEarlyDraftPhase("%")
                 .stream().map(TopPerformingChampions::getChampion).toList();
+
+        //Late draft phase cache
+        cachedDraftPresenceLateDraftPhase = draftPresenceRequests.getChampionDraftPresenceLateDraftPhase("%")
+                .stream().map(ChampionPresence::getChampion).toList();
+        cachedBanRatesLateDraftPhase = banRateRequests.getMostBannedChampionsLateDraftPhase("%")
+                .stream().map(MostBannedChampions::getChampion).toList();
+        cachedWinRatesLateDraftPhase = winRateRequests.getTopPerformingChampionsByWinRateLateDraftPhase("%")
+                .stream().map(TopPerformingChampions::getChampion).toList();
+        cachedPickRatesLateDraftPhase = pickRateRequests.getTopPerformingChampionsByPickRateLateDraftPhase("%")
+                .stream().map(TopPerformingChampions::getChampion).toList();
+
+        //Champion list cache
         cachedChampionList = participantsRepository.getChampionList()
                 .stream().map(Champion::getChampion).toList();
         log.info("""
@@ -89,7 +114,7 @@ public class DraftPredictService {
                         Pick rates: {},
                         Champion list: {}
                         """,
-                cachedDraftPresence.size(), cachedBanRates.size(), cachedWinRates.size(), cachedPickRates.size(), cachedChampionList.size());
+                cachedDraftPresenceEarlyDraftPhase.size(), cachedBanRatesEarlyDraftPhase.size(), cachedWinRatesEarlyDraftPhase.size(), cachedPickRatesEarlyDraftPhase.size(), cachedChampionList.size());
     }
 
     private DraftContext prepareDraftContext(List<String> blueSideBans,
@@ -305,7 +330,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getBanFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresence, cachedBanRates)
+        Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedBanRatesEarlyDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
@@ -314,7 +339,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getBanFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresence, cachedBanRates)
+        Stream.of(cachedDraftPresenceLateDraftPhase, cachedBanRatesLateDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
@@ -323,7 +348,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getPickFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresence, cachedPickRates, cachedWinRates)
+        Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedPickRatesEarlyDraftPhase, cachedWinRatesEarlyDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
@@ -332,7 +357,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getPickFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresence, cachedPickRates, cachedWinRates)
+        Stream.of(cachedDraftPresenceLateDraftPhase, cachedPickRatesLateDraftPhase, cachedWinRatesLateDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
