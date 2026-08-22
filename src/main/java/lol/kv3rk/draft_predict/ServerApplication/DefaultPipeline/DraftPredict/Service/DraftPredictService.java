@@ -2,6 +2,7 @@ package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.S
 
 import jakarta.annotation.PostConstruct;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DTO.DraftContext;
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.Champion;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
@@ -36,11 +37,9 @@ public class DraftPredictService {
     private final PickRateRequests pickRateRequests;
     private final BanRateRequests banRateRequests;
     private final DraftPresenceRequests draftPresenceRequests;
-
+    private final BestDuoRequests bestDuoRequests;
 
     // ================= INITIATE VARIABLES =================
-
-
     // Initiate cache, once at app startup
     private List<String> cachedDraftPresenceEarlyDraftPhase;
     private List<String> cachedBanRatesEarlyDraftPhase;
@@ -56,6 +55,7 @@ public class DraftPredictService {
     // Caches, populated while app run (safe thread)
     private final Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
     private final Map<String, List<String>> counterPicksCache = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> bestDuoCache = new ConcurrentHashMap<>(); // <-- Новый кэш для дуо
 
     // Locked lanes for every side
     private final Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
@@ -68,8 +68,8 @@ public class DraftPredictService {
                                WinRateRequests winRateRequests,
                                PickRateRequests pickRateRequests,
                                BanRateRequests banRateRequests,
-                               DraftPresenceRequests draftPresenceRequests) {
-
+                               DraftPresenceRequests draftPresenceRequests,
+                               BestDuoRequests bestDuoRequests) {
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.rankedRequests = rankedRequests;
@@ -78,6 +78,7 @@ public class DraftPredictService {
         this.pickRateRequests = pickRateRequests;
         this.banRateRequests = banRateRequests;
         this.draftPresenceRequests = draftPresenceRequests;
+        this.bestDuoRequests = bestDuoRequests;
     }
 
     @PostConstruct
@@ -124,13 +125,10 @@ public class DraftPredictService {
                 blueSidePicks.stream(),
                 redSidePicks.stream()
         ).flatMap(s -> s).collect(Collectors.toSet());
-
         return new DraftContext(excludedChampions);
     }
 
-
     // ================= EARLY PHASE DRAFT =================
-
 
     public List<String> getBanRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
                                                              List<String> redSideBans,
@@ -180,6 +178,12 @@ public class DraftPredictService {
             }
         }
 
+        List<String> bestDuosForBlueSidePicks = getBestDuoList(blueSidePicks);
+        for (String duoChamp : bestDuosForBlueSidePicks) {
+            if (!context.excludedChampions().contains(duoChamp)) {
+                freq.merge(duoChamp, 1, Integer::sum);
+            }
+        }
 
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
@@ -219,6 +223,13 @@ public class DraftPredictService {
             }
         }
 
+        List<String> bestDuosForRedSidePicks = getBestDuoList(redSidePicks);
+        for (String duoChamp : bestDuosForRedSidePicks) {
+            if (!context.excludedChampions().contains(duoChamp)) {
+                freq.merge(duoChamp, 1, Integer::sum);
+            }
+        }
+
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
 
         return freq.entrySet()
@@ -229,9 +240,7 @@ public class DraftPredictService {
                 .toList();
     }
 
-
     // ================= LATE PHASE DRAFT =================
-
 
     public List<String> getBanRecommendationsLatePhaseDraft(List<String> blueSideBans,
                                                             List<String> redSideBans,
@@ -239,7 +248,6 @@ public class DraftPredictService {
                                                             List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(getBanFrequencyMapLatePhaseDraft(context.excludedChampions()));
-
 
         Set<String> allOccupiedPositions = new HashSet<>(blueSideOccupiedPositions);
         allOccupiedPositions.addAll(redSideOccupiedPositions);
@@ -281,6 +289,14 @@ public class DraftPredictService {
             }
         }
 
+        // Интеграция Best Duo для пиков Blue Side
+        List<String> bestDuosForBlueSidePicks = getBestDuoList(blueSidePicks);
+        for (String duoChamp : bestDuosForBlueSidePicks) {
+            if (!context.excludedChampions().contains(duoChamp)) {
+                freq.merge(duoChamp, 1, Integer::sum);
+            }
+        }
+
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
         return freq.entrySet()
@@ -319,6 +335,14 @@ public class DraftPredictService {
             }
         }
 
+        // Интеграция Best Duo для пиков Red Side
+        List<String> bestDuosForRedSidePicks = getBestDuoList(redSidePicks);
+        for (String duoChamp : bestDuosForRedSidePicks) {
+            if (!context.excludedChampions().contains(duoChamp)) {
+                freq.merge(duoChamp, 1, Integer::sum);
+            }
+        }
+
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
 
         return freq.entrySet()
@@ -328,7 +352,6 @@ public class DraftPredictService {
                 .map(Map.Entry::getKey)
                 .toList();
     }
-
 
     // ================= PRIVATE METHODS =================
 
@@ -410,6 +433,21 @@ public class DraftPredictService {
             }
         }
         return allCounterPicks;
+    }
+
+    private List<String> getBestDuoList(List<String> champions) {
+        List<String> allBestDuos = new ArrayList<>();
+        for (String champion : champions) {
+            String cacheKey = "duo:" + champion;
+            List<String> duos = bestDuoCache.computeIfAbsent(cacheKey,
+                    key -> bestDuoRequests.getBestDuoChampionsWithoutRoleConstraint("%", champion)
+                            .stream()
+                            .map(BestDuo::getChampion2)
+                            .toList()
+            );
+            allBestDuos.addAll(duos);
+        }
+        return allBestDuos;
     }
 
     private void updateOccupiedPositions(List<String> blueSidePicks, List<String> redSidePicks) {
