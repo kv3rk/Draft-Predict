@@ -16,6 +16,8 @@ public class RiotRequestParameters {
         return tierParameters;
     }
 
+    //"MASTER", "GRANDMASTER",
+
     public List<String> divisionParameters() {
 
         List<String> divisionParameters = List.of(
