@@ -69,7 +69,7 @@ public interface DraftPresenceRequests extends JpaRepository<MatchesEntity, Stri
                         tm.total_matches
                     order by
                         presence desc
-                    limit 15;
+                    limit 10;
                     """
     )
     List<ChampionPresence> getChampionDraftPresenceEarlyDraftPhase(
@@ -135,7 +135,7 @@ public interface DraftPresenceRequests extends JpaRepository<MatchesEntity, Stri
                         tm.total_matches
                     order by
                         presence desc
-                    limit 30;
+                    limit 15;
                     """
     )
     List<ChampionPresence> getChampionDraftPresenceLateDraftPhase(

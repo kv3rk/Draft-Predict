@@ -34,7 +34,7 @@ public interface WinRateRequests extends JpaRepository<ParticipantsEntity, UUID>
                     	tm.total
                     order by
                     	win_rate desc
-                    limit 15;
+                    limit 10;
                     """
     )
     List<TopPerformingChampions> getTopPerformingChampionsByWinRateEarlyDraftPhase(String patch);
@@ -63,7 +63,7 @@ public interface WinRateRequests extends JpaRepository<ParticipantsEntity, UUID>
                     	tm.total
                     order by
                     	win_rate desc
-                    limit 30;
+                    limit 15;
                     """
     )
     List<TopPerformingChampions> getTopPerformingChampionsByWinRateLateDraftPhase(String patch);

@@ -34,7 +34,7 @@ public interface PickRateRequests extends JpaRepository<ParticipantsEntity, UUID
                     	tm.total
                     order by
                     	pick_rate desc
-                    limit 15;
+                    limit 10;
                     """
     )
     List<TopPerformingChampions> getTopPerformingChampionsByPickRateEarlyDraftPhase(String patch);
@@ -63,7 +63,7 @@ public interface PickRateRequests extends JpaRepository<ParticipantsEntity, UUID
                     	tm.total
                     order by
                     	pick_rate desc
-                    limit 30;
+                    limit 15;
                     """
     )
     List<TopPerformingChampions> getTopPerformingChampionsByPickRateLateDraftPhase(String patch);

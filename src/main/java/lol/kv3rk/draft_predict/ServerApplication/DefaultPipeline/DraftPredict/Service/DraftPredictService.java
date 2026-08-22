@@ -50,6 +50,7 @@ public class DraftPredictService {
     private List<String> cachedBanRatesLateDraftPhase;
     private List<String> cachedWinRatesLateDraftPhase;
     private List<String> cachedPickRatesLateDraftPhase;
+    private List<String> cachedBanRatesByActualPatch;
     private List<String> cachedChampionList;
 
     // Caches, populated while app run (safe thread)
@@ -103,9 +104,11 @@ public class DraftPredictService {
         cachedPickRatesLateDraftPhase = pickRateRequests.getTopPerformingChampionsByPickRateLateDraftPhase("%")
                 .stream().map(TopPerformingChampions::getChampion).toList();
 
-        //Champion list cache
+        //Other cached data
         cachedChampionList = participantsRepository.getChampionList()
                 .stream().map(Champion::getChampion).toList();
+        cachedBanRatesByActualPatch = banRateRequests.getMostBannedChampionsByActualPatch("16.16")
+                .stream().map(MostBannedChampions::getChampion).toList();
 
         log.info("Loaded draft predict statistics into cache");
     }
@@ -331,7 +334,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getBanFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedBanRatesEarlyDraftPhase, cachedChampionList)
+        Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedBanRatesEarlyDraftPhase, cachedChampionList, cachedBanRatesByActualPatch, cachedPickRatesEarlyDraftPhase, cachedWinRatesEarlyDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
@@ -340,7 +343,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getBanFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresenceLateDraftPhase, cachedBanRatesLateDraftPhase, cachedChampionList)
+        Stream.of(cachedDraftPresenceLateDraftPhase, cachedBanRatesLateDraftPhase, cachedChampionList, cachedWinRatesLateDraftPhase, cachedPickRatesLateDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
@@ -349,7 +352,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getPickFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedPickRatesEarlyDraftPhase, cachedWinRatesEarlyDraftPhase, cachedChampionList)
+        Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedPickRatesEarlyDraftPhase, cachedWinRatesEarlyDraftPhase, cachedChampionList, cachedBanRatesEarlyDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
@@ -358,7 +361,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getPickFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresenceLateDraftPhase, cachedPickRatesLateDraftPhase, cachedWinRatesLateDraftPhase, cachedChampionList)
+        Stream.of(cachedDraftPresenceLateDraftPhase, cachedPickRatesLateDraftPhase, cachedWinRatesLateDraftPhase, cachedChampionList, cachedBanRatesLateDraftPhase)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
