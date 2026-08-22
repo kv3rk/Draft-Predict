@@ -29,7 +29,7 @@ public interface BanRateRequests extends JpaRepository<BansEntity, UUID> {
                     where m.patch like :patch and b.champion is not null
                     GROUP BY b.champion, tm.total
                     ORDER BY ban_rate DESC
-                    LIMIT 30;
+                    LIMIT 15;
                     """
     )
     List<MostBannedChampions> getMostBannedChampionsEarlyDraftPhase(
@@ -54,7 +54,7 @@ public interface BanRateRequests extends JpaRepository<BansEntity, UUID> {
                     where m.patch like :patch and b.champion is not null
                     GROUP BY b.champion, tm.total
                     ORDER BY ban_rate DESC
-                    LIMIT 100;
+                    LIMIT 30;
                     """
     )
     List<MostBannedChampions> getMostBannedChampionsLateDraftPhase(
