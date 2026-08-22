@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 
 public record DraftContext(
-        Set<String> excludedChampions,
-        Map<String, Integer> generalFreq
+        Set<String> excludedChampions
 ) {
 }

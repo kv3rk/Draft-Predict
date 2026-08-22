@@ -103,8 +103,8 @@ public class DraftPredictService {
                 blueSidePicks.stream(),
                 redSidePicks.stream()
         ).flatMap(s -> s).collect(Collectors.toSet());
-        Map<String, Integer> generalFreq = getGeneralFrequencyMap(excludedChampions);
-        return new DraftContext(excludedChampions, generalFreq);
+
+        return new DraftContext(excludedChampions);
     }
 
 
@@ -116,7 +116,7 @@ public class DraftPredictService {
                                                              List<String> blueSidePicks,
                                                              List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = new HashMap<>(context.generalFreq());
+        Map<String, Integer> freq = new HashMap<>(getBanFrequencyMapEarlyPhaseDraft(context.excludedChampions()));
 
 
         Set<String> allOccupiedPositions = new HashSet<>(blueSideOccupiedPositions);
@@ -136,7 +136,7 @@ public class DraftPredictService {
                                                                       List<String> blueSidePicks,
                                                                       List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = new HashMap<>(context.generalFreq());
+        Map<String, Integer> freq = new HashMap<>(getPickFrequencyMapEarlyPhaseDraft(context.excludedChampions()));
 
         List<String> counterPicksForBlueSide = getCounterPickListForBans(blueSideBans);
         for (String counterPickChamp : counterPicksForBlueSide) {
@@ -168,7 +168,7 @@ public class DraftPredictService {
                                                                      List<String> blueSidePicks,
                                                                      List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = new HashMap<>(context.generalFreq());
+        Map<String, Integer> freq = new HashMap<>(getPickFrequencyMapEarlyPhaseDraft(context.excludedChampions()));
 
         List<String> counterPicksForRedSide = getCounterPickListForBans(redSideBans);
         for (String counterPickChamp : counterPicksForRedSide) {
@@ -203,7 +203,7 @@ public class DraftPredictService {
                                                             List<String> blueSidePicks,
                                                             List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = new HashMap<>(context.generalFreq());
+        Map<String, Integer> freq = new HashMap<>(getBanFrequencyMapLatePhaseDraft(context.excludedChampions()));
 
         // Late phase: учитываем весь пул чемпионов
         for (String champion : cachedChampionList) {
@@ -229,7 +229,7 @@ public class DraftPredictService {
                                                                      List<String> blueSidePicks,
                                                                      List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = new HashMap<>(context.generalFreq());
+        Map<String, Integer> freq = new HashMap<>(getPickFrequencyMapLatePhaseDraft(context.excludedChampions()));
 
         List<String> counterPicksForBlueSide = getCounterPickListForBans(blueSideBans);
         for (String counterPickChamp : counterPicksForBlueSide) {
@@ -267,7 +267,7 @@ public class DraftPredictService {
                                                                     List<String> blueSidePicks,
                                                                     List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = new HashMap<>(context.generalFreq());
+        Map<String, Integer> freq = new HashMap<>(getPickFrequencyMapLatePhaseDraft(context.excludedChampions()));
 
         List<String> counterPicksForRedSide = getCounterPickListForBans(redSideBans);
         for (String counterPickChamp : counterPicksForRedSide) {
@@ -303,10 +303,36 @@ public class DraftPredictService {
 
     // ================= PRIVATE METHODS =================
 
-
-    private Map<String, Integer> getGeneralFrequencyMap(Set<String> excludedChampions) {
+    private Map<String, Integer> getBanFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresence, cachedBanRates, cachedWinRates, cachedPickRates)
+        Stream.of(cachedDraftPresence, cachedBanRates)
+                .flatMap(List::stream)
+                .filter(champion -> !excludedChampions.contains(champion))
+                .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
+        return frequencyMap;
+    }
+
+    private Map<String, Integer> getBanFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
+        Map<String, Integer> frequencyMap = new HashMap<>();
+        Stream.of(cachedDraftPresence, cachedBanRates)
+                .flatMap(List::stream)
+                .filter(champion -> !excludedChampions.contains(champion))
+                .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
+        return frequencyMap;
+    }
+
+    private Map<String, Integer> getPickFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
+        Map<String, Integer> frequencyMap = new HashMap<>();
+        Stream.of(cachedDraftPresence, cachedPickRates, cachedWinRates)
+                .flatMap(List::stream)
+                .filter(champion -> !excludedChampions.contains(champion))
+                .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
+        return frequencyMap;
+    }
+
+    private Map<String, Integer> getPickFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
+        Map<String, Integer> frequencyMap = new HashMap<>();
+        Stream.of(cachedDraftPresence, cachedPickRates, cachedWinRates)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
