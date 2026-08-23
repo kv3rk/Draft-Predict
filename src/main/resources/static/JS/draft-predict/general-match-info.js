@@ -37,8 +37,8 @@ async function handleApply() {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                patch: patch,
                 season: season,
+                patch: patch,
                 draftType: draftType,
                 firstPickSide: firstPick
             })
