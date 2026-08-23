@@ -1,15 +1,5 @@
 document.addEventListener('DOMContentLoaded', init);
 
-const BAN_ORDER_BLUE_FIRST = ['blue-1', 'red-1', 'blue-2', 'red-2', 'blue-3', 'red-3'];
-const BAN_ORDER_RED_FIRST = ['red-1', 'blue-1', 'red-2', 'blue-2', 'red-3', 'blue-3'];
-const PICK_ORDER_BLUE_FIRST = ['blue-1', 'red-1', 'red-2', 'blue-2', 'blue-3', 'red-3'];
-const PICK_ORDER_RED_FIRST = ['red-1', 'blue-1', 'blue-2', 'red-2', 'red-3', 'blue-3'];
-
-const BAN_ORDER_SECOND_BLUE_FIRST = ['red-4', 'blue-4', 'red-5', 'blue-5'];
-const BAN_ORDER_SECOND_RED_FIRST  = ['blue-4', 'red-4', 'blue-5', 'red-5'];
-const PICK_ORDER_SECOND_BLUE_FIRST = ['red-4', 'blue-4', 'blue-5', 'red-5'];
-const PICK_ORDER_SECOND_RED_FIRST  = ['blue-4', 'red-4', 'red-5', 'blue-5'];
-
 let currentBanIndex = 0;
 let currentBanOrder = [];
 let isBanPhaseActive = false;
@@ -19,6 +9,8 @@ let currentPickOrder = [];
 let isPickPhaseActive = false;
 
 let currentFirstPickSide = 'BLUE';
+let currentDraftType = 'LEGACY';
+let currentDraftConfig = null;
 let isDraftFinished = false;
 
 function init() {
@@ -55,7 +47,7 @@ function init() {
         });
     }
 
-    // Обработчики кликов по рекомендациям (делегирование событий)
+    // Recommendation click handlers (event delegation)
     const banRecContainer = document.getElementById('banRecommendations');
     if (banRecContainer) {
         banRecContainer.addEventListener('click', handleBanRecommendationClick);
@@ -67,7 +59,7 @@ function init() {
     }
 }
 
-// ================= ОБРАБОТЧИКИ КЛИКОВ ПО РЕКОМЕНДАЦИЯМ =================
+// ================= RECOMMENDATION CLICK HANDLERS =================
 function handleBanRecommendationClick(e) {
     const target = e.target.closest('.ban-rec-item');
     if (!target) return;
@@ -90,10 +82,31 @@ function handlePickRecommendationClick(e) {
     }
 }
 
+// ================= DRAFT CONFIG RESOLVER =================
+// Resolve draft config by type from global window registry
+function resolveDraftConfig(draftType) {
+    switch (draftType) {
+        case 'SOLOQ':
+            return window.SoloQDraftConfig || null;
+        case 'LEGACY':
+            return window.LegacyDraftConfig || null;
+        default:
+            console.warn(`[Draft] Unknown draft type: ${draftType}. Falling back to LEGACY.`);
+            return window.LegacyDraftConfig || null;
+    }
+}
+
 // ================= DRAFT SETUP =================
 function handleDraftSetup(event) {
     const detail = event.detail || {};
     currentFirstPickSide = detail.firstPickSide || 'BLUE';
+    currentDraftType = detail.draftType || 'FEARLESS';
+    currentDraftConfig = resolveDraftConfig(currentDraftType);
+
+    if (!currentDraftConfig) {
+        console.error('[Draft] No config found for draft type:', currentDraftType);
+        return;
+    }
 
     currentBanIndex = 0;
     isBanPhaseActive = true;
@@ -119,7 +132,8 @@ function handleDraftSetup(event) {
         select.disabled = false;
     }
 
-    currentBanOrder = currentFirstPickSide === 'BLUE' ? [...BAN_ORDER_BLUE_FIRST] : [...BAN_ORDER_RED_FIRST];
+    // Get first-phase orders from draft-specific config
+    currentBanOrder = currentDraftConfig.getBanOrder(currentFirstPickSide);
 
     highlightCurrentBan();
     fetchBanRecommendations();
@@ -157,12 +171,12 @@ async function fetchBanRecommendations() {
         ? window.getPickedChampionsBySide()
         : { blueSidePicks: [], redSidePicks: [] };
 
-    // Определяем стадию драфта по номеру текущего слота (1-3 = early, 4-5 = late)
+    // Determine draft phase by slot number (1-3 = early, 4-5 = late)
     const currentSlotId = currentBanOrder[currentBanIndex];
     const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
     const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
 
-    // Определяем сайд текущего бана
+    // Determine side of current ban
     const side = getCurrentBanSide();
     const endpoint = side === 'blue'
         ? `/draft-predict/blue-side-ban/recommendations/${phaseEndpoint}`
@@ -236,6 +250,7 @@ function advanceBan(championName) {
         document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
         renderBanRecommendations([]);
 
+        // Decide next phase based on draft config
         if (currentBanOrder.length === 6) {
             startPickPhase();
         } else {
@@ -248,9 +263,7 @@ function startSecondPickPhase() {
     console.log('[Draft] Starting second pick phase');
     currentPickIndex = 0;
     isPickPhaseActive = true;
-    currentPickOrder = currentFirstPickSide === 'BLUE'
-        ? [...PICK_ORDER_SECOND_BLUE_FIRST]
-        : [...PICK_ORDER_SECOND_RED_FIRST];
+    currentPickOrder = currentDraftConfig.getSecondPickOrder(currentFirstPickSide);
     highlightCurrentPick();
     fetchPickRecommendations();
 }
@@ -259,7 +272,7 @@ function startSecondPickPhase() {
 function startPickPhase() {
     currentPickIndex = 0;
     isPickPhaseActive = true;
-    currentPickOrder = currentFirstPickSide === 'BLUE' ? [...PICK_ORDER_BLUE_FIRST] : [...PICK_ORDER_RED_FIRST];
+    currentPickOrder = currentDraftConfig.getPickOrder(currentFirstPickSide);
     highlightCurrentPick();
     fetchPickRecommendations();
 }
@@ -269,9 +282,7 @@ function startSecondBanPhase() {
     currentBanIndex = 0;
     isBanPhaseActive = true;
     isPickPhaseActive = false;
-    currentBanOrder = currentFirstPickSide === 'BLUE'
-        ? [...BAN_ORDER_SECOND_BLUE_FIRST]
-        : [...BAN_ORDER_SECOND_RED_FIRST];
+    currentBanOrder = currentDraftConfig.getSecondBanOrder(currentFirstPickSide);
     highlightCurrentBan();
     fetchBanRecommendations();
 }
@@ -310,7 +321,7 @@ async function fetchPickRecommendations() {
     const bans = typeof window.getBannedChampionsBySide === 'function' ? window.getBannedChampionsBySide() : { blueSideBans: [], redSideBans: [] };
     const picks = typeof window.getPickedChampionsBySide === 'function' ? window.getPickedChampionsBySide() : { blueSidePicks: [], redSidePicks: [] };
 
-    // Определяем стадию драфта по номеру текущего слота (1-3 = early, 4-5 = late)
+    // Determine draft phase by slot number (1-3 = early, 4-5 = late)
     const currentSlotId = currentPickOrder[currentPickIndex];
     const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
     const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';

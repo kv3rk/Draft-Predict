@@ -29,6 +29,7 @@
     <script src="/JS/draft-predict/locking-system.js" defer></script>
     <script src="/JS/draft-predict/banned-champions.js" defer></script>
     <script src="/JS/draft-predict/picked-champions.js" defer></script>
+    <script src="/JS/draft-predict/draft-types/ranked-legacy-draft-predict.js" defer></script>
     <script src="/JS/draft-predict/draft-phase.js" defer></script>
 
 </head>
@@ -86,6 +87,16 @@
                     <select id="patchSelect" class="setup-select">
                         <option value="" disabled selected>Select</option>
                         <option th:each="patch : ${patchList}" th:value="${patch}" th:text="${patch}"></option>
+                    </select>
+                </div>
+
+                <div class="setup-field">
+                    <label for="draftTypeSelect">Draft Type</label>
+                    <select id="draftTypeSelect" class="setup-select">
+                        <option value="" disabled selected>Select</option>
+                        <option value="LEGACY">5v5 Legacy Draft</option>
+<!--                        <option value="SOLOQ">5v5 SoloQ Ranked</option>-->
+<!--                        <option value="FEARLESS">5v5 Fearless Draft</option>-->
                     </select>
                 </div>
 

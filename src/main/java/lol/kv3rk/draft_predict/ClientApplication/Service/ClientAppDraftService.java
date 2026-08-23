@@ -55,6 +55,7 @@ public class ClientAppDraftService {
                 "season", dto.season(),
                 "patch", dto.patch(),
                 "patchFilter", patchFilter,
+                "draftType", dto.draftType(),
                 "firstPickSide", dto.firstPickSide()
         );
     }

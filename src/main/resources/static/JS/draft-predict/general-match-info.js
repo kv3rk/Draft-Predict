@@ -3,10 +3,11 @@ document.addEventListener('DOMContentLoaded', init);
 function init() {
     const patchSelect = document.getElementById('patchSelect');
     const seasonSelect = document.getElementById('seasonSelect');
+    const draftTypeSelect = document.getElementById('draftTypeSelect');
     const firstPickSelect = document.getElementById('firstPickSelect');
     const applyBtn = document.getElementById('applyBtn');
 
-    if (!patchSelect || !seasonSelect || !firstPickSelect || !applyBtn) {
+    if (!patchSelect || !seasonSelect || !draftTypeSelect || !firstPickSelect || !applyBtn) {
         console.error('Required DOM elements not found');
         return;
     }
@@ -17,11 +18,12 @@ function init() {
 async function handleApply() {
     const patch = document.getElementById('patchSelect').value;
     const season = document.getElementById('seasonSelect').value;
+    const draftType = document.getElementById('draftTypeSelect').value;
     const firstPick = document.getElementById('firstPickSelect').value;
     const applyBtn = document.getElementById('applyBtn');
 
-    if (!patch || !season) {
-        alert('Please select both patch and season');
+    if (!patch || !season || !draftType) {
+        alert('Please select patch, season and draft type');
         return;
     }
 
@@ -37,6 +39,7 @@ async function handleApply() {
             body: JSON.stringify({
                 patch: patch,
                 season: season,
+                draftType: draftType,
                 firstPickSide: firstPick
             })
         });
