@@ -86,6 +86,7 @@ public class DraftPredictService {
         this.bestTrioRequests = bestTrioRequests;
     }
 
+    // Load all statistics into cache at application startup
     @PostConstruct
     public void initCache() {
         log.info("Loading draft predict statistics into cache");
@@ -119,6 +120,7 @@ public class DraftPredictService {
         log.info("Loaded draft predict statistics into cache");
     }
 
+    // Prepare draft context with excluded champions and occupied positions
     private DraftContext prepareDraftContext(List<String> blueSideBans,
                                              List<String> redSideBans,
                                              List<String> blueSidePicks,
@@ -135,6 +137,8 @@ public class DraftPredictService {
 
     // ================= EARLY PHASE DRAFT =================
 
+    // Blue side ban recommendations for early phase (bans 1-3)
+    // Integration of counter picks for opposite team bans (red side bans)
     public List<String> getBlueSideBanRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
                                                                      List<String> redSideBans,
                                                                      List<String> blueSidePicks,
@@ -142,7 +146,7 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(getBanFrequencyMapEarlyPhaseDraft(context.excludedChampions()));
 
-        // Интеграция контр-пиков для банов противоположной команды (red side bans)
+        // Integration of counter picks for opposite team bans (red side bans)
         List<String> counterPicksForRedSideBans = getCounterPickListForBans(redSideBans);
         for (String counterPickChamp : counterPicksForRedSideBans) {
             if (!context.excludedChampions().contains(counterPickChamp)) {
@@ -162,6 +166,8 @@ public class DraftPredictService {
                 .toList();
     }
 
+    // Red side ban recommendations for early phase (bans 1-3)
+    // Integration of counter picks for opposite team bans (blue side bans)
     public List<String> getRedSideBanRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
                                                                     List<String> redSideBans,
                                                                     List<String> blueSidePicks,
@@ -169,7 +175,7 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(getBanFrequencyMapEarlyPhaseDraft(context.excludedChampions()));
 
-        // Интеграция контр-пиков для банов противоположной команды (blue side bans)
+        // Integration of counter picks for opposite team bans (blue side bans)
         List<String> counterPicksForBlueSideBans = getCounterPickListForBans(blueSideBans);
         for (String counterPickChamp : counterPicksForBlueSideBans) {
             if (!context.excludedChampions().contains(counterPickChamp)) {
@@ -189,6 +195,7 @@ public class DraftPredictService {
                 .toList();
     }
 
+    // Blue side pick recommendations for early phase (picks 1-3)
     public List<String> getBlueSidePickRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
                                                                       List<String> redSideBans,
                                                                       List<String> blueSidePicks,
@@ -217,6 +224,7 @@ public class DraftPredictService {
             }
         }
 
+        // Integration of best duo for Blue Side picks
         List<String> bestDuosForBlueSidePicks = getBestDuoList(blueSidePicks);
         for (String duoChamp : bestDuosForBlueSidePicks) {
             if (!context.excludedChampions().contains(duoChamp)) {
@@ -224,7 +232,7 @@ public class DraftPredictService {
             }
         }
 
-        // Интеграция Best Trio для пиков Blue Side
+        // Integration of best trio for Blue Side picks
         List<String> bestTriosForBlueSidePicks = getBestTrioList(blueSidePicks);
         for (String trioChamp : bestTriosForBlueSidePicks) {
             if (!context.excludedChampions().contains(trioChamp)) {
@@ -242,6 +250,7 @@ public class DraftPredictService {
                 .toList();
     }
 
+    // Red side pick recommendations for early phase (picks 1-3)
     public List<String> getRedSidePickRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
                                                                      List<String> redSideBans,
                                                                      List<String> blueSidePicks,
@@ -270,6 +279,7 @@ public class DraftPredictService {
             }
         }
 
+        // Integration of best duo for Red Side picks
         List<String> bestDuosForRedSidePicks = getBestDuoList(redSidePicks);
         for (String duoChamp : bestDuosForRedSidePicks) {
             if (!context.excludedChampions().contains(duoChamp)) {
@@ -277,7 +287,7 @@ public class DraftPredictService {
             }
         }
 
-        // Интеграция Best Trio для пиков Red Side
+        // Integration of best trio for Red Side picks
         List<String> bestTriosForRedSidePicks = getBestTrioList(redSidePicks);
         for (String trioChamp : bestTriosForRedSidePicks) {
             if (!context.excludedChampions().contains(trioChamp)) {
@@ -297,6 +307,8 @@ public class DraftPredictService {
 
     // ================= LATE PHASE DRAFT =================
 
+    // Blue side ban recommendations for late phase (bans 4-5)
+    // Integration of best duo and best trio for opposite team picks (red side picks)
     public List<String> getBlueSideBanRecommendationsLatePhaseDraft(List<String> blueSideBans,
                                                                     List<String> redSideBans,
                                                                     List<String> blueSidePicks,
@@ -304,7 +316,7 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(getBanFrequencyMapLatePhaseDraft(context.excludedChampions()));
 
-        // Интеграция Best Duo для пиков противоположной команды (red side picks)
+        // Integration of best duo for opposite team picks (red side picks)
         List<String> bestDuosForRedSidePicks = getBestDuoList(redSidePicks);
         for (String duoChamp : bestDuosForRedSidePicks) {
             if (!context.excludedChampions().contains(duoChamp)) {
@@ -312,7 +324,7 @@ public class DraftPredictService {
             }
         }
 
-        // Интеграция Best Trio для пиков противоположной команды (red side picks)
+        // Integration of best trio for opposite team picks (red side picks)
         List<String> bestTriosForRedSidePicks = getBestTrioList(redSidePicks);
         for (String trioChamp : bestTriosForRedSidePicks) {
             if (!context.excludedChampions().contains(trioChamp)) {
@@ -332,6 +344,8 @@ public class DraftPredictService {
                 .toList();
     }
 
+    // Red side ban recommendations for late phase (bans 4-5)
+    // Integration of best duo and best trio for opposite team picks (blue side picks)
     public List<String> getRedSideBanRecommendationsLatePhaseDraft(List<String> blueSideBans,
                                                                    List<String> redSideBans,
                                                                    List<String> blueSidePicks,
@@ -339,7 +353,7 @@ public class DraftPredictService {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         Map<String, Integer> freq = new HashMap<>(getBanFrequencyMapLatePhaseDraft(context.excludedChampions()));
 
-        // Интеграция Best Duo для пиков противоположной команды (blue side picks)
+        // Integration of best duo for opposite team picks (blue side picks)
         List<String> bestDuosForBlueSidePicks = getBestDuoList(blueSidePicks);
         for (String duoChamp : bestDuosForBlueSidePicks) {
             if (!context.excludedChampions().contains(duoChamp)) {
@@ -347,7 +361,7 @@ public class DraftPredictService {
             }
         }
 
-        // Интеграция Best Trio для пиков противоположной команды (blue side picks)
+        // Integration of best trio for opposite team picks (blue side picks)
         List<String> bestTriosForBlueSidePicks = getBestTrioList(blueSidePicks);
         for (String trioChamp : bestTriosForBlueSidePicks) {
             if (!context.excludedChampions().contains(trioChamp)) {
@@ -367,6 +381,7 @@ public class DraftPredictService {
                 .toList();
     }
 
+    // Blue side pick recommendations for late phase (picks 4-5)
     public List<String> getBlueSidePickRecommendationsLatePhaseDraft(List<String> blueSideBans,
                                                                      List<String> redSideBans,
                                                                      List<String> blueSidePicks,
@@ -395,6 +410,7 @@ public class DraftPredictService {
             }
         }
 
+        // Integration of best duo for Blue Side picks
         List<String> bestDuosForBlueSidePicks = getBestDuoList(blueSidePicks);
         for (String duoChamp : bestDuosForBlueSidePicks) {
             if (!context.excludedChampions().contains(duoChamp)) {
@@ -402,7 +418,7 @@ public class DraftPredictService {
             }
         }
 
-        // Интеграция Best Trio для пиков Blue Side
+        // Integration of best trio for Blue Side picks
         List<String> bestTriosForBlueSidePicks = getBestTrioList(blueSidePicks);
         for (String trioChamp : bestTriosForBlueSidePicks) {
             if (!context.excludedChampions().contains(trioChamp)) {
@@ -420,6 +436,7 @@ public class DraftPredictService {
                 .toList();
     }
 
+    // Red side pick recommendations for late phase (picks 4-5)
     public List<String> getRedSidePickRecommendationsLatePhaseDraft(List<String> blueSideBans,
                                                                     List<String> redSideBans,
                                                                     List<String> blueSidePicks,
@@ -448,6 +465,7 @@ public class DraftPredictService {
             }
         }
 
+        // Integration of best duo for Red Side picks
         List<String> bestDuosForRedSidePicks = getBestDuoList(redSidePicks);
         for (String duoChamp : bestDuosForRedSidePicks) {
             if (!context.excludedChampions().contains(duoChamp)) {
@@ -455,7 +473,7 @@ public class DraftPredictService {
             }
         }
 
-        // Интеграция Best Trio для пиков Red Side
+        // Integration of best trio for Red Side picks
         List<String> bestTriosForRedSidePicks = getBestTrioList(redSidePicks);
         for (String trioChamp : bestTriosForRedSidePicks) {
             if (!context.excludedChampions().contains(trioChamp)) {
@@ -475,6 +493,7 @@ public class DraftPredictService {
 
     // ================= PRIVATE METHODS =================
 
+    // Get best duo champions list for given champions
     private List<String> getBestDuoList(List<String> champions) {
         List<String> allBestDuos = new ArrayList<>();
         for (String champion : champions) {
@@ -490,14 +509,15 @@ public class DraftPredictService {
         return allBestDuos;
     }
 
+    // Get best trio champions list for given champion pairs
     private List<String> getBestTrioList(List<String> champions) {
         List<String> allBestTrios = new ArrayList<>();
-        // Формируем все уникальные пары из списка чемпионов
+        // Generate all unique pairs from champion list
         for (int i = 0; i < champions.size(); i++) {
             for (int j = i + 1; j < champions.size(); j++) {
                 String champ1 = champions.get(i);
                 String champ2 = champions.get(j);
-                // Нормализуем ключ, чтобы (A,B) и (B,A) давали один и тот же ключ кэша
+                // Normalize key so (A,B) and (B,A) produce same cache key
                 String normalizedKey = champ1.compareTo(champ2) <= 0
                         ? "trio:" + champ1 + ":" + champ2
                         : "trio:" + champ2 + ":" + champ1;
@@ -513,6 +533,7 @@ public class DraftPredictService {
         return allBestTrios;
     }
 
+    // Get ban frequency map for early draft phase
     private Map<String, Integer> getBanFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
         Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedBanRatesEarlyDraftPhase, cachedChampionList, cachedBanRatesByActualPatch, cachedPickRatesEarlyDraftPhase, cachedWinRatesEarlyDraftPhase)
@@ -522,6 +543,7 @@ public class DraftPredictService {
         return frequencyMap;
     }
 
+    // Get ban frequency map for late draft phase
     private Map<String, Integer> getBanFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
         Stream.of(cachedDraftPresenceLateDraftPhase, cachedBanRatesLateDraftPhase, cachedChampionList, cachedWinRatesLateDraftPhase, cachedPickRatesLateDraftPhase)
@@ -531,6 +553,7 @@ public class DraftPredictService {
         return frequencyMap;
     }
 
+    // Get pick frequency map for early draft phase
     private Map<String, Integer> getPickFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
         Stream.of(cachedDraftPresenceEarlyDraftPhase, cachedPickRatesEarlyDraftPhase, cachedWinRatesEarlyDraftPhase, cachedChampionList, cachedBanRatesEarlyDraftPhase)
@@ -540,6 +563,7 @@ public class DraftPredictService {
         return frequencyMap;
     }
 
+    // Get pick frequency map for late draft phase
     private Map<String, Integer> getPickFrequencyMapLatePhaseDraft(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
         Stream.of(cachedDraftPresenceLateDraftPhase, cachedPickRatesLateDraftPhase, cachedWinRatesLateDraftPhase, cachedChampionList, cachedBanRatesLateDraftPhase)
@@ -549,6 +573,7 @@ public class DraftPredictService {
         return frequencyMap;
     }
 
+    // Get counter pick list for bans (best matchups)
     private List<String> getCounterPickListForBans(List<String> champions) {
         List<String> allCounterPicks = new ArrayList<>();
         for (String champion : champions) {
@@ -571,6 +596,7 @@ public class DraftPredictService {
         return allCounterPicks;
     }
 
+    // Get counter pick list for opposite picks (worst matchups)
     private List<String> getCounterPickListForOppositePicks(List<String> champions) {
         List<String> allCounterPicks = new ArrayList<>();
         for (String champion : champions) {
@@ -593,6 +619,7 @@ public class DraftPredictService {
         return allCounterPicks;
     }
 
+    // Update occupied positions for both sides
     private void updateOccupiedPositions(List<String> blueSidePicks, List<String> redSidePicks) {
         blueSideOccupiedPositions.clear();
         redSideOccupiedPositions.clear();
@@ -600,6 +627,7 @@ public class DraftPredictService {
         redSideOccupiedPositions.addAll(calculateOccupiedPositions(redSidePicks));
     }
 
+    // Calculate occupied positions based on champion flexibility
     private Set<String> calculateOccupiedPositions(List<String> picks) {
         Map<String, List<String>> champRoles = new HashMap<>();
         for (String champ : picks) {
@@ -630,10 +658,12 @@ public class DraftPredictService {
         return occupied;
     }
 
+    // Get champion flexibility from cache
     private ChampionFlexibility getFlexibility(String champion) {
         return flexibilityCache.computeIfAbsent(champion, c -> rankedRequests.getChampionFlexibility(c));
     }
 
+    // Get valid roles for champion based on flexibility
     private List<String> getRoles(ChampionFlexibility flex) {
         List<String> roles = new ArrayList<>();
         if (flex.getTop().isPresent() && flex.getTop().get() > 0) roles.add("TOP");
@@ -644,6 +674,7 @@ public class DraftPredictService {
         return roles;
     }
 
+    // Check if champion is blocked by occupied positions
     private boolean isChampionBlockedByOccupiedPositions(String champion, Set<String> occupiedPositions) {
         if (occupiedPositions.isEmpty()) {
             return false;
