@@ -29,12 +29,18 @@ public class ClientAppDraftService {
     }
 
     // --- EARLY PHASE DRAFT ---
+    public List<String> getBlueSideBanRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
+                                                                     List<String> redSideBans,
+                                                                     List<String> blueSidePicks,
+                                                                     List<String> redSidePicks) {
+        return draftPredictService.getBlueSideBanRecommendationsEarlyPhaseDraft(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+    }
 
-    public List<String> getBanRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
-                                                             List<String> redSideBans,
-                                                             List<String> blueSidePicks,
-                                                             List<String> redSidePicks) {
-        return draftPredictService.getBanRecommendationsEarlyPhaseDraft(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+    public List<String> getRedSideBanRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
+                                                                    List<String> redSideBans,
+                                                                    List<String> blueSidePicks,
+                                                                    List<String> redSidePicks) {
+        return draftPredictService.getRedSideBanRecommendationsEarlyPhaseDraft(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
 
     public List<String> getBlueSidePickRecommendationsEarlyPhaseDraft(List<String> blueSideBans,
@@ -52,12 +58,18 @@ public class ClientAppDraftService {
     }
 
     // --- LATE PHASE DRAFT ---
+    public List<String> getBlueSideBanRecommendationsLatePhaseDraft(List<String> blueSideBans,
+                                                                    List<String> redSideBans,
+                                                                    List<String> blueSidePicks,
+                                                                    List<String> redSidePicks) {
+        return draftPredictService.getBlueSideBanRecommendationsLatePhaseDraft(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+    }
 
-    public List<String> getBanRecommendationsLatePhaseDraft(List<String> blueSideBans,
-                                                            List<String> redSideBans,
-                                                            List<String> blueSidePicks,
-                                                            List<String> redSidePicks) {
-        return draftPredictService.getBanRecommendationsLatePhaseDraft(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+    public List<String> getRedSideBanRecommendationsLatePhaseDraft(List<String> blueSideBans,
+                                                                   List<String> redSideBans,
+                                                                   List<String> blueSidePicks,
+                                                                   List<String> redSidePicks) {
+        return draftPredictService.getRedSideBanRecommendationsLatePhaseDraft(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
     }
 
     public List<String> getBlueSidePickRecommendationsLatePhaseDraft(List<String> blueSideBans,

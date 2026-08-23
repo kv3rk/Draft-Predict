@@ -50,18 +50,30 @@ public class ClientAppDraftController {
     }
 
     // ================= EARLY PHASE DRAFT ENDPOINTS =================
-
-    @PostMapping("/ban/recommendations/early-phase-draft")
+    @PostMapping("/blue-side-ban/recommendations/early-phase-draft")
     @ResponseBody
-    public ResponseEntity<List<String>> getBanRecommendationsEarlyPhaseDraft(
+    public ResponseEntity<List<String>> getBlueSideBanRecommendationsEarlyPhaseDraft(
             @RequestBody Map<String, List<String>> request) {
-        log.info("Entered [/draft-predict/ban/recommendations/early-phase-draft] endpoint");
+        log.info("Entered [/draft-predict/blue-side-ban/recommendations/early-phase-draft] endpoint");
         List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
         List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
         List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
         List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
+        List<String> recommendations = clientAppDraftService.getBlueSideBanRecommendationsEarlyPhaseDraft(
+                blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+        return ResponseEntity.ok(recommendations);
+    }
 
-        List<String> recommendations = clientAppDraftService.getBanRecommendationsEarlyPhaseDraft(
+    @PostMapping("/red-side-ban/recommendations/early-phase-draft")
+    @ResponseBody
+    public ResponseEntity<List<String>> getRedSideBanRecommendationsEarlyPhaseDraft(
+            @RequestBody Map<String, List<String>> request) {
+        log.info("Entered [/draft-predict/red-side-ban/recommendations/early-phase-draft] endpoint");
+        List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
+        List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
+        List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
+        List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
+        List<String> recommendations = clientAppDraftService.getRedSideBanRecommendationsEarlyPhaseDraft(
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);
     }
@@ -75,7 +87,6 @@ public class ClientAppDraftController {
         List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
         List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
         List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
-
         List<String> recommendations = clientAppDraftService.getBlueSidePickRecommendationsEarlyPhaseDraft(
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);
@@ -90,25 +101,37 @@ public class ClientAppDraftController {
         List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
         List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
         List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
-
         List<String> recommendations = clientAppDraftService.getRedSidePickRecommendationsEarlyPhaseDraft(
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);
     }
 
-    // ================= LATE PHASE DRAFT ENDPOINTS =================
 
-    @PostMapping("/ban/recommendations/late-phase-draft")
+    // ================= LATE PHASE DRAFT ENDPOINTS =================
+    @PostMapping("/blue-side-ban/recommendations/late-phase-draft")
     @ResponseBody
-    public ResponseEntity<List<String>> getBanRecommendationsLatePhaseDraft(
+    public ResponseEntity<List<String>> getBlueSideBanRecommendationsLatePhaseDraft(
             @RequestBody Map<String, List<String>> request) {
-        log.info("Entered [/draft-predict/ban/recommendations/late-phase-draft] endpoint");
+        log.info("Entered [/draft-predict/blue-side-ban/recommendations/late-phase-draft] endpoint");
         List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
         List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
         List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
         List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
+        List<String> recommendations = clientAppDraftService.getBlueSideBanRecommendationsLatePhaseDraft(
+                blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+        return ResponseEntity.ok(recommendations);
+    }
 
-        List<String> recommendations = clientAppDraftService.getBanRecommendationsLatePhaseDraft(
+    @PostMapping("/red-side-ban/recommendations/late-phase-draft")
+    @ResponseBody
+    public ResponseEntity<List<String>> getRedSideBanRecommendationsLatePhaseDraft(
+            @RequestBody Map<String, List<String>> request) {
+        log.info("Entered [/draft-predict/red-side-ban/recommendations/late-phase-draft] endpoint");
+        List<String> blueSideBans = request.getOrDefault("blueSideBans", List.of());
+        List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
+        List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
+        List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
+        List<String> recommendations = clientAppDraftService.getRedSideBanRecommendationsLatePhaseDraft(
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);
     }
@@ -122,7 +145,6 @@ public class ClientAppDraftController {
         List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
         List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
         List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
-
         List<String> recommendations = clientAppDraftService.getBlueSidePickRecommendationsLatePhaseDraft(
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);
@@ -137,7 +159,6 @@ public class ClientAppDraftController {
         List<String> redSideBans = request.getOrDefault("redSideBans", List.of());
         List<String> blueSidePicks = request.getOrDefault("blueSidePicks", List.of());
         List<String> redSidePicks = request.getOrDefault("redSidePicks", List.of());
-
         List<String> recommendations = clientAppDraftService.getRedSidePickRecommendationsLatePhaseDraft(
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);

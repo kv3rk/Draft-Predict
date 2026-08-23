@@ -68,7 +68,6 @@ function init() {
 }
 
 // ================= ОБРАБОТЧИКИ КЛИКОВ ПО РЕКОМЕНДАЦИЯМ =================
-
 function handleBanRecommendationClick(e) {
     const target = e.target.closest('.ban-rec-item');
     if (!target) return;
@@ -92,7 +91,6 @@ function handlePickRecommendationClick(e) {
 }
 
 // ================= DRAFT SETUP =================
-
 function handleDraftSetup(event) {
     const detail = event.detail || {};
     currentFirstPickSide = detail.firstPickSide || 'BLUE';
@@ -122,12 +120,12 @@ function handleDraftSetup(event) {
     }
 
     currentBanOrder = currentFirstPickSide === 'BLUE' ? [...BAN_ORDER_BLUE_FIRST] : [...BAN_ORDER_RED_FIRST];
+
     highlightCurrentBan();
     fetchBanRecommendations();
 }
 
 // ================= BAN PHASE LOGIC =================
-
 function getCurrentBanSide() {
     const currentSlotId = currentBanOrder[currentBanIndex];
     return currentSlotId.startsWith('blue') ? 'blue' : 'red';
@@ -135,10 +133,12 @@ function getCurrentBanSide() {
 
 function highlightCurrentBan() {
     document.querySelectorAll('.ban-slot').forEach(slot => slot.classList.remove('active-ban'));
+
     if (currentBanIndex >= currentBanOrder.length || isDraftFinished) {
         isBanPhaseActive = false;
         return;
     }
+
     const currentSlotId = currentBanOrder[currentBanIndex];
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
     if (slot) slot.classList.add('active-ban');
@@ -146,11 +146,13 @@ function highlightCurrentBan() {
 
 async function fetchBanRecommendations() {
     if (!isBanPhaseActive || isDraftFinished) return;
+
     renderBanLoading();
 
     const bans = typeof window.getBannedChampionsBySide === 'function'
         ? window.getBannedChampionsBySide()
         : { blueSideBans: [], redSideBans: [] };
+
     const picks = typeof window.getPickedChampionsBySide === 'function'
         ? window.getPickedChampionsBySide()
         : { blueSidePicks: [], redSidePicks: [] };
@@ -160,8 +162,14 @@ async function fetchBanRecommendations() {
     const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
     const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
 
+    // Определяем сайд текущего бана
+    const side = getCurrentBanSide();
+    const endpoint = side === 'blue'
+        ? `/draft-predict/blue-side-ban/recommendations/${phaseEndpoint}`
+        : `/draft-predict/red-side-ban/recommendations/${phaseEndpoint}`;
+
     try {
-        const response = await fetch(`/draft-predict/ban/recommendations/${phaseEndpoint}`, {
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
@@ -171,6 +179,7 @@ async function fetchBanRecommendations() {
                 redSidePicks: picks.redSidePicks
             })
         });
+
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         renderBanRecommendations(await response.json());
     } catch (err) {
@@ -204,9 +213,10 @@ function renderBanRecommendations(champions) {
 
 function advanceBan(championName) {
     if (!isBanPhaseActive || isDraftFinished) return;
-    const currentSlotId = currentBanOrder[currentBanIndex];
 
+    const currentSlotId = currentBanOrder[currentBanIndex];
     const side = getCurrentBanSide();
+
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
     if (slot) {
         slot.classList.remove('active-ban');
@@ -217,6 +227,7 @@ function advanceBan(championName) {
     if (typeof window.addBannedChampion === 'function') window.addBannedChampion(championName, side);
 
     currentBanIndex++;
+
     if (currentBanIndex < currentBanOrder.length) {
         highlightCurrentBan();
         fetchBanRecommendations();
@@ -224,6 +235,7 @@ function advanceBan(championName) {
         isBanPhaseActive = false;
         document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
         renderBanRecommendations([]);
+
         if (currentBanOrder.length === 6) {
             startPickPhase();
         } else {
@@ -244,7 +256,6 @@ function startSecondPickPhase() {
 }
 
 // ================= PICK PHASE LOGIC =================
-
 function startPickPhase() {
     currentPickIndex = 0;
     isPickPhaseActive = true;
@@ -274,11 +285,13 @@ function highlightCurrentPick() {
     document.querySelectorAll('.pick-slot').forEach(slot => {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
     });
+
     if (currentPickIndex >= currentPickOrder.length || isDraftFinished) {
         isPickPhaseActive = false;
         renderPickRecommendations([]);
         return;
     }
+
     const currentSlotId = currentPickOrder[currentPickIndex];
     const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
     if (slot) {
@@ -289,9 +302,11 @@ function highlightCurrentPick() {
 
 async function fetchPickRecommendations() {
     if (!isPickPhaseActive || isDraftFinished) return;
+
     renderPickLoading();
 
     const side = getCurrentPickSide();
+
     const bans = typeof window.getBannedChampionsBySide === 'function' ? window.getBannedChampionsBySide() : { blueSideBans: [], redSideBans: [] };
     const picks = typeof window.getPickedChampionsBySide === 'function' ? window.getPickedChampionsBySide() : { blueSidePicks: [], redSidePicks: [] };
 
@@ -315,6 +330,7 @@ async function fetchPickRecommendations() {
                 redSidePicks: picks.redSidePicks
             })
         });
+
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         renderPickRecommendations(await response.json());
     } catch (err) {
@@ -348,9 +364,10 @@ function renderPickRecommendations(champions) {
 
 function advancePick(championName) {
     if (!isPickPhaseActive || isDraftFinished) return;
-    const currentSlotId = currentPickOrder[currentPickIndex];
 
+    const currentSlotId = currentPickOrder[currentPickIndex];
     const side = getCurrentPickSide();
+
     const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
     if (slot) {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
@@ -364,6 +381,7 @@ function advancePick(championName) {
     }
 
     currentPickIndex++;
+
     if (currentPickIndex < currentPickOrder.length) {
         highlightCurrentPick();
         fetchPickRecommendations();
@@ -371,6 +389,7 @@ function advancePick(championName) {
         isPickPhaseActive = false;
         document.querySelectorAll('.pick-slot').forEach(s => s.classList.remove('active-pick', 'blue-pick', 'red-pick'));
         renderPickRecommendations([]);
+
         if (currentPickOrder.length === 6) {
             startSecondBanPhase();
         } else {
@@ -383,6 +402,7 @@ function finishDraft() {
     isDraftFinished = true;
     isBanPhaseActive = false;
     isPickPhaseActive = false;
+
     renderBanRecommendations([]);
     renderPickRecommendations([]);
 
