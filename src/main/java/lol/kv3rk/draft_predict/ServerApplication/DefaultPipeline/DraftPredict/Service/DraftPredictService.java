@@ -2,12 +2,7 @@ package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.S
 
 import jakarta.annotation.PostConstruct;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DTO.DraftContext;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.Champion;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.CounterPick;
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.*;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.*;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
@@ -40,6 +35,10 @@ public class DraftPredictService {
     private final DraftPresenceRequests draftPresenceRequests;
     private final BestDuoRequests bestDuoRequests;
     private final BestTrioRequests bestTrioRequests;
+
+    // Current patch filter (season + ".%") and actual patch for queries
+    private String currentPatchFilter = "%";
+    private String currentPatch = "";
 
     // ================= INITIATE VARIABLES =================
     // Initiate cache, once at app startup
@@ -86,38 +85,59 @@ public class DraftPredictService {
         this.bestTrioRequests = bestTrioRequests;
     }
 
-    // Load all statistics into cache at application startup
+    // Setup match info with patch filter and actual patch, then rebuild cache
+    public void setupMatchInfo(String patchFilter, String patch) {
+        log.info("Setting up match info - PatchFilter: {}, Patch: {}", patchFilter, patch);
+        this.currentPatchFilter = patchFilter;
+        this.currentPatch = patch;
+
+        // Rebuild cache after season/patch selection
+        rebuildCache();
+    }
+
+    // Load champion list into cache at application startup
     @PostConstruct
     public void initCache() {
-        log.info("Loading draft predict statistics into cache");
+        log.info("Loading champion list into cache");
+        cachedChampionList = participantsRepository.getChampionList()
+                .stream().map(Champion::getChampion).toList();
+        log.info("Loaded champion list into cache");
+    }
+
+    // Rebuild all season-dependent caches after match info setup
+    private void rebuildCache() {
+        log.info("Rebuilding draft predict statistics cache for patch filter: {}", currentPatchFilter);
 
         //Early draft phase cache
-        cachedDraftPresenceEarlyDraftPhase = draftPresenceRequests.getChampionDraftPresenceEarlyDraftPhase("%")
+        cachedDraftPresenceEarlyDraftPhase = draftPresenceRequests.getChampionDraftPresenceEarlyDraftPhase(currentPatchFilter)
                 .stream().map(ChampionPresence::getChampion).toList();
-        cachedBanRatesEarlyDraftPhase = banRateRequests.getMostBannedChampionsEarlyDraftPhase("%")
+        cachedBanRatesEarlyDraftPhase = banRateRequests.getMostBannedChampionsEarlyDraftPhase(currentPatchFilter)
                 .stream().map(MostBannedChampions::getChampion).toList();
-        cachedWinRatesEarlyDraftPhase = winRateRequests.getTopPerformingChampionsByWinRateEarlyDraftPhase("%")
+        cachedWinRatesEarlyDraftPhase = winRateRequests.getTopPerformingChampionsByWinRateEarlyDraftPhase(currentPatchFilter)
                 .stream().map(TopPerformingChampions::getChampion).toList();
-        cachedPickRatesEarlyDraftPhase = pickRateRequests.getTopPerformingChampionsByPickRateEarlyDraftPhase("%")
+        cachedPickRatesEarlyDraftPhase = pickRateRequests.getTopPerformingChampionsByPickRateEarlyDraftPhase(currentPatchFilter)
                 .stream().map(TopPerformingChampions::getChampion).toList();
 
         //Late draft phase cache
-        cachedDraftPresenceLateDraftPhase = draftPresenceRequests.getChampionDraftPresenceLateDraftPhase("%")
+        cachedDraftPresenceLateDraftPhase = draftPresenceRequests.getChampionDraftPresenceLateDraftPhase(currentPatchFilter)
                 .stream().map(ChampionPresence::getChampion).toList();
-        cachedBanRatesLateDraftPhase = banRateRequests.getMostBannedChampionsLateDraftPhase("%")
+        cachedBanRatesLateDraftPhase = banRateRequests.getMostBannedChampionsLateDraftPhase(currentPatchFilter)
                 .stream().map(MostBannedChampions::getChampion).toList();
-        cachedWinRatesLateDraftPhase = winRateRequests.getTopPerformingChampionsByWinRateLateDraftPhase("%")
+        cachedWinRatesLateDraftPhase = winRateRequests.getTopPerformingChampionsByWinRateLateDraftPhase(currentPatchFilter)
                 .stream().map(TopPerformingChampions::getChampion).toList();
-        cachedPickRatesLateDraftPhase = pickRateRequests.getTopPerformingChampionsByPickRateLateDraftPhase("%")
+        cachedPickRatesLateDraftPhase = pickRateRequests.getTopPerformingChampionsByPickRateLateDraftPhase(currentPatchFilter)
                 .stream().map(TopPerformingChampions::getChampion).toList();
 
-        //Other cached data
-        cachedChampionList = participantsRepository.getChampionList()
-                .stream().map(Champion::getChampion).toList();
-        cachedBanRatesByActualPatch = banRateRequests.getMostBannedChampionsByActualPatch("16.16")
+        //Actual patch ban rates
+        cachedBanRatesByActualPatch = banRateRequests.getMostBannedChampionsByActualPatch(currentPatch)
                 .stream().map(MostBannedChampions::getChampion).toList();
 
-        log.info("Loaded draft predict statistics into cache");
+        // Clear runtime caches to force reload with new patch filter
+        counterPicksCache.clear();
+        bestDuoCache.clear();
+        bestTrioCache.clear();
+
+        log.info("Rebuilt draft predict statistics cache");
     }
 
     // Prepare draft context with excluded champions and occupied positions
@@ -497,9 +517,9 @@ public class DraftPredictService {
     private List<String> getBestDuoList(List<String> champions) {
         List<String> allBestDuos = new ArrayList<>();
         for (String champion : champions) {
-            String cacheKey = "duo:" + champion;
+            String cacheKey = "duo:" + champion + ":" + currentPatchFilter;
             List<String> duos = bestDuoCache.computeIfAbsent(cacheKey,
-                    key -> bestDuoRequests.getBestDuoChampionsWithoutRoleConstraint("%", champion)
+                    key -> bestDuoRequests.getBestDuoChampionsWithoutRoleConstraint(currentPatchFilter, champion)
                             .stream()
                             .map(BestDuo::getChampion2)
                             .toList()
@@ -519,10 +539,10 @@ public class DraftPredictService {
                 String champ2 = champions.get(j);
                 // Normalize key so (A,B) and (B,A) produce same cache key
                 String normalizedKey = champ1.compareTo(champ2) <= 0
-                        ? "trio:" + champ1 + ":" + champ2
-                        : "trio:" + champ2 + ":" + champ1;
+                        ? "trio:" + champ1 + ":" + champ2 + ":" + currentPatchFilter
+                        : "trio:" + champ2 + ":" + champ1 + ":" + currentPatchFilter;
                 List<String> trios = bestTrioCache.computeIfAbsent(normalizedKey,
-                        key -> bestTrioRequests.getBestTrioChampionsNoRole("%", champ1, champ2)
+                        key -> bestTrioRequests.getBestTrioChampionsNoRole(currentPatchFilter, champ1, champ2)
                                 .stream()
                                 .map(BestTrio::getChampion3)
                                 .toList()
@@ -583,9 +603,9 @@ public class DraftPredictService {
             }
             List<String> validRoles = getRoles(flex);
             for (String role : validRoles) {
-                String cacheKey = champion + ":" + role;
+                String cacheKey = champion + ":" + role + ":" + currentPatchFilter;
                 List<String> counters = counterPicksCache.computeIfAbsent(cacheKey,
-                        key -> counterPickRequests.getBestMatchups(champion, role, "%")
+                        key -> counterPickRequests.getBestMatchups(champion, role, currentPatchFilter)
                                 .stream()
                                 .map(CounterPick::getChampion2)
                                 .toList()
@@ -606,9 +626,9 @@ public class DraftPredictService {
             }
             List<String> validRoles = getRoles(flex);
             for (String role : validRoles) {
-                String cacheKey = champion + ":" + role;
+                String cacheKey = champion + ":" + role + ":" + currentPatchFilter;
                 List<String> counters = counterPicksCache.computeIfAbsent(cacheKey,
-                        key -> counterPickRequests.getWorstMatchups(champion, role, "%")
+                        key -> counterPickRequests.getWorstMatchups(champion, role, currentPatchFilter)
                                 .stream()
                                 .map(CounterPick::getChampion2)
                                 .toList()

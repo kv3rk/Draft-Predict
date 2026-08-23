@@ -2,10 +2,11 @@ document.addEventListener('DOMContentLoaded', init);
 
 function init() {
     const patchSelect = document.getElementById('patchSelect');
+    const seasonSelect = document.getElementById('seasonSelect');
     const firstPickSelect = document.getElementById('firstPickSelect');
     const applyBtn = document.getElementById('applyBtn');
 
-    if (!patchSelect || !firstPickSelect || !applyBtn) {
+    if (!patchSelect || !seasonSelect || !firstPickSelect || !applyBtn) {
         console.error('Required DOM elements not found');
         return;
     }
@@ -15,11 +16,12 @@ function init() {
 
 async function handleApply() {
     const patch = document.getElementById('patchSelect').value;
+    const season = document.getElementById('seasonSelect').value;
     const firstPick = document.getElementById('firstPickSelect').value;
     const applyBtn = document.getElementById('applyBtn');
 
-    if (!patch) {
-        alert('Please select a patch');
+    if (!patch || !season) {
+        alert('Please select both patch and season');
         return;
     }
 
@@ -34,6 +36,7 @@ async function handleApply() {
             },
             body: JSON.stringify({
                 patch: patch,
+                season: season,
                 firstPickSide: firstPick
             })
         });
@@ -43,11 +46,9 @@ async function handleApply() {
         }
 
         const data = await response.json();
-
         document.dispatchEvent(new CustomEvent('draftSetupApplied', {
             detail: data
         }));
-
     } catch (err) {
         console.error('Apply error:', err);
         alert('Failed to apply match setup. Please try again.');

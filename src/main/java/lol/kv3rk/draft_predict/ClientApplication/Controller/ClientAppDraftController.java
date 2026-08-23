@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +25,7 @@ public class ClientAppDraftController {
     private void addCommonAttributes(Model model) {
         model.addAttribute("patchList", clientAppDraftService.getPatchList());
         model.addAttribute("championList", clientAppDraftService.getChampionList());
+        model.addAttribute("seasonList", clientAppDraftService.getSeasonList());
     }
 
     //-------------- Page Endpoints --------------
@@ -41,11 +41,11 @@ public class ClientAppDraftController {
     @ResponseBody
     public ResponseEntity<Map<String, String>> setupMatchInfo(@RequestBody MatchSetupInfoDTO matchSetupInfoDTO) {
         log.info("Entered [/draft-predict/setup/match/info] endpoint");
-        log.info("Patch: {}, FirstPickSide: {}", matchSetupInfoDTO.patch(), matchSetupInfoDTO.firstPickSide());
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("patch", matchSetupInfoDTO.patch());
-        response.put("firstPickSide", matchSetupInfoDTO.firstPickSide());
+        log.info("Season: {}, Patch: {}, FirstPickSide: {}",
+                matchSetupInfoDTO.season(), matchSetupInfoDTO.patch(), matchSetupInfoDTO.firstPickSide());
+
+        // Service already returns complete response with firstPickSide included
+        Map<String, String> response = clientAppDraftService.setupMatchInfo(matchSetupInfoDTO);
         return ResponseEntity.ok(response);
     }
 
@@ -105,7 +105,6 @@ public class ClientAppDraftController {
                 blueSideBans, redSideBans, blueSidePicks, redSidePicks);
         return ResponseEntity.ok(recommendations);
     }
-
 
     // ================= LATE PHASE DRAFT ENDPOINTS =================
     @PostMapping("/blue-side-ban/recommendations/late-phase-draft")

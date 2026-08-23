@@ -76,7 +76,7 @@ public interface BanRateRequests extends JpaRepository<BansEntity, UUID> {
                     JOIN matches m
                         ON m.match_id = b.match_id
                     CROSS JOIN total_matches tm
-                    where m.patch like :patch and b.champion is not null
+                    where m.patch = patch and b.champion is not null
                     GROUP BY b.champion, tm.total
                     ORDER BY ban_rate DESC
                     LIMIT 5;

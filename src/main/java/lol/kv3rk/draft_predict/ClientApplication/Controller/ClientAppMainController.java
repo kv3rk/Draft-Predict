@@ -24,7 +24,7 @@ public class ClientAppMainController {
         model.addAttribute("servers", String.join(", ", clientAppSoloqService.getRiotServerName()));
         model.addAttribute("tiers", String.join(", ", clientAppSoloqService.getTierParameters()));
         model.addAttribute("timeUpdated", clientAppSoloqService.lastTimeUpdate());
-        model.addAttribute("patchList", clientAppSoloqService.getPatchList());
+        model.addAttribute("actualSeason", clientAppSoloqService.getActualSeason());
     }
 
     //-------------- Page Endpoints --------------
