@@ -3,6 +3,7 @@ package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.S
 import jakarta.annotation.PostConstruct;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DTO.DraftContext;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.BestDuo;
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.BestTrio;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.Champion;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionFlexibility;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.ChampionPresence;
@@ -38,6 +39,7 @@ public class DraftPredictService {
     private final BanRateRequests banRateRequests;
     private final DraftPresenceRequests draftPresenceRequests;
     private final BestDuoRequests bestDuoRequests;
+    private final BestTrioRequests bestTrioRequests;
 
     // ================= INITIATE VARIABLES =================
     // Initiate cache, once at app startup
@@ -56,6 +58,7 @@ public class DraftPredictService {
     private final Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
     private final Map<String, List<String>> counterPicksCache = new ConcurrentHashMap<>();
     private final Map<String, List<String>> bestDuoCache = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> bestTrioCache = new ConcurrentHashMap<>();
 
     // Locked lanes for every side
     private final Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
@@ -69,7 +72,8 @@ public class DraftPredictService {
                                PickRateRequests pickRateRequests,
                                BanRateRequests banRateRequests,
                                DraftPresenceRequests draftPresenceRequests,
-                               BestDuoRequests bestDuoRequests) {
+                               BestDuoRequests bestDuoRequests,
+                               BestTrioRequests bestTrioRequests) {
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.rankedRequests = rankedRequests;
@@ -79,6 +83,7 @@ public class DraftPredictService {
         this.banRateRequests = banRateRequests;
         this.draftPresenceRequests = draftPresenceRequests;
         this.bestDuoRequests = bestDuoRequests;
+        this.bestTrioRequests = bestTrioRequests;
     }
 
     @PostConstruct
@@ -219,6 +224,14 @@ public class DraftPredictService {
             }
         }
 
+        // Интеграция Best Trio для пиков Blue Side
+        List<String> bestTriosForBlueSidePicks = getBestTrioList(blueSidePicks);
+        for (String trioChamp : bestTriosForBlueSidePicks) {
+            if (!context.excludedChampions().contains(trioChamp)) {
+                freq.merge(trioChamp, 1, Integer::sum);
+            }
+        }
+
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
         return freq.entrySet()
@@ -264,6 +277,14 @@ public class DraftPredictService {
             }
         }
 
+        // Интеграция Best Trio для пиков Red Side
+        List<String> bestTriosForRedSidePicks = getBestTrioList(redSidePicks);
+        for (String trioChamp : bestTriosForRedSidePicks) {
+            if (!context.excludedChampions().contains(trioChamp)) {
+                freq.merge(trioChamp, 1, Integer::sum);
+            }
+        }
+
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
 
         return freq.entrySet()
@@ -291,6 +312,14 @@ public class DraftPredictService {
             }
         }
 
+        // Интеграция Best Trio для пиков противоположной команды (red side picks)
+        List<String> bestTriosForRedSidePicks = getBestTrioList(redSidePicks);
+        for (String trioChamp : bestTriosForRedSidePicks) {
+            if (!context.excludedChampions().contains(trioChamp)) {
+                freq.merge(trioChamp, 1, Integer::sum);
+            }
+        }
+
         Set<String> allOccupiedPositions = new HashSet<>(blueSideOccupiedPositions);
         allOccupiedPositions.addAll(redSideOccupiedPositions);
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), allOccupiedPositions));
@@ -315,6 +344,14 @@ public class DraftPredictService {
         for (String duoChamp : bestDuosForBlueSidePicks) {
             if (!context.excludedChampions().contains(duoChamp)) {
                 freq.merge(duoChamp, 1, Integer::sum);
+            }
+        }
+
+        // Интеграция Best Trio для пиков противоположной команды (blue side picks)
+        List<String> bestTriosForBlueSidePicks = getBestTrioList(blueSidePicks);
+        for (String trioChamp : bestTriosForBlueSidePicks) {
+            if (!context.excludedChampions().contains(trioChamp)) {
+                freq.merge(trioChamp, 1, Integer::sum);
             }
         }
 
@@ -365,6 +402,14 @@ public class DraftPredictService {
             }
         }
 
+        // Интеграция Best Trio для пиков Blue Side
+        List<String> bestTriosForBlueSidePicks = getBestTrioList(blueSidePicks);
+        for (String trioChamp : bestTriosForBlueSidePicks) {
+            if (!context.excludedChampions().contains(trioChamp)) {
+                freq.merge(trioChamp, 1, Integer::sum);
+            }
+        }
+
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
 
         return freq.entrySet()
@@ -410,6 +455,14 @@ public class DraftPredictService {
             }
         }
 
+        // Интеграция Best Trio для пиков Red Side
+        List<String> bestTriosForRedSidePicks = getBestTrioList(redSidePicks);
+        for (String trioChamp : bestTriosForRedSidePicks) {
+            if (!context.excludedChampions().contains(trioChamp)) {
+                freq.merge(trioChamp, 1, Integer::sum);
+            }
+        }
+
         freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
 
         return freq.entrySet()
@@ -435,6 +488,29 @@ public class DraftPredictService {
             allBestDuos.addAll(duos);
         }
         return allBestDuos;
+    }
+
+    private List<String> getBestTrioList(List<String> champions) {
+        List<String> allBestTrios = new ArrayList<>();
+        // Формируем все уникальные пары из списка чемпионов
+        for (int i = 0; i < champions.size(); i++) {
+            for (int j = i + 1; j < champions.size(); j++) {
+                String champ1 = champions.get(i);
+                String champ2 = champions.get(j);
+                // Нормализуем ключ, чтобы (A,B) и (B,A) давали один и тот же ключ кэша
+                String normalizedKey = champ1.compareTo(champ2) <= 0
+                        ? "trio:" + champ1 + ":" + champ2
+                        : "trio:" + champ2 + ":" + champ1;
+                List<String> trios = bestTrioCache.computeIfAbsent(normalizedKey,
+                        key -> bestTrioRequests.getBestTrioChampionsNoRole("%", champ1, champ2)
+                                .stream()
+                                .map(BestTrio::getChampion3)
+                                .toList()
+                );
+                allBestTrios.addAll(trios);
+            }
+        }
+        return allBestTrios;
     }
 
     private Map<String, Integer> getBanFrequencyMapEarlyPhaseDraft(Set<String> excludedChampions) {
