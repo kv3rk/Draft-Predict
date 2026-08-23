@@ -181,7 +181,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
@@ -210,7 +210,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
@@ -265,7 +265,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
@@ -320,7 +320,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
@@ -359,7 +359,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
@@ -396,7 +396,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
@@ -451,7 +451,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
@@ -506,7 +506,7 @@ public class DraftPredictService {
         return freq.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(3)
+                .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
     }
