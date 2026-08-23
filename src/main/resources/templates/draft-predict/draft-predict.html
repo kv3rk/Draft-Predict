@@ -225,6 +225,15 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Champion Grid (clickable champion tiles) -->
+                <div class="champion-grid" id="championGrid">
+                    <div th:each="champion : ${championList}"
+                         class="champion-grid-item"
+                         th:data-champion="${champion.champion}"
+                         th:text="${champion.champion}">
+                    </div>
+                </div>
             </div>
         </section>
     </main>

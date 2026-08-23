@@ -441,3 +441,105 @@ option.picked-option {
     font-weight: 700;
     text-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
 }
+
+/* ─── Champion Grid ─── */
+.champion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.champion-grid-item {
+    aspect-ratio: 1;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 6px;
+    word-break: break-word;
+    line-height: 1.2;
+    user-select: none;
+}
+
+.champion-grid-item:hover {
+    border-color: var(--accent-gold);
+    background: rgba(201, 169, 110, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(201, 169, 110, 0.15);
+}
+
+.champion-grid-item:active {
+    transform: translateY(0);
+}
+
+.champion-grid-item.unavailable {
+    opacity: 0.25;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.champion-grid-item.unavailable:hover {
+    transform: none;
+    border-color: var(--border-card);
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: none;
+}
+
+/* Scrollbar for champion grid */
+.champion-grid::-webkit-scrollbar {
+    width: 6px;
+}
+.champion-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+.champion-grid::-webkit-scrollbar-thumb {
+    background: rgba(201, 169, 110, 0.3);
+    border-radius: 3px;
+}
+.champion-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(201, 169, 110, 0.5);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .champion-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 6px;
+        padding: 12px;
+        max-height: 360px;
+    }
+    .champion-grid-item {
+        min-height: 56px;
+        font-size: 0.6875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .champion-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 4px;
+        padding: 8px;
+        max-height: 300px;
+    }
+    .champion-grid-item {
+        min-height: 48px;
+        font-size: 0.625rem;
+    }
+}
