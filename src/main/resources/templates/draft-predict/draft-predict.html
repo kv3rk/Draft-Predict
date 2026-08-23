@@ -77,7 +77,6 @@
                 <div class="setup-field">
                     <label for="seasonSelect">Season</label>
                     <select id="seasonSelect" class="setup-select">
-                        <option value="" disabled selected>Select</option>
                         <option th:each="season : ${seasonList}" th:value="${season}" th:text="${season}"></option>
                     </select>
                 </div>
@@ -85,7 +84,6 @@
                 <div class="setup-field">
                     <label for="patchSelect">Patch</label>
                     <select id="patchSelect" class="setup-select">
-                        <option value="" disabled selected>Select</option>
                         <option th:each="patch : ${patchList}" th:value="${patch}" th:text="${patch}"></option>
                     </select>
                 </div>
@@ -93,10 +91,7 @@
                 <div class="setup-field">
                     <label for="draftTypeSelect">Draft Type</label>
                     <select id="draftTypeSelect" class="setup-select">
-                        <option value="" disabled selected>Select</option>
                         <option value="LEGACY">5v5 Legacy Draft</option>
-<!--                        <option value="SOLOQ">5v5 SoloQ Ranked</option>-->
-<!--                        <option value="FEARLESS">5v5 Fearless Draft</option>-->
                     </select>
                 </div>
 
@@ -230,8 +225,10 @@
                 <div class="champion-grid" id="championGrid">
                     <div th:each="champion : ${championList}"
                          class="champion-grid-item"
-                         th:data-champion="${champion.champion}"
-                         th:text="${champion.champion}">
+                         th:data-champion="${champion.champion}">
+                        <img class="champion-grid-img"
+                             alt="Champion"
+                             th:data-champion-name="${champion.champion}" />
                     </div>
                 </div>
             </div>

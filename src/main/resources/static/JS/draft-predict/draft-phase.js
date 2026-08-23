@@ -13,6 +13,9 @@ let currentDraftType = 'LEGACY';
 let currentDraftConfig = null;
 let isDraftFinished = false;
 
+// Global Data Dragon patch version (e.g. "16.16.1")
+let currentDataDragonPatch = '14.10.1';
+
 function init() {
     document.addEventListener('draftSetupApplied', handleDraftSetup);
 
@@ -128,16 +131,15 @@ function handlePickRecommendationClick(e) {
 }
 
 // ================= DRAFT CONFIG RESOLVER =================
-// Resolve draft config by type from global window registry
 function resolveDraftConfig(draftType) {
     switch (draftType) {
         case 'SOLOQ':
             return window.SoloQDraftConfig || null;
         case 'LEGACY':
-            return window.LegacyDraftConfig || null;
+            return window.LegacyDraftConfig || window.FearlessDraftConfig || null;
         default:
             console.warn(`[Draft] Unknown draft type: ${draftType}. Falling back to LEGACY.`);
-            return window.LegacyDraftConfig || null;
+            return window.LegacyDraftConfig || window.FearlessDraftConfig || null;
     }
 }
 
@@ -152,6 +154,10 @@ function handleDraftSetup(event) {
         console.error('[Draft] No config found for draft type:', currentDraftType);
         return;
     }
+
+    // Update Data Dragon patch version
+    const patch = detail.patch || '14.10';
+    currentDataDragonPatch = patch + '.1';
 
     currentBanIndex = 0;
     isBanPhaseActive = true;
@@ -172,19 +178,27 @@ function handleDraftSetup(event) {
         slot.innerHTML = `<span class="pick-number">${pickNum}</span>`;
     });
 
-    // Reset champion grid availability on new draft
+    // === UPDATE CHAMPION GRID IMAGES ===
     document.querySelectorAll('.champion-grid-item').forEach(item => {
         item.classList.remove('unavailable');
+        const champName = item.dataset.champion;
+        const img = item.querySelector('.champion-grid-img');
+        if (img && champName) {
+            img.src = `https://ddragon.leagueoflegends.com/cdn/${currentDataDragonPatch}/img/champion/${champName}.png`;
+            img.alt = champName;
+            img.onerror = function() {
+                console.warn(`Failed to load image for: ${champName}`);
+            };
+        }
     });
+    // ===================================
 
     const select = document.getElementById('championSelect');
     if (select) {
         select.disabled = false;
     }
 
-    // Get first-phase orders from draft-specific config
     currentBanOrder = currentDraftConfig.getBanOrder(currentFirstPickSide);
-
     highlightCurrentBan();
     fetchBanRecommendations();
 }
@@ -210,23 +224,18 @@ function highlightCurrentBan() {
 
 async function fetchBanRecommendations() {
     if (!isBanPhaseActive || isDraftFinished) return;
-
     renderBanLoading();
 
     const bans = typeof window.getBannedChampionsBySide === 'function'
         ? window.getBannedChampionsBySide()
         : { blueSideBans: [], redSideBans: [] };
-
     const picks = typeof window.getPickedChampionsBySide === 'function'
         ? window.getPickedChampionsBySide()
         : { blueSidePicks: [], redSidePicks: [] };
 
-    // Determine draft phase by slot number (1-3 = early, 4-5 = late)
     const currentSlotId = currentBanOrder[currentBanIndex];
     const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
     const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
-
-    // Determine side of current ban
     const side = getCurrentBanSide();
     const endpoint = side === 'blue'
         ? `/draft-predict/blue-side-ban/recommendations/${phaseEndpoint}`
@@ -243,7 +252,6 @@ async function fetchBanRecommendations() {
                 redSidePicks: picks.redSidePicks
             })
         });
-
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         renderBanRecommendations(await response.json());
     } catch (err) {
@@ -269,9 +277,15 @@ function renderBanRecommendations(champions) {
         return;
     }
 
-    container.innerHTML = champions
-        .map(name => `<span class="ban-rec-item" data-champion="${name}">${name}</span>`)
-        .join('');
+    // Render champion images instead of text
+    container.innerHTML = champions.map(name => `
+        <div class="ban-rec-item" data-champion="${name}">
+            <img src="https://ddragon.leagueoflegends.com/cdn/${currentDataDragonPatch}/img/champion/${name}.png"
+                 alt="${name}"
+                 class="rec-champion-img"
+                 onerror="this.style.display='none'" />
+        </div>
+    `).join('');
     container.style.display = 'flex';
 }
 
@@ -280,17 +294,16 @@ function advanceBan(championName) {
 
     const currentSlotId = currentBanOrder[currentBanIndex];
     const side = getCurrentBanSide();
-
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
+
     if (slot) {
         slot.classList.remove('active-ban');
         slot.classList.add('ban-completed');
-        slot.innerHTML = `<span class="ban-champion-name">${championName}</span>`;
+        slot.innerHTML = `<img src="https://ddragon.leagueoflegends.com/cdn/${currentDataDragonPatch}/img/champion/${championName}.png" alt="${championName}" class="slot-champion-img" />`;
     }
 
     if (typeof window.addBannedChampion === 'function') window.addBannedChampion(championName, side);
 
-    // Update champion grid availability after ban
     updateChampionGridAvailability();
 
     currentBanIndex++;
@@ -303,7 +316,6 @@ function advanceBan(championName) {
         document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
         renderBanRecommendations([]);
 
-        // Decide next phase based on draft config
         if (currentBanOrder.length === 6) {
             startPickPhase();
         } else {
@@ -366,19 +378,15 @@ function highlightCurrentPick() {
 
 async function fetchPickRecommendations() {
     if (!isPickPhaseActive || isDraftFinished) return;
-
     renderPickLoading();
 
     const side = getCurrentPickSide();
-
     const bans = typeof window.getBannedChampionsBySide === 'function' ? window.getBannedChampionsBySide() : { blueSideBans: [], redSideBans: [] };
     const picks = typeof window.getPickedChampionsBySide === 'function' ? window.getPickedChampionsBySide() : { blueSidePicks: [], redSidePicks: [] };
 
-    // Determine draft phase by slot number (1-3 = early, 4-5 = late)
     const currentSlotId = currentPickOrder[currentPickIndex];
     const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
     const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
-
     const endpoint = side === 'blue'
         ? `/draft-predict/blue-side-pick/recommendations/${phaseEndpoint}`
         : `/draft-predict/red-side-pick/recommendations/${phaseEndpoint}`;
@@ -394,7 +402,6 @@ async function fetchPickRecommendations() {
                 redSidePicks: picks.redSidePicks
             })
         });
-
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         renderPickRecommendations(await response.json());
     } catch (err) {
@@ -420,9 +427,15 @@ function renderPickRecommendations(champions) {
         return;
     }
 
-    container.innerHTML = champions
-        .map(name => `<span class="pick-rec-item" data-champion="${name}">${name}</span>`)
-        .join('');
+    // Render champion images instead of text
+    container.innerHTML = champions.map(name => `
+        <div class="pick-rec-item" data-champion="${name}">
+            <img src="https://ddragon.leagueoflegends.com/cdn/${currentDataDragonPatch}/img/champion/${name}.png"
+                 alt="${name}"
+                 class="rec-champion-img"
+                 onerror="this.style.display='none'" />
+        </div>
+    `).join('');
     container.style.display = 'flex';
 }
 
@@ -431,20 +444,18 @@ function advancePick(championName) {
 
     const currentSlotId = currentPickOrder[currentPickIndex];
     const side = getCurrentPickSide();
-
     const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
+
     if (slot) {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
         slot.classList.add('pick-completed');
-        const sideClass = side === 'blue' ? 'blue-picked' : 'red-picked';
-        slot.innerHTML = `<span class="pick-champion-name picked ${sideClass}">${championName}</span>`;
+        slot.innerHTML = `<img src="https://ddragon.leagueoflegends.com/cdn/${currentDataDragonPatch}/img/champion/${championName}.png" alt="${championName}" class="slot-champion-img pick-img-${side}" />`;
     }
 
     if (typeof window.addPickedChampion === 'function') {
         window.addPickedChampion(championName, side);
     }
 
-    // Update champion grid availability after pick
     updateChampionGridAvailability();
 
     currentPickIndex++;

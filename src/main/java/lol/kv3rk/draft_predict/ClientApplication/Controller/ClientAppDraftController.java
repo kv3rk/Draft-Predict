@@ -26,6 +26,7 @@ public class ClientAppDraftController {
         model.addAttribute("patchList", clientAppDraftService.getPatchList());
         model.addAttribute("championList", clientAppDraftService.getChampionList());
         model.addAttribute("seasonList", clientAppDraftService.getSeasonList());
+        model.addAttribute("actualPatch", clientAppDraftService.getPatchList().getLast());
     }
 
     //-------------- Page Endpoints --------------
