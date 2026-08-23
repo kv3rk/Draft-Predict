@@ -66,6 +66,8 @@ public interface CounterPickRequests extends JpaRepository<ParticipantsEntity, U
                     	p2.champion
                     having
                     	round(avg(p.gold - p2.gold), 1) <= 0
+                        and round(avg(p.xp - p2.xp), 1) <= 0
+                        and round(avg(p.farm - p2.farm), 1) <= 0
                     order by
                     	gold asc,
                     	xp asc,
@@ -132,6 +134,8 @@ public interface CounterPickRequests extends JpaRepository<ParticipantsEntity, U
                     	p2.champion
                     having
                     	round(avg(p.gold - p2.gold), 1) >= 0
+                        and round(avg(p.xp - p2.xp), 1) >= 0
+                        and round(avg(p.farm - p2.farm), 1) >= 0
                     order by
                     	gold desc,
                     	xp desc,

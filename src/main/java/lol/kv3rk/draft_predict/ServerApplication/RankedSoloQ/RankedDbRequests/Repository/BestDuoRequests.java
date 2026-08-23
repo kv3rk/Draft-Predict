@@ -68,9 +68,10 @@ public interface BestDuoRequests extends JpaRepository<ParticipantsEntity, UUID>
                     cross join avg_pick
                     where
                     	pick_rate > avg_pick
+                        and win_rate > 50.0
                     order by
-                    	pick_rate desc,
-                    	win_rate desc;
+                    	win_rate desc,
+                    	pick_rate desc;
                     """
     )
     List<BestDuo> getBestDuoChampionsWithoutRoleConstraint(
