@@ -49,8 +49,13 @@ public class DraftPredictService {
     private final Map<String, List<String>> bestDuoCache = new ConcurrentHashMap<>();
     private final Map<String, List<String>> bestTrioCache = new ConcurrentHashMap<>();
 
+    // Hard occupied - железобетонно занятые позиции
     private final Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
     private final Set<String> redSideOccupiedPositions = ConcurrentHashMap.newKeySet();
+
+    // Soft occupied - вероятные позиции для флекс-чемпионов
+    private final Set<String> blueSideSoftOccupiedPositions = ConcurrentHashMap.newKeySet();
+    private final Set<String> redSideSoftOccupiedPositions = ConcurrentHashMap.newKeySet();
 
     public DraftPredictService(MatchesRepository matchesRepository,
                                ParticipantsRepository participantsRepository,
@@ -91,7 +96,6 @@ public class DraftPredictService {
 
     private void rebuildCache() {
         log.info("Rebuilding draft predict statistics cache for patch filter: {}", currentPatchFilter);
-
         cachedDraftPresence = draftPresenceRequests.getChampionDraftPresence(currentPatchFilter)
                 .stream().map(ChampionPresence::getChampion).toList();
         cachedBanRates = banRateRequests.getMostBannedChampions(currentPatchFilter)
@@ -100,7 +104,6 @@ public class DraftPredictService {
                 .stream().map(TopPerformingChampions::getChampion).toList();
         cachedPickRates = pickRateRequests.getTopPerformingChampionsByPickRate(currentPatchFilter)
                 .stream().map(TopPerformingChampions::getChampion).toList();
-
         cachedBanRatesByActualPatch = banRateRequests.getMostBannedChampionsByActualPatch(currentPatch)
                 .stream().map(MostBannedChampions::getChampion).toList();
         cachedDraftPresenceByActualPatch = draftPresenceRequests.getChampionDraftPresenceByActualPatch(currentPatch)
@@ -109,7 +112,6 @@ public class DraftPredictService {
                 .stream().map(TopPerformingChampions::getChampion).toList();
         cachedWinRatesByActualPatch = winRateRequests.getTopPerformingChampionsByWinRateByActualPatch(currentPatch)
                 .stream().map(TopPerformingChampions::getChampion).toList();
-
         counterPicksCache.clear();
         bestDuoCache.clear();
         bestTrioCache.clear();
@@ -137,36 +139,27 @@ public class DraftPredictService {
                                                       List<String> blueSidePicks,
                                                       List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = new HashMap<>();
 
-        List<String> bestDuos = getBestDuoList(redSidePicks);
-        for (String c : bestDuos) {
-            if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
+        Set<String> allHardOccupied = new HashSet<>(blueSideOccupiedPositions);
+        allHardOccupied.addAll(redSideOccupiedPositions);
+
+        Set<String> allSoftOccupied = new HashSet<>(blueSideSoftOccupiedPositions);
+        allSoftOccupied.addAll(redSideSoftOccupiedPositions);
+
+        // Вариант B: генерируем рекомендации для разных сценариев
+        Set<String> recommendations = new LinkedHashSet<>();
+
+        // Сценарий 1: базовый (без учёта soft occupied)
+        recommendations.addAll(generateBanRecommendations(context, allHardOccupied, redSidePicks));
+
+        // Сценарий 2: для каждой soft-роли генерируем отдельно
+        for (String softRole : allSoftOccupied) {
+            Set<String> scenarioOccupied = new HashSet<>(allHardOccupied);
+            scenarioOccupied.add(softRole);
+            recommendations.addAll(generateBanRecommendations(context, scenarioOccupied, redSidePicks));
         }
-        List<String> bestTrios = getBestTrioList(redSidePicks);
-        for (String c : bestTrios) {
-            if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
-        }
 
-        int totalBans = blueSideBans.size() + redSideBans.size();
-        Map<String, Integer> phaseFreq = Map.of();
-        if (totalBans < 6) {
-            phaseFreq = getEarlyPhaseBanRecommendations(context.excludedChampions(), redSideBans);
-        }
-
-        for (Map.Entry<String, Integer> entry : phaseFreq.entrySet()) {
-            freq.merge(entry.getKey(), entry.getValue(), Integer::sum);
-        }
-
-        Set<String> allOccupied = new HashSet<>(blueSideOccupiedPositions);
-        allOccupied.addAll(redSideOccupiedPositions);
-        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), allOccupied));
-
-        return freq.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(5)
-                .map(Map.Entry::getKey)
-                .toList();
+        return recommendations.stream().limit(5).toList();
     }
 
     public List<String> getRedSideBanRecommendations(List<String> blueSideBans,
@@ -174,30 +167,104 @@ public class DraftPredictService {
                                                      List<String> blueSidePicks,
                                                      List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+
+        Set<String> allHardOccupied = new HashSet<>(blueSideOccupiedPositions);
+        allHardOccupied.addAll(redSideOccupiedPositions);
+
+        Set<String> allSoftOccupied = new HashSet<>(blueSideSoftOccupiedPositions);
+        allSoftOccupied.addAll(redSideSoftOccupiedPositions);
+
+        // Вариант B: генерируем рекомендации для разных сценариев
+        Set<String> recommendations = new LinkedHashSet<>();
+
+        // Сценарий 1: базовый (без учёта soft occupied)
+        recommendations.addAll(generateBanRecommendations(context, allHardOccupied, blueSidePicks));
+
+        // Сценарий 2: для каждой soft-роли генерируем отдельно
+        for (String softRole : allSoftOccupied) {
+            Set<String> scenarioOccupied = new HashSet<>(allHardOccupied);
+            scenarioOccupied.add(softRole);
+            recommendations.addAll(generateBanRecommendations(context, scenarioOccupied, blueSidePicks));
+        }
+
+        return recommendations.stream().limit(5).toList();
+    }
+
+    public List<String> getBlueSidePickRecommendations(List<String> blueSideBans,
+                                                       List<String> redSideBans,
+                                                       List<String> blueSidePicks,
+                                                       List<String> redSidePicks) {
+        DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+
+        // Вариант B: генерируем рекомендации для разных сценариев
+        Set<String> recommendations = new LinkedHashSet<>();
+
+        // Сценарий 1: базовый (без учёта soft occupied)
+        recommendations.addAll(generateBlueSidePickRecommendations(context, blueSideOccupiedPositions,
+                blueSidePicks, redSidePicks, blueSideBans, redSideBans));
+
+        // Сценарий 2: для каждой soft-роли генерируем отдельно
+        for (String softRole : blueSideSoftOccupiedPositions) {
+            Set<String> scenarioOccupied = new HashSet<>(blueSideOccupiedPositions);
+            scenarioOccupied.add(softRole);
+            recommendations.addAll(generateBlueSidePickRecommendations(context, scenarioOccupied,
+                    blueSidePicks, redSidePicks, blueSideBans, redSideBans));
+        }
+
+        return recommendations.stream().limit(5).toList();
+    }
+
+    public List<String> getRedSidePickRecommendations(List<String> blueSideBans,
+                                                      List<String> redSideBans,
+                                                      List<String> blueSidePicks,
+                                                      List<String> redSidePicks) {
+        DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+
+        // Вариант B: генерируем рекомендации для разных сценариев
+        Set<String> recommendations = new LinkedHashSet<>();
+
+        // Сценарий 1: базовый (без учёта soft occupied)
+        recommendations.addAll(generateRedSidePickRecommendations(context, redSideOccupiedPositions,
+                blueSidePicks, redSidePicks, blueSideBans, redSideBans));
+
+        // Сценарий 2: для каждой soft-роли генерируем отдельно
+        for (String softRole : redSideSoftOccupiedPositions) {
+            Set<String> scenarioOccupied = new HashSet<>(redSideOccupiedPositions);
+            scenarioOccupied.add(softRole);
+            recommendations.addAll(generateRedSidePickRecommendations(context, scenarioOccupied,
+                    blueSidePicks, redSidePicks, blueSideBans, redSideBans));
+        }
+
+        return recommendations.stream().limit(5).toList();
+    }
+
+    // ================= PRIVATE GENERATION METHODS (Вариант B) =================
+
+    private List<String> generateBanRecommendations(DraftContext context, Set<String> occupiedPositions,
+                                                    List<String> opponentPicks) {
         Map<String, Integer> freq = new HashMap<>();
 
-        List<String> bestDuos = getBestDuoList(blueSidePicks);
+        List<String> bestDuos = getBestDuoList(opponentPicks);
         for (String c : bestDuos) {
             if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
         }
-        List<String> bestTrios = getBestTrioList(blueSidePicks);
+
+        List<String> bestTrios = getBestTrioList(opponentPicks);
         for (String c : bestTrios) {
             if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
         }
 
-        int totalBans = blueSideBans.size() + redSideBans.size();
+        int totalBans = context.excludedChampions().size(); // упрощённо
         Map<String, Integer> phaseFreq = Map.of();
         if (totalBans < 6) {
-            phaseFreq = getEarlyPhaseBanRecommendations(context.excludedChampions(), blueSideBans);
+            phaseFreq = getEarlyPhaseBanRecommendations(context.excludedChampions(), List.of());
         }
 
         for (Map.Entry<String, Integer> entry : phaseFreq.entrySet()) {
             freq.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
 
-        Set<String> allOccupied = new HashSet<>(blueSideOccupiedPositions);
-        allOccupied.addAll(redSideOccupiedPositions);
-        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), allOccupied));
+        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), occupiedPositions));
 
         return freq.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
@@ -206,17 +273,16 @@ public class DraftPredictService {
                 .toList();
     }
 
-    public List<String> getBlueSidePickRecommendations(List<String> blueSideBans,
-                                                       List<String> redSideBans,
-                                                       List<String> blueSidePicks,
-                                                       List<String> redSidePicks) {
-        DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+    private List<String> generateBlueSidePickRecommendations(DraftContext context, Set<String> occupiedPositions,
+                                                             List<String> blueSidePicks, List<String> redSidePicks,
+                                                             List<String> blueSideBans, List<String> redSideBans) {
         Map<String, Integer> freq = new HashMap<>();
 
         List<String> bestDuos = getBestDuoList(blueSidePicks);
         for (String c : bestDuos) {
             if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
         }
+
         List<String> bestTrios = getBestTrioList(blueSidePicks);
         for (String c : bestTrios) {
             if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
@@ -239,7 +305,7 @@ public class DraftPredictService {
             freq.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
 
-        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), blueSideOccupiedPositions));
+        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), occupiedPositions));
 
         return freq.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
@@ -248,17 +314,16 @@ public class DraftPredictService {
                 .toList();
     }
 
-    public List<String> getRedSidePickRecommendations(List<String> blueSideBans,
-                                                      List<String> redSideBans,
-                                                      List<String> blueSidePicks,
-                                                      List<String> redSidePicks) {
-        DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
+    private List<String> generateRedSidePickRecommendations(DraftContext context, Set<String> occupiedPositions,
+                                                            List<String> blueSidePicks, List<String> redSidePicks,
+                                                            List<String> blueSideBans, List<String> redSideBans) {
         Map<String, Integer> freq = new HashMap<>();
 
         List<String> bestDuos = getBestDuoList(redSidePicks);
         for (String c : bestDuos) {
             if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
         }
+
         List<String> bestTrios = getBestTrioList(redSidePicks);
         for (String c : bestTrios) {
             if (!context.excludedChampions().contains(c)) freq.merge(c, 1, Integer::sum);
@@ -281,7 +346,7 @@ public class DraftPredictService {
             freq.merge(entry.getKey(), entry.getValue(), Integer::sum);
         }
 
-        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), redSideOccupiedPositions));
+        freq.entrySet().removeIf(entry -> isChampionBlockedByOccupiedPositions(entry.getKey(), occupiedPositions));
 
         return freq.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
@@ -294,12 +359,10 @@ public class DraftPredictService {
 
     private Map<String, Integer> getFirstPickRecommendation(Set<String> excludedChampions, List<String> blueSideBans, List<String> redSideBans) {
         Map<String, Integer> freq = new HashMap<>(getGeneralFrequencyMap(excludedChampions));
-
         List<String> counterPicksBlueSideBans = getCounterPickListForBans(blueSideBans);
         for (String c : counterPicksBlueSideBans) {
             if (!excludedChampions.contains(c)) freq.merge(c, 1, Integer::sum);
         }
-
         List<String> counterPicksRedSideBans = getCounterPickListForBans(redSideBans);
         for (String c : counterPicksRedSideBans) {
             if (!excludedChampions.contains(c)) freq.merge(c, 1, Integer::sum);
@@ -309,13 +372,10 @@ public class DraftPredictService {
 
     private Map<String, Integer> getEarlyPhaseBanRecommendations(Set<String> excludedChampions, List<String> banList) {
         Map<String, Integer> freq = new HashMap<>(getGeneralFrequencyMap(excludedChampions));
-
-        // Counter picks for opposite team bans (red side bans)
         List<String> counterPicks = getCounterPickListForBans(banList);
         for (String c : counterPicks) {
             if (!excludedChampions.contains(c)) freq.merge(c, 1, Integer::sum);
         }
-
         return freq;
     }
 
@@ -367,7 +427,6 @@ public class DraftPredictService {
         for (String champion : champions) {
             ChampionFlexibility flex = getFlexibility(champion);
             if (flex == null) continue;
-
             List<String> validRoles = getRoles(flex);
             for (String role : validRoles) {
                 String cacheKey = champion + ":" + role + ":" + currentPatchFilter;
@@ -386,7 +445,6 @@ public class DraftPredictService {
         for (String champion : champions) {
             ChampionFlexibility flex = getFlexibility(champion);
             if (flex == null) continue;
-
             List<String> validRoles = getRoles(flex);
             for (String role : validRoles) {
                 String cacheKey = champion + ":" + role + ":" + currentPatchFilter;
@@ -401,73 +459,58 @@ public class DraftPredictService {
     private void updateOccupiedPositions(List<String> blueSidePicks, List<String> redSidePicks) {
         blueSideOccupiedPositions.clear();
         redSideOccupiedPositions.clear();
-        blueSideOccupiedPositions.addAll(calculateOccupiedPositions(blueSidePicks));
-        redSideOccupiedPositions.addAll(calculateOccupiedPositions(redSidePicks));
+        blueSideSoftOccupiedPositions.clear();
+        redSideSoftOccupiedPositions.clear();
+
+        OccupiedPositionsResult blueResult = calculateOccupiedPositions(blueSidePicks);
+        OccupiedPositionsResult redResult = calculateOccupiedPositions(redSidePicks);
+
+        blueSideOccupiedPositions.addAll(blueResult.hard());
+        redSideOccupiedPositions.addAll(redResult.hard());
+        blueSideSoftOccupiedPositions.addAll(blueResult.soft());
+        redSideSoftOccupiedPositions.addAll(redResult.soft());
     }
 
-    private Set<String> calculateOccupiedPositions(List<String> picks) {
-        Map<String, List<String>> champRoles = new HashMap<>();
-        Map<String, String> primaryRole = new HashMap<>(); // Основная роль чемпиона
+    private record OccupiedPositionsResult(Set<String> hard, Set<String> soft) {}
 
+    private OccupiedPositionsResult calculateOccupiedPositions(List<String> picks) {
+        Map<String, List<String>> champRoles = new HashMap<>();
         for (String champ : picks) {
             ChampionFlexibility flex = getFlexibility(champ);
             if (flex != null) {
                 List<String> roles = getRoles(flex);
-                if (!roles.isEmpty()) {
-                    champRoles.put(champ, roles);
-                    // Выбираем роль с наибольшим процентом игры
-                    String primary = roles.stream()
-                            .max(Comparator.comparingDouble(role -> getRolePercentage(flex, role)))
-                            .orElse(null);
-                    if (primary != null) primaryRole.put(champ, primary);
-                }
+                if (!roles.isEmpty()) champRoles.put(champ, roles);
             }
         }
 
-        Set<String> occupied = new HashSet<>();
-        Set<String> likelyOccupied = new HashSet<>(); // Вероятно занятые
-
-        // Сначала строгое определение (как было)
+        // Уровень 1: железобетонные роли (constraint propagation)
+        Set<String> hard = new HashSet<>();
         boolean changed = true;
         while (changed) {
             changed = false;
-            for (Map.Entry<String, List<String>> entry : champRoles.entrySet()) {
-                List<String> freeRoles = entry.getValue().stream()
-                        .filter(role -> !occupied.contains(role))
+            for (List<String> roles : champRoles.values()) {
+                List<String> freeRoles = roles.stream()
+                        .filter(role -> !hard.contains(role))
                         .toList();
                 if (freeRoles.size() == 1) {
-                    String forcedRole = freeRoles.get(0);
-                    if (occupied.add(forcedRole)) changed = true;
+                    if (hard.add(freeRoles.get(0))) changed = true;
                 }
             }
         }
 
-        // Затем добавляем вероятные роли для флекс-чемпионов
-        for (Map.Entry<String, List<String>> entry : champRoles.entrySet()) {
-            String champ = entry.getKey();
-            List<String> roles = entry.getValue();
-            if (roles.size() > 1) {
-                String primary = primaryRole.get(champ);
-                if (primary != null && !occupied.contains(primary)) {
-                    likelyOccupied.add(primary);
-                }
+        // Уровень 2: флекс-роли (все свободные роли чемпионов с >1 свободной ролью)
+        Set<String> soft = new HashSet<>();
+        for (List<String> roles : champRoles.values()) {
+            List<String> freeRoles = roles.stream()
+                    .filter(role -> !hard.contains(role))
+                    .toList();
+            // Если у чемпиона больше 1 свободной роли — это флекс
+            if (freeRoles.size() > 1) {
+                soft.addAll(freeRoles);
             }
         }
 
-        // Объединяем (опционально)
-        occupied.addAll(likelyOccupied);
-        return occupied;
-    }
-
-    private double getRolePercentage(ChampionFlexibility flex, String role) {
-        return switch (role) {
-            case "TOP" -> flex.getTop().orElse(0.0);
-            case "JUNGLE" -> flex.getJungle().orElse(0.0);
-            case "MIDDLE" -> flex.getMiddle().orElse(0.0);
-            case "BOTTOM" -> flex.getBottom().orElse(0.0);
-            case "UTILITY" -> flex.getUtility().orElse(0.0);
-            default -> 0.0;
-        };
+        return new OccupiedPositionsResult(hard, soft);
     }
 
     private ChampionFlexibility getFlexibility(String champion) {
@@ -486,13 +529,10 @@ public class DraftPredictService {
 
     private boolean isChampionBlockedByOccupiedPositions(String champion, Set<String> occupiedPositions) {
         if (occupiedPositions.isEmpty()) return false;
-
         ChampionFlexibility flex = getFlexibility(champion);
         if (flex == null) return false;
-
         List<String> champRoles = getRoles(flex);
         if (champRoles.isEmpty()) return false;
-
         return occupiedPositions.containsAll(champRoles);
     }
 }
