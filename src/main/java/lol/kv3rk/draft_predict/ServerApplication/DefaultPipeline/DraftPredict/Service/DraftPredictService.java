@@ -11,12 +11,7 @@ import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Part
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -412,19 +407,32 @@ public class DraftPredictService {
 
     private Set<String> calculateOccupiedPositions(List<String> picks) {
         Map<String, List<String>> champRoles = new HashMap<>();
+        Map<String, String> primaryRole = new HashMap<>(); // Основная роль чемпиона
+
         for (String champ : picks) {
             ChampionFlexibility flex = getFlexibility(champ);
             if (flex != null) {
                 List<String> roles = getRoles(flex);
-                if (!roles.isEmpty()) champRoles.put(champ, roles);
+                if (!roles.isEmpty()) {
+                    champRoles.put(champ, roles);
+                    // Выбираем роль с наибольшим процентом игры
+                    String primary = roles.stream()
+                            .max(Comparator.comparingDouble(role -> getRolePercentage(flex, role)))
+                            .orElse(null);
+                    if (primary != null) primaryRole.put(champ, primary);
+                }
             }
         }
+
         Set<String> occupied = new HashSet<>();
+        Set<String> likelyOccupied = new HashSet<>(); // Вероятно занятые
+
+        // Сначала строгое определение (как было)
         boolean changed = true;
         while (changed) {
             changed = false;
-            for (List<String> roles : champRoles.values()) {
-                List<String> freeRoles = roles.stream()
+            for (Map.Entry<String, List<String>> entry : champRoles.entrySet()) {
+                List<String> freeRoles = entry.getValue().stream()
                         .filter(role -> !occupied.contains(role))
                         .toList();
                 if (freeRoles.size() == 1) {
@@ -433,7 +441,33 @@ public class DraftPredictService {
                 }
             }
         }
+
+        // Затем добавляем вероятные роли для флекс-чемпионов
+        for (Map.Entry<String, List<String>> entry : champRoles.entrySet()) {
+            String champ = entry.getKey();
+            List<String> roles = entry.getValue();
+            if (roles.size() > 1) {
+                String primary = primaryRole.get(champ);
+                if (primary != null && !occupied.contains(primary)) {
+                    likelyOccupied.add(primary);
+                }
+            }
+        }
+
+        // Объединяем (опционально)
+        occupied.addAll(likelyOccupied);
         return occupied;
+    }
+
+    private double getRolePercentage(ChampionFlexibility flex, String role) {
+        return switch (role) {
+            case "TOP" -> flex.getTop().orElse(0.0);
+            case "JUNGLE" -> flex.getJungle().orElse(0.0);
+            case "MIDDLE" -> flex.getMiddle().orElse(0.0);
+            case "BOTTOM" -> flex.getBottom().orElse(0.0);
+            case "UTILITY" -> flex.getUtility().orElse(0.0);
+            default -> 0.0;
+        };
     }
 
     private ChampionFlexibility getFlexibility(String champion) {
