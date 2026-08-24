@@ -142,7 +142,7 @@ public class DraftPredictService {
                                                       List<String> blueSidePicks,
                                                       List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = getGeneralFrequencyMap(context.excludedChampions());
+        Map<String, Integer> freq = new HashMap<>();
 
         List<String> bestDuos = getBestDuoList(redSidePicks);
         for (String c : bestDuos) {
@@ -179,7 +179,7 @@ public class DraftPredictService {
                                                      List<String> blueSidePicks,
                                                      List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = getGeneralFrequencyMap(context.excludedChampions());
+        Map<String, Integer> freq = new HashMap<>();
 
         List<String> bestDuos = getBestDuoList(blueSidePicks);
         for (String c : bestDuos) {
@@ -216,7 +216,7 @@ public class DraftPredictService {
                                                        List<String> blueSidePicks,
                                                        List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = getGeneralFrequencyMap(context.excludedChampions());
+        Map<String, Integer> freq = new HashMap<>();
 
         List<String> bestDuos = getBestDuoList(blueSidePicks);
         for (String c : bestDuos) {
@@ -258,7 +258,7 @@ public class DraftPredictService {
                                                       List<String> blueSidePicks,
                                                       List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
-        Map<String, Integer> freq = getGeneralFrequencyMap(context.excludedChampions());
+        Map<String, Integer> freq = new HashMap<>();
 
         List<String> bestDuos = getBestDuoList(redSidePicks);
         for (String c : bestDuos) {
@@ -298,7 +298,7 @@ public class DraftPredictService {
     // ================= PRIVATE PHASE METHODS =================
 
     private Map<String, Integer> getFirstPickRecommendation(Set<String> excludedChampions, List<String> blueSideBans, List<String> redSideBans) {
-        Map<String, Integer> freq = new HashMap<>(getFirstPickFrequencyMap(excludedChampions));
+        Map<String, Integer> freq = new HashMap<>(getGeneralFrequencyMap(excludedChampions));
 
         List<String> counterPicksBlueSideBans = getCounterPickListForBans(blueSideBans);
         for (String c : counterPicksBlueSideBans) {
@@ -313,7 +313,7 @@ public class DraftPredictService {
     }
 
     private Map<String, Integer> getEarlyPhaseBanRecommendations(Set<String> excludedChampions, List<String> banList) {
-        Map<String, Integer> freq = new HashMap<>(getEarlyBanPhaseFrequencyMap(excludedChampions));
+        Map<String, Integer> freq = new HashMap<>(getGeneralFrequencyMap(excludedChampions));
 
         // Counter picks for opposite team bans (red side bans)
         List<String> counterPicks = getCounterPickListForBans(banList);
@@ -328,25 +328,7 @@ public class DraftPredictService {
 
     private Map<String, Integer> getGeneralFrequencyMap(Set<String> excludedChampions) {
         Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresence, cachedWinRates, cachedPickRates, cachedBanRates, cachedChampionList)
-                .flatMap(List::stream)
-                .filter(champion -> !excludedChampions.contains(champion))
-                .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
-        return frequencyMap;
-    }
-
-    private Map<String, Integer> getEarlyBanPhaseFrequencyMap(Set<String> excludedChampions) {
-        Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedBanRatesByActualPatch)
-                .flatMap(List::stream)
-                .filter(champion -> !excludedChampions.contains(champion))
-                .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
-        return frequencyMap;
-    }
-
-    private Map<String, Integer> getFirstPickFrequencyMap(Set<String> excludedChampions) {
-        Map<String, Integer> frequencyMap = new HashMap<>();
-        Stream.of(cachedDraftPresenceByActualPatch, cachedPickRatesByActualPatch, cachedWinRatesByActualPatch)
+        Stream.of(cachedBanRatesByActualPatch, cachedDraftPresenceByActualPatch, cachedPickRatesByActualPatch, cachedWinRatesByActualPatch)
                 .flatMap(List::stream)
                 .filter(champion -> !excludedChampions.contains(champion))
                 .forEach(champion -> frequencyMap.merge(champion, 1, Integer::sum));
