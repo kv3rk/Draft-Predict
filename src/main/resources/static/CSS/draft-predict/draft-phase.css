@@ -61,6 +61,19 @@
     padding: 8px 4px 4px;
 }
 
+/* ─── Recommendations Inline (next to draft center) ─── */
+.recommendations-inline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: 80px;
+    border: none;
+    background: transparent;
+}
+
 /* ─── Bans Row ─── */
 .bans-row {
     display: flex;
@@ -95,6 +108,8 @@
     background: linear-gradient(135deg, transparent 45%, rgba(248, 113, 113, 0.3) 45%, rgba(248, 113, 113, 0.3) 55%, transparent 55%);
     opacity: 0;
     transition: opacity var(--transition-fast);
+    z-index: 2;
+    pointer-events: none;
 }
 .ban-slot:hover {
     border-color: var(--accent-ban);
@@ -103,12 +118,48 @@
 .ban-slot:hover::after {
     opacity: 1;
 }
-.bans-divider {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
+/* Red diagonal line ALWAYS visible on completed (banned) slots */
+.ban-slot.ban-completed::after {
+    opacity: 1;
+}
+
+/* ─── Champion Search (in bans row) ─── */
+.champion-search-wrapper {
+    width: 180px;
+    position: relative;
+}
+.champion-search {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px 10px 38px;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-family: inherit;
+    cursor: text;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238b92a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+}
+.champion-search::placeholder {
     color: var(--text-muted);
-    text-transform: uppercase;
+    opacity: 0.7;
+}
+.champion-search:hover {
+    border-color: var(--border-hover);
+    background: rgba(255, 255, 255, 0.06);
+}
+.champion-search:focus {
+    border-color: var(--accent-gold);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.12);
+}
+.champion-search:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* ─── Picks Row ─── */
@@ -116,14 +167,16 @@
     display: flex;
     align-items: stretch;
     justify-content: space-between;
-    gap: 24px;
-    min-height: 320px;
+    gap: 16px;
 }
+
+/* ─── Picks Columns (narrow, fixed width) ─── */
 .picks-column {
     display: flex;
     flex-direction: column;
     gap: 8px;
     align-items: center;
+    flex-shrink: 0;
 }
 .pick-slot {
     width: 52px;
@@ -157,35 +210,112 @@
     border-right: 3px solid #ef4444;
 }
 
-/* ─── Draft Center ─── */
-.draft-center {
+/* ─── Champion Grid Card (between pick columns) ─── */
+.champion-grid-card {
+    flex: 1;
+    min-width: 0;
+    max-height: calc(5 * 52px + 4 * 8px);
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 12px;
+}
+
+/* Scrollbar for champion grid card */
+.champion-grid-card::-webkit-scrollbar {
+    width: 6px;
+}
+.champion-grid-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+.champion-grid-card::-webkit-scrollbar-thumb {
+    background: rgba(201, 169, 110, 0.3);
+    border-radius: 3px;
+}
+.champion-grid-card::-webkit-scrollbar-thumb:hover {
+    background: rgba(201, 169, 110, 0.5);
+}
+
+/* ─── Champion Grid (inside card) ─── */
+.champion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 6px;
+}
+.champion-grid-item {
+    width: 52px;
+    height: 52px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 0 16px;
-    min-width: 140px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 0;
+    user-select: none;
+    overflow: hidden;
+    position: relative;
 }
-.draft-patch {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--accent-gold);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+.champion-grid-item:hover {
+    border-color: var(--accent-gold);
+    background: rgba(201, 169, 110, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(201, 169, 110, 0.15);
 }
-.draft-vs {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 2px;
+.champion-grid-item:active {
+    transform: translateY(0);
 }
-.draft-first-pick {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+
+/* Unavailable (banned/picked) - grayscale + red diagonal line */
+.champion-grid-item.unavailable {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.02);
+}
+.champion-grid-item.unavailable::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+            to top left,
+            transparent 45%,
+            rgba(248, 113, 113, 0.8) 45%,
+            rgba(248, 113, 113, 0.8) 55%,
+            transparent 55%
+    );
+    z-index: 2;
+    pointer-events: none;
+}
+.champion-grid-item.unavailable:hover {
+    transform: none;
+    border-color: var(--border-card);
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: none;
+}
+
+/* Hidden by search filter */
+.champion-grid-item.filtered-out {
+    display: none;
+}
+
+/* ─── Champion Grid Images ─── */
+.champion-grid-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    display: block;
+    transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+.champion-grid-item:hover .champion-grid-img {
+    transform: scale(1.08);
+}
+.champion-grid-item.unavailable .champion-grid-img {
+    filter: grayscale(100%) brightness(0.35);
+    transform: scale(1.0);
 }
 
 /* ─── Champion Images in Slots (bans & picks) ─── */
@@ -207,60 +337,38 @@
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 }
 
-/* ─── Recommendation Items (image-only tiles) ─── */
-.ban-rec-item,
-.pick-rec-item {
-    width: 52px;
-    height: 52px;
-    flex-shrink: 0;
-    padding: 0;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: all 0.18s ease;
-}
-
-.rec-champion-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    display: block;
-    transition: transform 0.18s ease, filter 0.18s ease;
-}
-
-.ban-rec-item:hover .rec-champion-img,
-.pick-rec-item:hover .rec-champion-img {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-}
-
 /* ─── Responsive ─── */
+@media (max-width: 1024px) {
+    .champion-grid {
+        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    }
+    .champion-grid-item {
+        width: 48px;
+        height: 48px;
+    }
+}
+
 @media (max-width: 768px) {
     .picks-row {
-        gap: 12px;
+        gap: 8px;
     }
-    .draft-center {
-        min-width: 100px;
-        padding: 0 8px;
-    }
-    .draft-vs {
-        font-size: 1.125rem;
+    .recommendations-inline {
+        height: 160px;
     }
     .ban-slot,
     .pick-slot {
         width: 40px;
         height: 40px;
     }
-    .ban-rec-item,
-    .pick-rec-item {
+    .champion-grid-item {
         width: 40px;
         height: 40px;
+    }
+    .champion-grid {
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    }
+    .champion-search-wrapper {
+        width: 140px;
     }
 }
 
@@ -271,18 +379,23 @@
     .bans-group {
         gap: 4px;
     }
-    .picks-column {
-        max-width: 120px;
+    .recommendations-inline {
+        height: 140px;
     }
     .ban-slot,
     .pick-slot {
         width: 36px;
         height: 36px;
     }
-    .ban-rec-item,
-    .pick-rec-item {
+    .champion-grid-item {
         width: 36px;
         height: 36px;
+    }
+    .champion-grid {
+        grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+    }
+    .champion-search-wrapper {
+        width: 120px;
     }
 }
 
@@ -309,75 +422,6 @@
     background: rgba(248, 113, 113, 0.08);
 }
 
-.ban-champion-name {
-    font-size: 0.625rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-align: center;
-    line-height: 1.2;
-    padding: 2px;
-    word-break: break-word;
-}
-
-/* ─── Champion Select ─── */
-.champion-select-wrapper {
-    margin-top: 12px;
-    width: 100%;
-    max-width: 180px;
-}
-.champion-select {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: border-color var(--transition-fast);
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b92a8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 32px;
-}
-.champion-select:hover,
-.champion-select:focus {
-    border-color: var(--accent-gold);
-    outline: none;
-}
-.champion-select option {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-}
-
-/* ─── Draft Toast ─── */
-.draft-toast {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-60px);
-    background: rgba(239, 68, 68, 0.95);
-    color: #fff;
-    padding: 12px 28px;
-    border-radius: var(--radius-sm);
-    font-size: 0.9375rem;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.35);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    opacity: 0;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-    white-space: nowrap;
-}
-.draft-toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
 /* ─── Pick Phase Animations ─── */
 @keyframes pickPulseBlue {
     0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); border-color: #3b82f6; }
@@ -401,164 +445,4 @@
     border-color: var(--border-card);
     opacity: 0.7;
     background: rgba(255, 255, 255, 0.08);
-}
-
-/* ─── Pick Champion Name (legacy text styles) ─── */
-.pick-champion-name {
-    font-size: 0.625rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    text-align: center;
-    line-height: 1.2;
-    padding: 2px;
-    word-break: break-word;
-}
-.pick-champion-name.picked.blue-picked {
-    color: #60a5fa;
-    font-weight: 700;
-    text-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
-}
-.pick-champion-name.picked.red-picked {
-    color: #f87171;
-    font-weight: 700;
-    text-shadow: 0 0 4px rgba(239, 68, 68, 0.4);
-}
-.pick-champion-name.picked {
-    color: #60a5fa;
-    font-weight: 700;
-    text-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
-}
-
-/* ─── Unavailable options in select ─── */
-.champion-select option.unavailable-option {
-    color: var(--text-muted);
-    text-decoration: line-through;
-    opacity: 0.5;
-}
-option.picked-option {
-    color: #60a5fa;
-    font-weight: 600;
-    background: rgba(59, 130, 246, 0.08);
-}
-
-/* ─── Champion Grid ─── */
-.champion-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-    gap: 8px;
-    margin-top: 20px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-md);
-    max-height: 420px;
-    overflow-y: auto;
-}
-
-.champion-grid-item {
-    aspect-ratio: 1;
-    min-height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    padding: 0;
-    word-break: break-word;
-    line-height: 1.2;
-    user-select: none;
-    overflow: hidden;
-    position: relative;
-}
-
-.champion-grid-item:hover {
-    border-color: var(--accent-gold);
-    background: rgba(201, 169, 110, 0.1);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(201, 169, 110, 0.15);
-}
-
-.champion-grid-item:active {
-    transform: translateY(0);
-}
-
-.champion-grid-item.unavailable {
-    opacity: 0.25;
-    cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.champion-grid-item.unavailable:hover {
-    transform: none;
-    border-color: var(--border-card);
-    background: rgba(255, 255, 255, 0.02);
-    box-shadow: none;
-}
-
-/* ─── Champion Grid Images ─── */
-.champion-grid-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    display: block;
-    transition: transform var(--transition-fast), filter var(--transition-fast);
-}
-
-.champion-grid-item:hover .champion-grid-img {
-    transform: scale(1.08);
-}
-
-.champion-grid-item.unavailable .champion-grid-img {
-    filter: grayscale(100%) brightness(0.35);
-    transform: scale(1.0);
-}
-
-/* Scrollbar for champion grid */
-.champion-grid::-webkit-scrollbar {
-    width: 6px;
-}
-.champion-grid::-webkit-scrollbar-track {
-    background: transparent;
-}
-.champion-grid::-webkit-scrollbar-thumb {
-    background: rgba(201, 169, 110, 0.3);
-    border-radius: 3px;
-}
-.champion-grid::-webkit-scrollbar-thumb:hover {
-    background: rgba(201, 169, 110, 0.5);
-}
-
-/* ─── Champion Grid Responsive ─── */
-@media (max-width: 768px) {
-    .champion-grid {
-        grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-        gap: 6px;
-        padding: 12px;
-        max-height: 360px;
-    }
-    .champion-grid-item {
-        min-height: 56px;
-        font-size: 0.6875rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .champion-grid {
-        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
-        gap: 4px;
-        padding: 8px;
-        max-height: 300px;
-    }
-    .champion-grid-item {
-        min-height: 48px;
-        font-size: 0.625rem;
-    }
 }

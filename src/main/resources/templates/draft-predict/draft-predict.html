@@ -135,8 +135,13 @@
                     </div>
                 </div>
 
-                <!-- Draft Interface -->
-                <div class="draft-interface" id="draftInterface">
+                <div class="draft-interface">
+                    <!-- Recommendations Row (fixed height to prevent layout shift) -->
+                    <div class="recommendations-inline">
+                        <div class="ban-recommendations" id="banRecommendations"></div>
+                        <div class="pick-recommendations" id="pickRecommendations"></div>
+                    </div>
+
                     <!-- Bans Row -->
                     <div class="bans-row">
                         <div class="bans-group blue-bans">
@@ -146,7 +151,14 @@
                             <div class="ban-slot" data-ban="blue-4"></div>
                             <div class="ban-slot" data-ban="blue-5"></div>
                         </div>
-                        <div class="bans-divider">BANS</div>
+                        <div class="champion-search-wrapper">
+                            <input type="text"
+                                   id="championSearch"
+                                   class="champion-search"
+                                   placeholder="Search champion..."
+                                   autocomplete="off"
+                                   spellcheck="false" />
+                        </div>
                         <div class="bans-group red-bans">
                             <div class="ban-slot" data-ban="red-1"></div>
                             <div class="ban-slot" data-ban="red-2"></div>
@@ -158,82 +170,44 @@
 
                     <!-- Picks Row -->
                     <div class="picks-row">
-                        <!-- Blue Side Picks -->
                         <div class="picks-column blue-picks">
-                            <div class="pick-slot" data-pick="blue-1">
-                                <span class="pick-number">1</span>
-                            </div>
-                            <div class="pick-slot" data-pick="blue-2">
-                                <span class="pick-number">2</span>
-                            </div>
-                            <div class="pick-slot" data-pick="blue-3">
-                                <span class="pick-number">3</span>
-                            </div>
-                            <div class="pick-slot" data-pick="blue-4">
-                                <span class="pick-number">4</span>
-                            </div>
-                            <div class="pick-slot" data-pick="blue-5">
-                                <span class="pick-number">5</span>
+                            <div class="pick-slot" data-pick="blue-1"><span class="pick-number">1</span></div>
+                            <div class="pick-slot" data-pick="blue-2"><span class="pick-number">2</span></div>
+                            <div class="pick-slot" data-pick="blue-3"><span class="pick-number">3</span></div>
+                            <div class="pick-slot" data-pick="blue-4"><span class="pick-number">4</span></div>
+                            <div class="pick-slot" data-pick="blue-5"><span class="pick-number">5</span></div>
+                        </div>
+
+                        <div class="champion-grid-card">
+                            <div class="champion-grid" id="championGrid">
+                                <div th:each="champion : ${championList}"
+                                     class="champion-grid-item"
+                                     th:data-champion="${champion.champion}">
+                                    <img class="champion-grid-img"
+                                         alt="Champion"
+                                         th:data-champion-name="${champion.champion}" />
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Center Info -->
-                        <div class="draft-center">
-
-                            <div class="champion-select-wrapper" id="championSelectWrapper">
-                                <select id="championSelect" class="champion-select">
-                                    <option value="" disabled selected>Select champion</option>
-                                    <option th:each="c : ${championList}" th:value="${c.champion}"
-                                            th:text="${c.champion}"></option>
-                                </select>
-                            </div>
-
-                            <div class="ban-recommendations" id="banRecommendations"></div>
-
-                            <div class="pick-recommendations" id="pickRecommendations"></div>
-
-<!--                            <div class="draft-patch" id="draftPatch">Patch 14.10</div>-->
-
-<!--                            <div class="draft-vs">VS</div>-->
-
-<!--                            <div class="draft-first-pick" id="draftFirstPick">First Pick: Blue</div>-->
-
-                        </div>
-
-                        <!-- Red Side Picks -->
                         <div class="picks-column red-picks">
-                            <div class="pick-slot" data-pick="red-1">
-                                <span class="pick-number">1</span>
-                            </div>
-                            <div class="pick-slot" data-pick="red-2">
-                                <span class="pick-number">2</span>
-                            </div>
-                            <div class="pick-slot" data-pick="red-3">
-                                <span class="pick-number">3</span>
-                            </div>
-                            <div class="pick-slot" data-pick="red-4">
-                                <span class="pick-number">4</span>
-                            </div>
-                            <div class="pick-slot" data-pick="red-5">
-                                <span class="pick-number">5</span>
-                            </div>
+                            <div class="pick-slot" data-pick="red-1"><span class="pick-number">1</span></div>
+                            <div class="pick-slot" data-pick="red-2"><span class="pick-number">2</span></div>
+                            <div class="pick-slot" data-pick="red-3"><span class="pick-number">3</span></div>
+                            <div class="pick-slot" data-pick="red-4"><span class="pick-number">4</span></div>
+                            <div class="pick-slot" data-pick="red-5"><span class="pick-number">5</span></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Champion Grid (clickable champion tiles) -->
-                <div class="champion-grid" id="championGrid">
-                    <div th:each="champion : ${championList}"
-                         class="champion-grid-item"
-                         th:data-champion="${champion.champion}">
-                        <img class="champion-grid-img"
-                             alt="Champion"
-                             th:data-champion-name="${champion.champion}" />
-                    </div>
-                </div>
+
             </div>
+
         </section>
+
     </main>
+
 </div>
+
 </body>
 </html>

@@ -19,35 +19,10 @@ let currentDataDragonPatch = '14.10.1';
 function init() {
     document.addEventListener('draftSetupApplied', handleDraftSetup);
 
-    const select = document.getElementById('championSelect');
-    if (select) {
-        select.addEventListener('change', (e) => {
-            const championName = e.target.value;
-            if (!championName || isDraftFinished) {
-                e.target.value = '';
-                return;
-            }
-
-            if (typeof window.isChampionBanned === 'function' && window.isChampionBanned(championName)) {
-                window.showToast('This champion is already banned');
-                e.target.value = '';
-                return;
-            }
-
-            if (typeof window.isChampionPicked === 'function' && window.isChampionPicked(championName)) {
-                window.showToast('This champion is already picked and cannot be picked again');
-                e.target.value = '';
-                return;
-            }
-
-            if (isBanPhaseActive) {
-                advanceBan(championName);
-                e.target.value = '';
-            } else if (isPickPhaseActive) {
-                advancePick(championName);
-                e.target.value = '';
-            }
-        });
+    // Champion search input handler (live filter for grid)
+    const searchInput = document.getElementById('championSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleChampionSearch);
     }
 
     // Recommendation click handlers (event delegation)
@@ -68,11 +43,39 @@ function init() {
     }
 }
 
+// ================= SEARCH INPUT CLEAR =================
+// Clear search input after any champion selection
+function clearSearchInput() {
+    const searchInput = document.getElementById('championSearch');
+    if (searchInput && searchInput.value) {
+        searchInput.value = '';
+        // Reset grid filter to show all champions
+        document.querySelectorAll('.champion-grid-item').forEach(item => {
+            item.classList.remove('filtered-out');
+        });
+    }
+}
+
+// ================= CHAMPION SEARCH (LIVE FILTER) =================
+function handleChampionSearch(e) {
+    const query = e.target.value.trim().toLowerCase();
+    const items = document.querySelectorAll('.champion-grid-item');
+    items.forEach(item => {
+        const championName = (item.dataset.champion || '').toLowerCase();
+        if (!query || championName.includes(query)) {
+            item.classList.remove('filtered-out');
+        } else {
+            item.classList.add('filtered-out');
+        }
+    });
+}
+
 // ================= CHAMPION GRID CLICK HANDLER =================
 function handleChampionGridClick(e) {
     const item = e.target.closest('.champion-grid-item');
     if (!item) return;
     if (item.classList.contains('unavailable')) return;
+    if (item.classList.contains('filtered-out')) return;
     if (isDraftFinished) return;
 
     const championName = item.dataset.champion;
@@ -178,9 +181,18 @@ function handleDraftSetup(event) {
         slot.innerHTML = `<span class="pick-number">${pickNum}</span>`;
     });
 
+    // === RESET CHAMPION SEARCH & GRID ===
+    const searchInput = document.getElementById('championSearch');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.disabled = false;
+    }
+    document.querySelectorAll('.champion-grid-item').forEach(item => {
+        item.classList.remove('unavailable', 'filtered-out');
+    });
+
     // === UPDATE CHAMPION GRID IMAGES ===
     document.querySelectorAll('.champion-grid-item').forEach(item => {
-        item.classList.remove('unavailable');
         const champName = item.dataset.champion;
         const img = item.querySelector('.champion-grid-img');
         if (img && champName) {
@@ -192,11 +204,6 @@ function handleDraftSetup(event) {
         }
     });
     // ===================================
-
-    const select = document.getElementById('championSelect');
-    if (select) {
-        select.disabled = false;
-    }
 
     currentBanOrder = currentDraftConfig.getBanOrder(currentFirstPickSide);
     highlightCurrentBan();
@@ -305,6 +312,7 @@ function advanceBan(championName) {
     if (typeof window.addBannedChampion === 'function') window.addBannedChampion(championName, side);
 
     updateChampionGridAvailability();
+    clearSearchInput();
 
     currentBanIndex++;
 
@@ -457,6 +465,7 @@ function advancePick(championName) {
     }
 
     updateChampionGridAvailability();
+    clearSearchInput();
 
     currentPickIndex++;
 
@@ -487,9 +496,9 @@ function finishDraft() {
     document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
     document.querySelectorAll('.pick-slot').forEach(s => s.classList.remove('active-pick', 'blue-pick', 'red-pick'));
 
-    const select = document.getElementById('championSelect');
-    if (select) {
-        select.disabled = true;
+    const searchInput = document.getElementById('championSearch');
+    if (searchInput) {
+        searchInput.disabled = true;
     }
 }
 

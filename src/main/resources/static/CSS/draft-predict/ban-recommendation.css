@@ -5,15 +5,12 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin-bottom: 12px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     background: rgba(248, 113, 113, 0.1);
     border: 1px solid rgba(248, 113, 113, 0.3);
     border-radius: var(--radius-sm);
     width: fit-content;
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .ban-rec-item {
@@ -57,25 +54,6 @@
 .ban-rec-item:hover .rec-champion-img {
     transform: scale(1.05);
     filter: brightness(1.1);
-}
-
-/* ─── Banned option in select ─── */
-option.banned-option {
-    color: #ef4444;
-    text-decoration: line-through;
-    background: rgba(248, 113, 113, 0.08);
-    font-weight: 500;
-}
-
-/* ─── Picked option in select (GREEN) ─── */
-option.picked-option {
-    color: #4ade80;
-    font-weight: 600;
-    background: rgba(74, 222, 128, 0.08);
-}
-
-option.available-option {
-    color: var(--text-primary);
 }
 
 /* ─── Loading Spinners ─── */
