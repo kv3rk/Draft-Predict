@@ -85,7 +85,6 @@ function handleChampionGridClick(e) {
         window.showToast('This champion is already banned');
         return;
     }
-
     if (typeof window.isChampionPicked === 'function' && window.isChampionPicked(championName)) {
         window.showToast('This champion is already picked');
         return;
@@ -218,12 +217,10 @@ function getCurrentBanSide() {
 
 function highlightCurrentBan() {
     document.querySelectorAll('.ban-slot').forEach(slot => slot.classList.remove('active-ban'));
-
     if (currentBanIndex >= currentBanOrder.length || isDraftFinished) {
         isBanPhaseActive = false;
         return;
     }
-
     const currentSlotId = currentBanOrder[currentBanIndex];
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
     if (slot) slot.classList.add('active-ban');
@@ -240,13 +237,10 @@ async function fetchBanRecommendations() {
         ? window.getPickedChampionsBySide()
         : { blueSidePicks: [], redSidePicks: [] };
 
-    const currentSlotId = currentBanOrder[currentBanIndex];
-    const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
-    const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
     const side = getCurrentBanSide();
     const endpoint = side === 'blue'
-        ? `/draft-predict/blue-side-ban/recommendations/${phaseEndpoint}`
-        : `/draft-predict/red-side-ban/recommendations/${phaseEndpoint}`;
+        ? '/draft-predict/blue-side-ban/recommendations'
+        : '/draft-predict/red-side-ban/recommendations';
 
     try {
         const response = await fetch(endpoint, {
@@ -277,13 +271,11 @@ function renderBanLoading() {
 function renderBanRecommendations(champions) {
     const container = document.getElementById('banRecommendations');
     if (!container) return;
-
     if (!champions || champions.length === 0 || isDraftFinished) {
         container.innerHTML = '';
         container.style.display = 'none';
         return;
     }
-
     // Render champion images instead of text
     container.innerHTML = champions.map(name => `
         <div class="ban-rec-item" data-champion="${name}">
@@ -302,7 +294,6 @@ function advanceBan(championName) {
     const currentSlotId = currentBanOrder[currentBanIndex];
     const side = getCurrentBanSide();
     const slot = document.querySelector(`[data-ban="${currentSlotId}"]`);
-
     if (slot) {
         slot.classList.remove('active-ban');
         slot.classList.add('ban-completed');
@@ -310,12 +301,10 @@ function advanceBan(championName) {
     }
 
     if (typeof window.addBannedChampion === 'function') window.addBannedChampion(championName, side);
-
     updateChampionGridAvailability();
     clearSearchInput();
 
     currentBanIndex++;
-
     if (currentBanIndex < currentBanOrder.length) {
         highlightCurrentBan();
         fetchBanRecommendations();
@@ -323,7 +312,6 @@ function advanceBan(championName) {
         isBanPhaseActive = false;
         document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
         renderBanRecommendations([]);
-
         if (currentBanOrder.length === 6) {
             startPickPhase();
         } else {
@@ -369,13 +357,11 @@ function highlightCurrentPick() {
     document.querySelectorAll('.pick-slot').forEach(slot => {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
     });
-
     if (currentPickIndex >= currentPickOrder.length || isDraftFinished) {
         isPickPhaseActive = false;
         renderPickRecommendations([]);
         return;
     }
-
     const currentSlotId = currentPickOrder[currentPickIndex];
     const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
     if (slot) {
@@ -389,15 +375,16 @@ async function fetchPickRecommendations() {
     renderPickLoading();
 
     const side = getCurrentPickSide();
-    const bans = typeof window.getBannedChampionsBySide === 'function' ? window.getBannedChampionsBySide() : { blueSideBans: [], redSideBans: [] };
-    const picks = typeof window.getPickedChampionsBySide === 'function' ? window.getPickedChampionsBySide() : { blueSidePicks: [], redSidePicks: [] };
+    const bans = typeof window.getBannedChampionsBySide === 'function'
+        ? window.getBannedChampionsBySide()
+        : { blueSideBans: [], redSideBans: [] };
+    const picks = typeof window.getPickedChampionsBySide === 'function'
+        ? window.getPickedChampionsBySide()
+        : { blueSidePicks: [], redSidePicks: [] };
 
-    const currentSlotId = currentPickOrder[currentPickIndex];
-    const slotNumber = parseInt(currentSlotId.split('-')[1], 10);
-    const phaseEndpoint = slotNumber <= 3 ? 'early-phase-draft' : 'late-phase-draft';
     const endpoint = side === 'blue'
-        ? `/draft-predict/blue-side-pick/recommendations/${phaseEndpoint}`
-        : `/draft-predict/red-side-pick/recommendations/${phaseEndpoint}`;
+        ? '/draft-predict/blue-side-pick/recommendations'
+        : '/draft-predict/red-side-pick/recommendations';
 
     try {
         const response = await fetch(endpoint, {
@@ -428,13 +415,11 @@ function renderPickLoading() {
 function renderPickRecommendations(champions) {
     const container = document.getElementById('pickRecommendations');
     if (!container) return;
-
     if (!champions || champions.length === 0 || isDraftFinished) {
         container.innerHTML = '';
         container.style.display = 'none';
         return;
     }
-
     // Render champion images instead of text
     container.innerHTML = champions.map(name => `
         <div class="pick-rec-item" data-champion="${name}">
@@ -453,7 +438,6 @@ function advancePick(championName) {
     const currentSlotId = currentPickOrder[currentPickIndex];
     const side = getCurrentPickSide();
     const slot = document.querySelector(`[data-pick="${currentSlotId}"]`);
-
     if (slot) {
         slot.classList.remove('active-pick', 'blue-pick', 'red-pick');
         slot.classList.add('pick-completed');
@@ -463,12 +447,10 @@ function advancePick(championName) {
     if (typeof window.addPickedChampion === 'function') {
         window.addPickedChampion(championName, side);
     }
-
     updateChampionGridAvailability();
     clearSearchInput();
 
     currentPickIndex++;
-
     if (currentPickIndex < currentPickOrder.length) {
         highlightCurrentPick();
         fetchPickRecommendations();
@@ -476,7 +458,6 @@ function advancePick(championName) {
         isPickPhaseActive = false;
         document.querySelectorAll('.pick-slot').forEach(s => s.classList.remove('active-pick', 'blue-pick', 'red-pick'));
         renderPickRecommendations([]);
-
         if (currentPickOrder.length === 6) {
             startSecondBanPhase();
         } else {
@@ -489,10 +470,8 @@ function finishDraft() {
     isDraftFinished = true;
     isBanPhaseActive = false;
     isPickPhaseActive = false;
-
     renderBanRecommendations([]);
     renderPickRecommendations([]);
-
     document.querySelectorAll('.ban-slot').forEach(s => s.classList.remove('active-ban'));
     document.querySelectorAll('.pick-slot').forEach(s => s.classList.remove('active-pick', 'blue-pick', 'red-pick'));
 
