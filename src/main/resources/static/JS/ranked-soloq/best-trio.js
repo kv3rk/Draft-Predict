@@ -117,7 +117,6 @@ async function fetchBestTrios(champion1, champion2, role1, role2, role3, patch) 
 
 function renderTable(trios) {
     const tbody = document.getElementById('trioTableBody');
-
     if (!Array.isArray(trios) || trios.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -127,36 +126,49 @@ function renderTable(trios) {
             </tr>`;
         return;
     }
-
-    tbody.innerHTML = trios.map((trio, index) => `
-        <tr style="animation-delay: ${index * 0.06}s">
-            <td class="col-rank">${index + 1}</td>
-            <td class="col-champ">
-                <div class="champ-cell">
-                    <div class="champ-avatar">${escapeHtml(trio.champion1?.charAt(0) || '?')}</div>
-                    <span class="champ-name">${escapeHtml(trio.champion1 || 'Unknown')}</span>
-                </div>
-            </td>
-            <td class="col-champ">
-                <div class="champ-cell">
-                    <div class="champ-avatar">${escapeHtml(trio.champion2?.charAt(0) || '?')}</div>
-                    <span class="champ-name">${escapeHtml(trio.champion2 || 'Unknown')}</span>
-                </div>
-            </td>
-            <td class="col-champ">
-                <div class="champ-cell">
-                    <div class="champ-avatar">${escapeHtml(trio.champion3?.charAt(0) || '?')}</div>
-                    <span class="champ-name">${escapeHtml(trio.champion3 || 'Unknown')}</span>
-                </div>
-            </td>
-            <td class="col-rate">
-                <span class="rate-badge pick">${trio.pickRate}</span>
-            </td>
-            <td class="col-rate">
-                <span class="rate-badge win">${formatNum(trio.winRate)}%</span>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = trios.map((trio, index) => {
+        const name1 = trio.champion1 || 'Unknown';
+        const name2 = trio.champion2 || 'Unknown';
+        const name3 = trio.champion3 || 'Unknown';
+        const logo1 = `/IMG/champions/logo/${escapeHtml(name1)}.png`;
+        const logo2 = `/IMG/champions/logo/${escapeHtml(name2)}.png`;
+        const logo3 = `/IMG/champions/logo/${escapeHtml(name3)}.png`;
+        return `
+            <tr style="animation-delay: ${index * 0.06}s">
+                <td class="col-rank">${index + 1}</td>
+                <td class="col-champ">
+                    <div class="champ-cell">
+                        <div class="champ-avatar">
+                            <img src="${logo1}" alt="${escapeHtml(name1)}" />
+                        </div>
+                        <span class="champ-name">${escapeHtml(name1)}</span>
+                    </div>
+                </td>
+                <td class="col-champ">
+                    <div class="champ-cell">
+                        <div class="champ-avatar">
+                            <img src="${logo2}" alt="${escapeHtml(name2)}" />
+                        </div>
+                        <span class="champ-name">${escapeHtml(name2)}</span>
+                    </div>
+                </td>
+                <td class="col-champ">
+                    <div class="champ-cell">
+                        <div class="champ-avatar">
+                            <img src="${logo3}" alt="${escapeHtml(name3)}" />
+                        </div>
+                        <span class="champ-name">${escapeHtml(name3)}</span>
+                    </div>
+                </td>
+                <td class="col-rate">
+                    <span class="rate-badge pick">${trio.pickRate}</span>
+                </td>
+                <td class="col-rate">
+                    <span class="rate-badge win">${formatNum(trio.winRate)}%</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function updateSubtitle(champion1, champion2, role1, role2, role3) {

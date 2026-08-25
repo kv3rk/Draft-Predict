@@ -131,31 +131,40 @@
                     </tr>
                     </thead>
                     <tbody id="trioTableBody">
-                    <tr th:each="trio, iter : ${bestTrioChampions}">
-                        <td class="col-rank" th:text="${iter.count}">1</td>
+                    <tr th:each="trio, iterStat : ${bestTrioChampions}" th:style="'animation-delay: ' + ${iterStat.index * 0.06} + 's'">
+                        <td class="col-rank" th:text="${iterStat.index + 1}">1</td>
                         <td class="col-champ">
                             <div class="champ-cell">
-                                <div class="champ-avatar" th:text="${#strings.substring(trio.champion1, 0, 1)}">A</div>
-                                <span class="champ-name" th:text="${trio.champion1}">Aatrox</span>
+                                <div class="champ-avatar">
+                                    <img th:src="@{'/IMG/champions/logo/' + ${trio.champion1} + '.png'}"
+                                         th:alt="${trio.champion1}" />
+                                </div>
+                                <span class="champ-name" th:text="${trio.champion1}">Champion 1</span>
                             </div>
                         </td>
                         <td class="col-champ">
                             <div class="champ-cell">
-                                <div class="champ-avatar" th:text="${#strings.substring(trio.champion2, 0, 1)}">S</div>
-                                <span class="champ-name" th:text="${trio.champion2}">Syndra</span>
+                                <div class="champ-avatar">
+                                    <img th:src="@{'/IMG/champions/logo/' + ${trio.champion2} + '.png'}"
+                                         th:alt="${trio.champion2}" />
+                                </div>
+                                <span class="champ-name" th:text="${trio.champion2}">Champion 2</span>
                             </div>
                         </td>
                         <td class="col-champ">
                             <div class="champ-cell">
-                                <div class="champ-avatar" th:text="${#strings.substring(trio.champion3, 0, 1)}">L</div>
-                                <span class="champ-name" th:text="${trio.champion3}">Lee Sin</span>
+                                <div class="champ-avatar">
+                                    <img th:src="@{'/IMG/champions/logo/' + ${trio.champion3} + '.png'}"
+                                         th:alt="${trio.champion3}" />
+                                </div>
+                                <span class="champ-name" th:text="${trio.champion3}">Champion 3</span>
                             </div>
                         </td>
                         <td class="col-rate">
                             <span class="rate-badge pick" th:text="${trio.pickRate}">0</span>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge win" th:text="${#numbers.formatDecimal(trio.winRate, 1, 1)} + '%'">56.3%</span>
+                            <span class="rate-badge win" th:text="${#numbers.formatDecimal(trio.winRate, 1, 1)} + '%'">0.0%</span>
                         </td>
                     </tr>
                     </tbody>
