@@ -1,14 +1,12 @@
 package lol.kv3rk.draft_predict.ServerApplication.InvocationSystem;
 
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Component.ChampionIdDB;
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.RankedGatherInfo.Service.GatherMatchInfo;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.SystemRankedRequests;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.Service.RankedSoloQService;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Component.ChampionIdDB;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Service.GatherMatchInfo;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Service.SoloQDbRequestsService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @EnableScheduling
 @Component
@@ -17,34 +15,34 @@ public class ProdScheduledInvocationSystem {
 
     private final GatherMatchInfo gatherMatchInfo;
     private final ChampionIdDB championIdDB;
-    private final RankedSoloQService rankedSoloQService;
+    private final SoloQDbRequestsService soloQDbRequestsService;
 
     public ProdScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
                                          ChampionIdDB championIdDB,
-                                         RankedSoloQService rankedSoloQService) {
+                                         SoloQDbRequestsService soloQDbRequestsService) {
         this.gatherMatchInfo = gatherMatchInfo;
         this.championIdDB = championIdDB;
-        this.rankedSoloQService = rankedSoloQService;
+        this.soloQDbRequestsService = soloQDbRequestsService;
     }
 
     @Scheduled(cron = "0 1 0 1/1 * *", zone = "UTC")
     public void everyDayRoutine() throws InterruptedException {
 
         //------------ Initial EUW refresh ---------------
-        rankedSoloQService.refreshMaterializedViewRankedFlexibility();
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
         championIdDB.populateChampionAndIdsDB();
         gatherMatchInfo.getEUWMatchInfo();
 
         //------------  After EUW refresh ---------------
-        rankedSoloQService.refreshMaterializedViewRankedFlexibility();
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
         gatherMatchInfo.getNAMatchInfo();
 
         //------------  After NA refresh ---------------
-        rankedSoloQService.refreshMaterializedViewRankedFlexibility();
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
         gatherMatchInfo.getKRMatchInfo();
 
         //------------  After KR refresh ---------------
-        rankedSoloQService.refreshMaterializedViewRankedFlexibility();
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
         gatherMatchInfo.getEUNEMatchInfo();
     }
 }

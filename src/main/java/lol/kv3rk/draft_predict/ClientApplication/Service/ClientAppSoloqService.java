@@ -1,15 +1,10 @@
 package lol.kv3rk.draft_predict.ClientApplication.Service;
 
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.*;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.*;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Repository.ParticipantsRepository;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.Service.RankedSoloQService;
-import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotRequestParameters;
-import lol.kv3rk.draft_predict.common.RiotParametersDB.RiotServerName;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.DTO.*;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Repository.*;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Service.SoloQDbRequestsService;
+import lol.kv3rk.draft_predict.common.RiotParameters.RiotRequestParameters;
+import lol.kv3rk.draft_predict.common.RiotParameters.RiotServerName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -22,47 +17,50 @@ import java.util.List;
 @Slf4j
 public class ClientAppSoloqService {
 
-    private final MatchesRepository matchesRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final BansRepository bansRepository;
     private final RiotRequestParameters riotRequestParameters;
     private final ChampionFlexibilityRequests championFlexibilityRequests;
     private final CounterPickRequests counterPickRequests;
-    private final RankedSoloQService rankedSoloQService;
     private final BestDuoRequests bestDuoRequests;
     private final BestTrioRequests bestTrioRequests;
     private final DraftPresenceRequests draftPresenceRequests;
+    private final BanRateRequests banRateRequests;
+    private final SystemRankedRequests systemRankedRequests;
+    private final WinRateRequests winRateRequests;
+    private final PickRateRequests pickRateRequests;
+    private final SoloQDbRequestsService soloQDbRequestsService;
 
-    public ClientAppSoloqService(MatchesRepository matchesRepository,
-                                 ParticipantsRepository participantsRepository,
-                                 BansRepository bansRepository,
-                                 RiotRequestParameters riotRequestParameters,
+    public ClientAppSoloqService(RiotRequestParameters riotRequestParameters,
                                  ChampionFlexibilityRequests championFlexibilityRequests,
                                  CounterPickRequests counterPickRequests,
-                                 RankedSoloQService rankedSoloQService,
                                  BestDuoRequests bestDuoRequests,
                                  BestTrioRequests bestTrioRequests,
-                                 DraftPresenceRequests draftPresenceRequests) {
+                                 DraftPresenceRequests draftPresenceRequests,
+                                 BanRateRequests banRateRequests,
+                                 SystemRankedRequests systemRankedRequests,
+                                 WinRateRequests winRateRequests,
+                                 PickRateRequests pickRateRequests,
+                                 SoloQDbRequestsService soloQDbRequestsService) {
 
-        this.matchesRepository = matchesRepository;
-        this.participantsRepository = participantsRepository;
-        this.bansRepository = bansRepository;
         this.riotRequestParameters = riotRequestParameters;
         this.championFlexibilityRequests = championFlexibilityRequests;
         this.counterPickRequests = counterPickRequests;
-        this.rankedSoloQService = rankedSoloQService;
         this.bestDuoRequests = bestDuoRequests;
         this.bestTrioRequests = bestTrioRequests;
         this.draftPresenceRequests = draftPresenceRequests;
+        this.banRateRequests = banRateRequests;
+        this.systemRankedRequests = systemRankedRequests;
+        this.winRateRequests = winRateRequests;
+        this.pickRateRequests = pickRateRequests;
+        this.soloQDbRequestsService = soloQDbRequestsService;
     }
 
     public long countMatches() {
-        long actualAmountMatches = matchesRepository.countMatches().orElse(0L);
+        long actualAmountMatches = systemRankedRequests.countMatches().orElse(0L);
         return actualAmountMatches;
     }
 
     public String actualPatch() {
-        String actualPatch = matchesRepository.actualPatch().orElse("0.0");
+        String actualPatch = systemRankedRequests.actualPatch().orElse("0.0");
         return actualPatch;
     }
 
@@ -70,15 +68,15 @@ public class ClientAppSoloqService {
                                                                   String patch) {
         if (orderParameter.equals("pick_rate")) {
             if (patch.equals("All patches")) {
-                return participantsRepository.getTopPerformingChampionsByPickRate("%");
+                return pickRateRequests.getTop10PickRate("%");
             } else {
-                return participantsRepository.getTopPerformingChampionsByPickRate(patch);
+                return pickRateRequests.getTop10PickRate(patch);
             }
         } else if (orderParameter.equals("win_rate")) {
             if (patch.equals("All patches")) {
-                return participantsRepository.getTopPerformingChampionsByWinRate("%");
+                return winRateRequests.getTop10WinRate("%");
             } else {
-                return participantsRepository.getTopPerformingChampionsByWinRate(patch);
+                return winRateRequests.getTop10WinRate(patch);
             }
         }
         return List.of();
@@ -86,9 +84,9 @@ public class ClientAppSoloqService {
 
     public List<MostBannedChampions> getMostBannedChampions(String patch) {
         if (patch.equals("All patches")) {
-            return bansRepository.getMostBannedChampions("%");
+            return banRateRequests.getTop10BannedChampions("%");
         } else {
-            return bansRepository.getMostBannedChampions(patch);
+            return banRateRequests.getTop10BannedChampions(patch);
         }
     }
 
@@ -104,7 +102,7 @@ public class ClientAppSoloqService {
     }
 
     public String lastTimeUpdate() {
-        String lastTimeUpdate = matchesRepository.getDateOfLastMatch().map(
+        String lastTimeUpdate = systemRankedRequests.getDateOfLastMatch().map(
                 LocalDate::toString
         ).orElse("none");
         return lastTimeUpdate;
@@ -139,7 +137,7 @@ public class ClientAppSoloqService {
     }
 
     public List<Champion> getChampionList() {
-        return participantsRepository.getChampionList();
+        return systemRankedRequests.getChampionList();
     }
 
     public List<ChampionPresence> getChampionDraftPresence(String patch) {
@@ -162,13 +160,13 @@ public class ClientAppSoloqService {
 
     // Get patch list via RankedSoloQService (unified pipeline)
     public List<String> getPatchList() {
-        List<String> allPatches = new ArrayList<>(rankedSoloQService.getPatchList());
+        List<String> allPatches = new ArrayList<>(systemRankedRequests.getPatchList());
         allPatches.addFirst("All patches");
         return allPatches;
     }
 
     // Get unique seasons list via RankedSoloQService
-    public String getActualSeason() {
-        return rankedSoloQService.getSeasonList().getLast();
+    public Integer getActualSeason() {
+        return soloQDbRequestsService.getSeasonList().getLast();
     }
 }

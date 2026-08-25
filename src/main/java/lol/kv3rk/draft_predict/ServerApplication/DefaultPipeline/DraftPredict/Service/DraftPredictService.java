@@ -1,10 +1,10 @@
 package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.Service;
 
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DTO.DraftContext;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.*;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.*;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.DTO.DraftContext;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.DTO.*;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Repository.*;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.DTO.MostBannedChampions;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.DTO.TopPerformingChampions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -81,9 +81,9 @@ public class DraftPredictService {
                 .stream().map(MostBannedChampions::getChampion).toList();
         cachedDraftPresenceByActualPatch = draftPresenceRequests.getChampionDraftPresenceByActualPatch(currentPatch)
                 .stream().map(ChampionPresence::getChampion).toList();
-        cachedPickRatesByActualPatch = pickRateRequests.getTopPerformingChampionsByPickRateByActualPatch(currentPatch)
+        cachedPickRatesByActualPatch = pickRateRequests.getPickRateByActualPatch(currentPatch)
                 .stream().map(TopPerformingChampions::getChampion).toList();
-        cachedWinRatesByActualPatch = winRateRequests.getTopPerformingChampionsByWinRateByActualPatch(currentPatch)
+        cachedWinRatesByActualPatch = winRateRequests.getWinRateByActualPatch(currentPatch)
                 .stream().map(TopPerformingChampions::getChampion).toList();
         counterPicksCache.clear();
         bestDuoCache.clear();

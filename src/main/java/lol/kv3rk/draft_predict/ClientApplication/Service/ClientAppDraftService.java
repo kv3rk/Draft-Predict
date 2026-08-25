@@ -2,8 +2,9 @@ package lol.kv3rk.draft_predict.ClientApplication.Service;
 
 import lol.kv3rk.draft_predict.ClientApplication.DTO.Draft.MatchSetupInfoDTO;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.Service.DraftPredictService;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.Champion;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.Service.RankedSoloQService;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.DTO.Champion;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Repository.SystemRankedRequests;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Service.SoloQDbRequestsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +16,17 @@ import java.util.Map;
 public class ClientAppDraftService {
     private final ClientAppSoloqService clientAppSoloqService;
     private final DraftPredictService draftPredictService;
-    private final RankedSoloQService rankedSoloQService;
+    private final SoloQDbRequestsService soloQDbRequestsService;
+    private final SystemRankedRequests systemRankedRequests;
 
     public ClientAppDraftService(ClientAppSoloqService clientAppSoloqService,
                                  DraftPredictService draftPredictService,
-                                 RankedSoloQService rankedSoloQService) {
+                                 SoloQDbRequestsService soloQDbRequestsService,
+                                 SystemRankedRequests systemRankedRequests) {
         this.clientAppSoloqService = clientAppSoloqService;
         this.draftPredictService = draftPredictService;
-        this.rankedSoloQService = rankedSoloQService;
+        this.soloQDbRequestsService = soloQDbRequestsService;
+        this.systemRankedRequests = systemRankedRequests;
     }
 
     public List<Champion> getChampionList() {
@@ -30,12 +34,12 @@ public class ClientAppDraftService {
     }
 
     public List<String> getPatchList() {
-        return rankedSoloQService.getPatchList();
+        return systemRankedRequests.getPatchList();
     }
 
     // Get unique seasons list via RankedSoloQService
-    public List<String> getSeasonList() {
-        return rankedSoloQService.getSeasonList();
+    public List<Integer> getSeasonList() {
+        return soloQDbRequestsService.getSeasonList();
     }
 
     // Setup match info with season and patch
