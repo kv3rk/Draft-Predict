@@ -109,7 +109,7 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/counter-pick] endpoint");
         addCommonAttributes(model);
         model.addAttribute("championCounterPick", clientAppSoloqService.getBestMatchUps(
-                "Aatrox", "MIDDLE", "%"
+                "Aatrox", "TOP", "%"
         ));
         return "ranked-soloq-page/stats-pages/counter-pick";
     }
