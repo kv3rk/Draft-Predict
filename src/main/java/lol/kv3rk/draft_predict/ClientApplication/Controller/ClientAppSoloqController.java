@@ -81,8 +81,8 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/best-trio] endpoint");
         addCommonAttributes(model);
         model.addAttribute("bestTrioChampions", clientAppSoloqService.getBestTrioChampions(
-                "TOP", "MIDDLE", "JUNGLE", "%",
-                "Jayce", "Viktor"));
+                "TOP", "JUNGLE", "MIDDLE", "%",
+                "Ambessa", "LeeSin"));
         return "ranked-soloq-page/stats-pages/best-trio";
     }
 

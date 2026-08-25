@@ -68,13 +68,13 @@
             <div class="role-filter trio-filter">
                 <label for="champion1Select">Champion 1</label>
                 <select id="champion1Select" class="champion-select">
-                    <option value="" disabled selected>Select champion</option>
+                    <option value="Ambessa" disabled selected>Ambessa</option>
                     <option th:each="c : ${championList}" th:value="${c.champion}" th:text="${c.champion}"></option>
                 </select>
 
                 <label for="champion2Select">Champion 2</label>
                 <select id="champion2Select" class="champion-select">
-                    <option value="" disabled selected>Select champion</option>
+                    <option value="LeeSin" disabled selected>LeeSin</option>
                     <option th:each="c : ${championList}" th:value="${c.champion}" th:text="${c.champion}"></option>
                 </select>
 
@@ -82,9 +82,9 @@
 
                 <label for="role1">Role 1</label>
                 <select id="role1" class="role-select">
-                    <option value="TOP">TOP</option>
+                    <option value="TOP" selected>TOP</option>
                     <option value="JUNGLE">JUNGLE</option>
-                    <option value="MIDDLE" selected>MIDDLE</option>
+                    <option value="MIDDLE">MIDDLE</option>
                     <option value="BOTTOM">BOTTOM</option>
                     <option value="UTILITY">UTILITY</option>
                 </select>
@@ -102,7 +102,7 @@
                 <select id="role3" class="role-select">
                     <option value="TOP">TOP</option>
                     <option value="JUNGLE">JUNGLE</option>
-                    <option value="MIDDLE">MIDDLE</option>
+                    <option value="MIDDLE" selected>MIDDLE</option>
                     <option value="BOTTOM">BOTTOM</option>
                     <option value="UTILITY">UTILITY</option>
                 </select>
