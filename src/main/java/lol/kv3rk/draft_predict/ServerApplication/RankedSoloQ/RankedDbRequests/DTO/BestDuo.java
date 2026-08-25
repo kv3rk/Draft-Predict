@@ -6,7 +6,7 @@ public interface BestDuo {
 
     String getChampion2();
 
-    double getPickRate();
+    int getPickRate();
 
     double getWinRate();
 }

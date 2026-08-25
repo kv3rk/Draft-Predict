@@ -1,5 +1,6 @@
 package lol.kv3rk.draft_predict.ClientApplication.Service;
 
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.BestDuoRequests;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.CounterPickRequests;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
@@ -30,6 +31,7 @@ public class ClientAppSoloqService {
     private final RankedRequests rankedRequests;
     private final CounterPickRequests counterPickRequests;
     private final RankedSoloQService rankedSoloQService;
+    private final BestDuoRequests bestDuoRequests;
 
     public ClientAppSoloqService(MatchesRepository matchesRepository,
                                  ParticipantsRepository participantsRepository,
@@ -37,7 +39,8 @@ public class ClientAppSoloqService {
                                  RiotRequestParameters riotRequestParameters,
                                  RankedRequests rankedRequests,
                                  CounterPickRequests counterPickRequests,
-                                 RankedSoloQService rankedSoloQService) {
+                                 RankedSoloQService rankedSoloQService,
+                                 BestDuoRequests bestDuoRequests) {
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
@@ -45,6 +48,7 @@ public class ClientAppSoloqService {
         this.rankedRequests = rankedRequests;
         this.counterPickRequests = counterPickRequests;
         this.rankedSoloQService = rankedSoloQService;
+        this.bestDuoRequests = bestDuoRequests;
     }
 
     public long countMatches() {
@@ -104,9 +108,9 @@ public class ClientAppSoloqService {
     public List<BestDuo> getBestDuoChampions(String role1, String role2,
                                              String patch, String champion) {
         if (patch.equals("All patches")) {
-            return rankedRequests.getBestDuoChampions(role1, role2, "%", champion);
+            return bestDuoRequests.getTop10DuoChampions(role1, role2, "%", champion);
         } else {
-            return rankedRequests.getBestDuoChampions(role1, role2, patch, champion);
+            return bestDuoRequests.getTop10DuoChampions(role1, role2, patch, champion);
         }
     }
 
@@ -117,10 +121,10 @@ public class ClientAppSoloqService {
                                                String champion1,
                                                String champion2) {
         if (patch.equals("All patches")) {
-            return rankedRequests.getBestTrioChampions(role1, role2, role3, "%",
+            return rankedRequests.getTop10TrioChampions(role1, role2, role3, "%",
                     champion1, champion2);
         } else {
-            return rankedRequests.getBestTrioChampions(role1, role2, role3, patch,
+            return rankedRequests.getTop10TrioChampions(role1, role2, role3, patch,
                     champion1, champion2);
         }
     }

@@ -103,7 +103,7 @@ function renderTable(duos) {
                     </div>
                 </td>
                 <td class="col-rate">
-                    <span class="rate-badge pick">${formatNum(duo.pickRate)}%</span>
+                    <span class="rate-badge pick">${duo.pickRate}</span>
                 </td>
                 <td class="col-rate">
                     <span class="rate-badge win">${formatNum(duo.winRate)}%</span>

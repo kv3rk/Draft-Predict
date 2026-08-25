@@ -72,7 +72,7 @@ public class ClientAppSoloqController {
         log.info("Entered [/ranked-soloq/best-duo] endpoint");
         addCommonAttributes(model);
         model.addAttribute("bestDuoChampions", clientAppSoloqService.getBestDuoChampions(
-                "MIDDLE", "JUNGLE", "%", "Viktor"));
+                "TOP", "JUNGLE", "%", "Aatrox"));
         return "ranked-soloq-page/stats-pages/best-duo";
     }
 

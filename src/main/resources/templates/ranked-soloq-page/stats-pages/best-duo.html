@@ -68,7 +68,7 @@
             <div class="role-filter">
                 <label for="championSelect">Champion</label>
                 <select id="championSelect" class="champion-select">
-                    <option value="" disabled selected>Select champion</option>
+                    <option value="Aatrox" disabled selected>Aatrox</option>
                     <option th:each="c : ${championList}" th:value="${c.champion}" th:text="${c.champion}"></option>
                 </select>
 
@@ -76,9 +76,9 @@
 
                 <label for="role1">Role 1</label>
                 <select id="role1" class="role-select">
-                    <option value="TOP">TOP</option>
+                    <option value="TOP" selected>TOP</option>
                     <option value="JUNGLE">JUNGLE</option>
-                    <option value="MIDDLE" selected>MIDDLE</option>
+                    <option value="MIDDLE">MIDDLE</option>
                     <option value="BOTTOM">BOTTOM</option>
                     <option value="UTILITY">UTILITY</option>
                 </select>
@@ -135,7 +135,7 @@
                         </div>
                     </td>
                     <td class="col-rate">
-                        <span class="rate-badge pick" th:text="${#numbers.formatDecimal(duo.pickRate, 1, 1)} + '%'">0.0%</span>
+                        <span class="rate-badge pick" th:text="${duo.pickRate}">0</span>
                     </td>
                     <td class="col-rate">
                         <span class="rate-badge win" th:text="${#numbers.formatDecimal(duo.winRate, 1, 1)} + '%'">0.0%</span>
