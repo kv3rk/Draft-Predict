@@ -71,49 +71,45 @@ function renderTable(duos) {
     const tbody = document.getElementById('duoTableBody');
     if (!Array.isArray(duos) || duos.length === 0) {
         tbody.innerHTML = `
-         <tr>
-             <td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
-                 No synergies found for this role combination.
-             </td>
-         </tr>`;
+            <tr>
+                <td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
+                    No synergies found for this role combination.
+                </td>
+            </tr>`;
         return;
     }
     tbody.innerHTML = duos.map((duo, index) => {
         const name1 = duo.champion1 || 'Unknown';
         const name2 = duo.champion2 || 'Unknown';
-        const initial1 = escapeHtml(name1.charAt(0));
-        const initial2 = escapeHtml(name2.charAt(0));
         const logo1 = `/IMG/champions/logo/${escapeHtml(name1)}.png`;
         const logo2 = `/IMG/champions/logo/${escapeHtml(name2)}.png`;
         return `
-     <tr style="animation-delay: ${index * 0.06}s">
-         <td class="col-rank">${index + 1}</td>
-         <td class="col-champ">
-             <div class="champ-cell">
-                 <div class="champ-avatar">
-                     <img src="${logo1}" alt="${escapeHtml(name1)}"
-                          onerror="this.onerror=null;this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span class=\\'champ-avatar-fallback\\'>${initial1}</span>');" />
-                 </div>
-                 <span class="champ-name">${escapeHtml(name1)}</span>
-             </div>
-         </td>
-         <td class="col-champ">
-             <div class="champ-cell">
-                 <div class="champ-avatar">
-                     <img src="${logo2}" alt="${escapeHtml(name2)}"
-                          onerror="this.onerror=null;this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span class=\\'champ-avatar-fallback\\'>${initial2}</span>');" />
-                 </div>
-                 <span class="champ-name">${escapeHtml(name2)}</span>
-             </div>
-         </td>
-         <td class="col-rate">
-             <span class="rate-badge pick">${formatNum(duo.pickRate)}%</span>
-         </td>
-         <td class="col-rate">
-             <span class="rate-badge win">${formatNum(duo.winRate)}%</span>
-         </td>
-     </tr>
-     `;
+            <tr style="animation-delay: ${index * 0.06}s">
+                <td class="col-rank">${index + 1}</td>
+                <td class="col-champ">
+                    <div class="champ-cell">
+                        <div class="champ-avatar">
+                            <img src="${logo1}" alt="${escapeHtml(name1)}" />
+                        </div>
+                        <span class="champ-name">${escapeHtml(name1)}</span>
+                    </div>
+                </td>
+                <td class="col-champ">
+                    <div class="champ-cell">
+                        <div class="champ-avatar">
+                            <img src="${logo2}" alt="${escapeHtml(name2)}" />
+                        </div>
+                        <span class="champ-name">${escapeHtml(name2)}</span>
+                    </div>
+                </td>
+                <td class="col-rate">
+                    <span class="rate-badge pick">${formatNum(duo.pickRate)}%</span>
+                </td>
+                <td class="col-rate">
+                    <span class="rate-badge win">${formatNum(duo.winRate)}%</span>
+                </td>
+            </tr>
+        `;
     }).join('');
 }
 function updateSubtitle(champion, role1, role2) {

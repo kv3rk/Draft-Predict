@@ -113,28 +113,32 @@
                     <th>Win Rate</th>
                 </tr>
                 </thead>
-                <tbody th:if="${presenceChampions != null and !presenceChampions.isEmpty()}">
-                <tr th:each="champ, iterStat : ${presenceChampions}" th:style="'animation-delay: ' + ${iterStat.index * 0.05} + 's'">
+                <tbody id="duoTableBody">
+                <tr th:each="duo, iterStat : ${bestDuoChampions}" th:style="'animation-delay: ' + ${iterStat.index * 0.06} + 's'">
                     <td class="col-rank" th:text="${iterStat.index + 1}">1</td>
                     <td class="col-champ">
                         <div class="champ-cell">
                             <div class="champ-avatar">
-                                <img th:src="@{'/IMG/champions/logo/' + ${champ.champion} + '.png'}"
-                                     th:alt="${champ.champion}"
-                                     onerror="this.onerror=null;this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span class=\'champ-avatar-fallback\'>' + this.alt.charAt(0) + '</span>');" />
+                                <img th:src="@{'/IMG/champions/logo/' + ${duo.champion1} + '.png'}"
+                                     th:alt="${duo.champion1}" />
                             </div>
-                            <span class="champ-name" th:text="${champ.champion}">Champion</span>
+                            <span class="champ-name" th:text="${duo.champion1}">Champion 1</span>
+                        </div>
+                    </td>
+                    <td class="col-champ">
+                        <div class="champ-cell">
+                            <div class="champ-avatar">
+                                <img th:src="@{'/IMG/champions/logo/' + ${duo.champion2} + '.png'}"
+                                     th:alt="${duo.champion2}" />
+                            </div>
+                            <span class="champ-name" th:text="${duo.champion2}">Champion 2</span>
                         </div>
                     </td>
                     <td class="col-rate">
-                        <span class="rate-badge presence" th:text="${#numbers.formatDecimal(champ.presence, 1, 1)} + '%'">0.0%</span>
+                        <span class="rate-badge pick" th:text="${#numbers.formatDecimal(duo.pickRate, 1, 1)} + '%'">0.0%</span>
                     </td>
-                </tr>
-                </tbody>
-                <tbody th:if="${presenceChampions == null or presenceChampions.isEmpty()}">
-                <tr>
-                    <td colspan="3" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
-                        No presence data available.
+                    <td class="col-rate">
+                        <span class="rate-badge win" th:text="${#numbers.formatDecimal(duo.winRate, 1, 1)} + '%'">0.0%</span>
                     </td>
                 </tr>
                 </tbody>
