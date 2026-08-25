@@ -3,9 +3,11 @@ package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.Sol
 import jakarta.transaction.Transactional;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Component.ChampionIdDB;
 import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqEntities.Bans.Entity.BansEntity;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqEntities.Matches.Entity.MatchesEntity;
 import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqEntities.Matches.Repository.MatchesRepository;
 import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqEntities.Participants.Entity.ParticipantsEntity;
+import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqEntities.Participants.Repository.ParticipantsRepository;
 import lol.kv3rk.draft_predict.common.RiotDTO.GeneralMatchInfo.*;
 import lol.kv3rk.draft_predict.common.RiotDTO.TimeLineMatchInfo.FramesTimeLineDTO;
 import lol.kv3rk.draft_predict.common.RiotDTO.TimeLineMatchInfo.ParticipantFrameDTO;
