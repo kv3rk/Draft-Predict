@@ -79,16 +79,20 @@
                     </tr>
                     </thead>
                     <tbody id="presenceTableBody">
-                    <tr th:each="champ, iter : ${championDraftPresence}">
-                        <td class="col-rank" th:text="${iter.count}">1</td>
+                    <tr th:each="champ, iterStat : ${championDraftPresence}" th:style="'animation-delay: ' + ${iterStat.index * 0.05} + 's'">
+                        <td class="col-rank" th:text="${iterStat.index + 1}">1</td>
                         <td class="col-champ">
                             <div class="champ-cell">
-                                <div class="champ-avatar" th:text="${#strings.substring(champ.champion, 0, 1)}">A</div>
-                                <span class="champ-name" th:text="${champ.champion}">Aatrox</span>
+                                <div class="champ-avatar">
+                                    <img th:src="@{'/IMG/champions/logo/' + ${champ.champion} + '.png'}"
+                                         th:alt="${champ.champion}"
+                                         onerror="this.onerror=null;this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span class=\'champ-avatar-fallback\'>' + this.alt.charAt(0) + '</span>');" />
+                                </div>
+                                <span class="champ-name" th:text="${champ.champion}">Champion</span>
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge presence" th:text="${#numbers.formatDecimal(champ.presence.orElse(0.0), 1, 1)} + '%'">45.2%</span>
+                            <span class="rate-badge presence" th:text="${champ.presence.orElse(0.0) != null ? #numbers.formatDecimal(champ.presence.orElse(0.0), 1, 1) + '%' : '0.0%'}">0.0%</span>
                         </td>
                     </tr>
                     </tbody>

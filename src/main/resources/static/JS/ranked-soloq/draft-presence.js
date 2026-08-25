@@ -64,15 +64,28 @@ function renderTable(data) {
 
     tbody.innerHTML = data.map((champ, index) => {
         const name = champ.champion || 'Unknown';
-        const presence = champ.presence != null ? Number(champ.presence).toFixed(1) : '0.0';
+
+        // Извлекаем значение из Optional (Jackson сериализует Optional как объект)
+        let presenceValue;
+        if (champ.presence != null && typeof champ.presence === 'object') {
+            presenceValue = champ.presence.value != null ? champ.presence.value : null;
+        } else {
+            presenceValue = champ.presence;
+        }
+
+        const presence = presenceValue != null ? Number(presenceValue).toFixed(1) : '0.0';
         const initial = name.charAt(0);
+        const logoSrc = `/IMG/champions/logo/${escapeHtml(name)}.png`;
 
         return `
             <tr style="animation-delay: ${index * 0.05}s">
                 <td class="col-rank">${index + 1}</td>
                 <td class="col-champ">
                     <div class="champ-cell">
-                        <div class="champ-avatar">${escapeHtml(initial)}</div>
+                        <div class="champ-avatar">
+                            <img src="${logoSrc}" alt="${escapeHtml(name)}" 
+                                 onerror="this.onerror=null;this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span class=\\'champ-avatar-fallback\\'>${escapeHtml(initial)}</span>');" />
+                        </div>
                         <span class="champ-name">${escapeHtml(name)}</span>
                     </div>
                 </td>

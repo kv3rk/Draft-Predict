@@ -86,24 +86,28 @@
                         </th>
                     </tr>
                     </thead>
+
                     <tbody id="winPickTableBody">
-                    <tr th:each="champ, iter : ${topPerformingChampions}">
-                        <td class="col-rank" th:text="${iter.count}">1</td>
+                    <tr th:each="champ, iterStat : ${topPerformingChampions}" th:style="'animation-delay: ' + ${iterStat.index * 0.06} + 's'">
+                        <td class="col-rank" th:text="${iterStat.index + 1}">1</td>
                         <td class="col-champ">
                             <div class="champ-cell">
-                                <div class="champ-avatar" th:text="${#strings.substring(champ.champion, 0, 1)}">A</div>
-                                <span class="champ-name" th:text="${champ.champion}">Aurora</span>
+                                <div class="champ-avatar">
+                                    <img th:src="@{'/IMG/champions/logo/' + ${champ.champion} + '.png'}"
+                                         th:alt="${champ.champion}" />
+                                </div>
+                                <span class="champ-name" th:text="${champ.champion}">Champion</span>
                             </div>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge win" th:text="${#numbers.formatDecimal(champ.winRate, 1, 1)} + '%'">54.2%</span>
+                            <span class="rate-badge win" th:text="${#numbers.formatDecimal(champ.winRate, 1, 1)} + '%'">0.0%</span>
                         </td>
                         <td class="col-rate">
-                            <span class="rate-badge pick"
-                                  th:text="${#numbers.formatDecimal(champ.pickRate, 1, 0)} + '%'">13%</span>
+                            <span class="rate-badge pick" th:text="${#numbers.formatDecimal(champ.pickRate, 1, 1)} + '%'">0.0%</span>
                         </td>
                     </tr>
                     </tbody>
+
                 </table>
             </div>
         </section>

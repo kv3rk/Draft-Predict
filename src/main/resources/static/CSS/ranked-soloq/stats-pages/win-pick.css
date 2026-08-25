@@ -4,26 +4,21 @@
     user-select: none;
     transition: color var(--transition-fast);
 }
-
 .sortable:hover {
     color: var(--text-primary);
 }
-
 .sortable.active {
     color: var(--accent-gold);
 }
-
 .sort-arrow {
     font-size: 0.625rem;
     margin-left: 4px;
     opacity: 0.5;
     transition: opacity var(--transition-fast);
 }
-
 .sortable.active .sort-arrow {
     opacity: 1;
 }
-
 /* ─── Patch Filter ─── */
 .patch-filter {
     display: flex;
@@ -32,19 +27,16 @@
     margin-bottom: 24px;
     flex-wrap: wrap;
 }
-
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
-
 .filter-group label {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
 }
-
 /* ─── Patch Select ─── */
 .patch-select {
     min-width: 200px;
@@ -64,18 +56,15 @@
     background-position: right 12px center;
     padding-right: 36px;
 }
-
 .patch-select:focus {
     outline: none;
     border-color: var(--accent-gold);
     box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
 }
-
 .patch-select option {
     background: var(--bg-primary);
     color: var(--text-primary);
 }
-
 /* ─── Search Button ─── */
 .search-btn {
     padding: 10px 24px;
@@ -89,32 +78,54 @@
     cursor: pointer;
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
-
 .search-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px var(--accent-gold-glow);
 }
-
 .search-btn:active:not(:disabled) {
     transform: translateY(0);
 }
-
 .search-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
-
+/* ─── Champion Avatar (logo in circle) ─── */
+.champ-avatar {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: rgba(15, 20, 35, 0.8);
+    border: 1px solid var(--border-card, rgba(255,255,255,0.08));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.champ-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+.champ-avatar-fallback {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary, #fff);
+    line-height: 1;
+}
 /* ─── Responsive ─── */
 @media (max-width: 480px) {
     .patch-filter {
         flex-direction: column;
         align-items: stretch;
     }
-
     .patch-select {
         max-width: none;
     }
-
     .search-btn {
         width: 100%;
     }

@@ -113,7 +113,30 @@
                     <th>Win Rate</th>
                 </tr>
                 </thead>
-                <tbody id="duoTableBody">
+                <tbody th:if="${presenceChampions != null and !presenceChampions.isEmpty()}">
+                <tr th:each="champ, iterStat : ${presenceChampions}" th:style="'animation-delay: ' + ${iterStat.index * 0.05} + 's'">
+                    <td class="col-rank" th:text="${iterStat.index + 1}">1</td>
+                    <td class="col-champ">
+                        <div class="champ-cell">
+                            <div class="champ-avatar">
+                                <img th:src="@{'/IMG/champions/logo/' + ${champ.champion} + '.png'}"
+                                     th:alt="${champ.champion}"
+                                     onerror="this.onerror=null;this.remove();this.parentElement.insertAdjacentHTML('beforeend','<span class=\'champ-avatar-fallback\'>' + this.alt.charAt(0) + '</span>');" />
+                            </div>
+                            <span class="champ-name" th:text="${champ.champion}">Champion</span>
+                        </div>
+                    </td>
+                    <td class="col-rate">
+                        <span class="rate-badge presence" th:text="${#numbers.formatDecimal(champ.presence, 1, 1)} + '%'">0.0%</span>
+                    </td>
+                </tr>
+                </tbody>
+                <tbody th:if="${presenceChampions == null or presenceChampions.isEmpty()}">
+                <tr>
+                    <td colspan="3" style="text-align:center;color:var(--text-muted);padding:32px 16px;">
+                        No presence data available.
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </section>

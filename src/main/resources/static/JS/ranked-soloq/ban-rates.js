@@ -1,28 +1,21 @@
 document.addEventListener('DOMContentLoaded', init);
-
 function init() {
     const patchSelect = document.getElementById('patchSelect');
     const searchBtn = document.getElementById('searchBtn');
-
     if (!patchSelect || !searchBtn) {
         console.error('Required DOM elements not found');
         return;
     }
-
     searchBtn.addEventListener('click', handleSearch);
 }
-
 async function handleSearch() {
     const patch = document.getElementById('patchSelect').value;
     const searchBtn = document.getElementById('searchBtn');
-
     if (!patch) {
         alert('Please select a patch');
         return;
     }
-
     setLoadingState(searchBtn, true);
-
     try {
         const data = await fetchBanRates(patch);
         renderTable(data);
@@ -33,60 +26,50 @@ async function handleSearch() {
         setLoadingState(searchBtn, false);
     }
 }
-
 async function fetchBanRates(patch) {
     const params = new URLSearchParams({ patch: patch });
-
     const response = await fetch(`/ranked-soloq/find/ban-rates?${params.toString()}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
     });
-
     const text = await response.text();
     if (!text || text.trim() === '') {
         return [];
     }
-
     if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-
     return JSON.parse(text);
 }
 
 function renderTable(data) {
     const tbody = document.querySelector('.stats-table tbody');
-
     if (!Array.isArray(data) || data.length === 0) {
         tbody.innerHTML = `
-            <tr>
-                <td colspan="3" class="matchup-empty" style="text-align:center;padding:32px;">
-                    No ban rate data found for this patch.
-                </td>
-            </tr>`;
+         <tr>
+             <td colspan="3" class="matchup-empty" style="text-align:center;padding:32px;">
+                 No ban rate data found for this patch.
+             </td>
+         </tr>`;
         return;
     }
-
-    tbody.innerHTML = data.map((champ, index) => {
-        const rank = index + 1;
-        const name = champ.champion || 'Unknown';
-        const banRate = champ.banRate != null ? Number(champ.banRate).toFixed(1) : '0.0';
-        const initial = name.charAt(0);
-
-        return `
-            <tr style="animation-delay: ${index * 0.05}s">
-                <td class="col-rank">${rank}</td>
-                <td class="col-champ">
-                    <div class="champ-cell">
-                        <div class="champ-avatar">${escapeHtml(initial)}</div>
-                        <span class="champ-name">${escapeHtml(name)}</span>
-                    </div>
-                </td>
-                <td class="col-rate">
-                    <span class="rate-badge ban">${escapeHtml(banRate)}%</span>
-                </td>
-            </tr>`;
-    }).join('');
+    tbody.innerHTML = data.map((champ, index) => `
+     <tr style="animation-delay: ${index * 0.05}s">
+         <td class="col-rank">${index + 1}</td>
+         <td class="col-champ">
+             <div class="champ-cell">
+                 <div class="champ-avatar">
+                     <img src="/IMG/champions/logo/${escapeHtml(champ.champion || '')}.png"
+                          alt="${escapeHtml(champ.champion || '')}" />
+                 </div>
+                 <span class="champ-name">${escapeHtml(champ.champion || 'Unknown')}</span>
+             </div>
+         </td>
+         <td class="col-rate">
+             <span class="rate-badge ban">${champ.banRate != null ? Number(champ.banRate).toFixed(1) : '0.0'}%</span>
+         </td>
+     </tr>
+ `).join('');
 }
 
 function setLoadingState(button, isLoading) {
@@ -99,7 +82,6 @@ function setLoadingState(button, isLoading) {
         button.disabled = false;
     }
 }
-
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
