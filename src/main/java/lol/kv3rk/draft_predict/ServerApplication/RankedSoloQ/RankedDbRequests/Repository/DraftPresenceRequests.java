@@ -72,7 +72,7 @@ public interface DraftPresenceRequests extends JpaRepository<MatchesEntity, Stri
                     limit 10;
                     """
     )
-    List<ChampionPresence> getChampionDraftPresence(
+    List<ChampionPresence> getTop10ChampionDraftPresence(
             @Param("patch") String patch
     );
 
@@ -141,4 +141,6 @@ public interface DraftPresenceRequests extends JpaRepository<MatchesEntity, Stri
     List<ChampionPresence> getChampionDraftPresenceByActualPatch(
             @Param("patch") String patch
     );
+
+
 }

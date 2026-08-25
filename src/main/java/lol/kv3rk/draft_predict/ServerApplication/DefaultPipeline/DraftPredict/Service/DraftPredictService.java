@@ -1,13 +1,10 @@
 package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DraftPredict.Service;
 
-import jakarta.annotation.PostConstruct;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.DTO.DraftContext;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.*;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.*;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Repository.ParticipantsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +17,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class DraftPredictService {
 
-    private final MatchesRepository matchesRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final RankedRequests rankedRequests;
+    private final ChampionFlexibilityRequests championFlexibilityRequests;
     private final CounterPickRequests counterPickRequests;
     private final WinRateRequests winRateRequests;
     private final PickRateRequests pickRateRequests;
@@ -34,15 +29,11 @@ public class DraftPredictService {
     private String currentPatchFilter = "%";
     private String currentPatch = "";
 
-    private List<String> cachedDraftPresence;
-    private List<String> cachedBanRates;
-    private List<String> cachedWinRates;
-    private List<String> cachedPickRates;
+
     private List<String> cachedBanRatesByActualPatch;
     private List<String> cachedDraftPresenceByActualPatch;
     private List<String> cachedWinRatesByActualPatch;
     private List<String> cachedPickRatesByActualPatch;
-    private List<String> cachedChampionList;
 
     private final Map<String, ChampionFlexibility> flexibilityCache = new ConcurrentHashMap<>();
     private final Map<String, List<String>> counterPicksCache = new ConcurrentHashMap<>();
@@ -57,9 +48,7 @@ public class DraftPredictService {
     private final Set<String> blueSideSoftOccupiedPositions = ConcurrentHashMap.newKeySet();
     private final Set<String> redSideSoftOccupiedPositions = ConcurrentHashMap.newKeySet();
 
-    public DraftPredictService(MatchesRepository matchesRepository,
-                               ParticipantsRepository participantsRepository,
-                               RankedRequests rankedRequests,
+    public DraftPredictService(ChampionFlexibilityRequests championFlexibilityRequests,
                                CounterPickRequests counterPickRequests,
                                WinRateRequests winRateRequests,
                                PickRateRequests pickRateRequests,
@@ -67,9 +56,8 @@ public class DraftPredictService {
                                DraftPresenceRequests draftPresenceRequests,
                                BestDuoRequests bestDuoRequests,
                                BestTrioRequests bestTrioRequests) {
-        this.matchesRepository = matchesRepository;
-        this.participantsRepository = participantsRepository;
-        this.rankedRequests = rankedRequests;
+
+        this.championFlexibilityRequests = championFlexibilityRequests;
         this.counterPickRequests = counterPickRequests;
         this.winRateRequests = winRateRequests;
         this.pickRateRequests = pickRateRequests;
@@ -86,24 +74,9 @@ public class DraftPredictService {
         rebuildCache();
     }
 
-    @PostConstruct
-    public void initCache() {
-        log.info("Loading champion list into cache");
-        cachedChampionList = participantsRepository.getChampionList()
-                .stream().map(Champion::getChampion).toList();
-        log.info("Loaded champion list into cache");
-    }
-
     private void rebuildCache() {
         log.info("Rebuilding draft predict statistics cache for patch filter: {}", currentPatchFilter);
-        cachedDraftPresence = draftPresenceRequests.getChampionDraftPresence(currentPatchFilter)
-                .stream().map(ChampionPresence::getChampion).toList();
-        cachedBanRates = banRateRequests.getMostBannedChampions(currentPatchFilter)
-                .stream().map(MostBannedChampions::getChampion).toList();
-        cachedWinRates = winRateRequests.getTopPerformingChampionsByWinRate(currentPatchFilter)
-                .stream().map(TopPerformingChampions::getChampion).toList();
-        cachedPickRates = pickRateRequests.getTopPerformingChampionsByPickRate(currentPatchFilter)
-                .stream().map(TopPerformingChampions::getChampion).toList();
+
         cachedBanRatesByActualPatch = banRateRequests.getMostBannedChampionsByActualPatch(currentPatch)
                 .stream().map(MostBannedChampions::getChampion).toList();
         cachedDraftPresenceByActualPatch = draftPresenceRequests.getChampionDraftPresenceByActualPatch(currentPatch)
@@ -514,7 +487,7 @@ public class DraftPredictService {
     }
 
     private ChampionFlexibility getFlexibility(String champion) {
-        return flexibilityCache.computeIfAbsent(champion, c -> rankedRequests.getChampionFlexibility(c));
+        return flexibilityCache.computeIfAbsent(champion, c -> championFlexibilityRequests.getChampionFlexibility(c));
     }
 
     private List<String> getRoles(ChampionFlexibility flex) {

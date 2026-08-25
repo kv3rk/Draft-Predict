@@ -1,12 +1,9 @@
 package lol.kv3rk.draft_predict.ClientApplication.Service;
 
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.BestDuoRequests;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.BestTrioRequests;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.CounterPickRequests;
+import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.*;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.DTO.MostBannedChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.DTO.TopPerformingChampions;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.DTO.*;
-import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedDbRequests.Repository.RankedRequests;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Bans.Repository.BansRepository;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Matches.Repository.MatchesRepository;
 import lol.kv3rk.draft_predict.ServerApplication.RankedSoloQ.RankedEntities.Participants.Repository.ParticipantsRepository;
@@ -29,30 +26,34 @@ public class ClientAppSoloqService {
     private final ParticipantsRepository participantsRepository;
     private final BansRepository bansRepository;
     private final RiotRequestParameters riotRequestParameters;
-    private final RankedRequests rankedRequests;
+    private final ChampionFlexibilityRequests championFlexibilityRequests;
     private final CounterPickRequests counterPickRequests;
     private final RankedSoloQService rankedSoloQService;
     private final BestDuoRequests bestDuoRequests;
     private final BestTrioRequests bestTrioRequests;
+    private final DraftPresenceRequests draftPresenceRequests;
 
     public ClientAppSoloqService(MatchesRepository matchesRepository,
                                  ParticipantsRepository participantsRepository,
                                  BansRepository bansRepository,
                                  RiotRequestParameters riotRequestParameters,
-                                 RankedRequests rankedRequests,
+                                 ChampionFlexibilityRequests championFlexibilityRequests,
                                  CounterPickRequests counterPickRequests,
                                  RankedSoloQService rankedSoloQService,
                                  BestDuoRequests bestDuoRequests,
-                                 BestTrioRequests bestTrioRequests) {
+                                 BestTrioRequests bestTrioRequests,
+                                 DraftPresenceRequests draftPresenceRequests) {
+
         this.matchesRepository = matchesRepository;
         this.participantsRepository = participantsRepository;
         this.bansRepository = bansRepository;
         this.riotRequestParameters = riotRequestParameters;
-        this.rankedRequests = rankedRequests;
+        this.championFlexibilityRequests = championFlexibilityRequests;
         this.counterPickRequests = counterPickRequests;
         this.rankedSoloQService = rankedSoloQService;
         this.bestDuoRequests = bestDuoRequests;
         this.bestTrioRequests = bestTrioRequests;
+        this.draftPresenceRequests = draftPresenceRequests;
     }
 
     public long countMatches() {
@@ -134,7 +135,7 @@ public class ClientAppSoloqService {
     }
 
     public ChampionFlexibility getChampionFlexibility(String name) {
-        return rankedRequests.getChampionFlexibility(name);
+        return championFlexibilityRequests.getChampionFlexibility(name);
     }
 
     public List<Champion> getChampionList() {
@@ -143,9 +144,9 @@ public class ClientAppSoloqService {
 
     public List<ChampionPresence> getChampionDraftPresence(String patch) {
         if (patch.equals("All patches")) {
-            return rankedRequests.getChampionDraftPresence("%");
+            return draftPresenceRequests.getTop10ChampionDraftPresence("%");
         } else {
-            return rankedRequests.getChampionDraftPresence(patch);
+            return draftPresenceRequests.getTop10ChampionDraftPresence(patch);
         }
     }
 
