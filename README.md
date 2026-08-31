@@ -95,14 +95,11 @@ The core idea is simple: instead of relying on intuition, the system analyzes th
 ## 📸 Screenshots
 
 <p align="center">
- <img src="src/main/resources/static/images/readme-images/main-page.png" width="450">
- <img src="src/main/resources/static/images/readme-images/draft-board.png" width="450">
- <img src="src/main/resources/static/images/readme-images/statistics.png" width="450">
- <img src="src/main/resources/static/images/readme-images/champion-details.png" width="450">
- <img src="src/main/resources/static/images/readme-images/filters.png" width="450">
+ <img src="src/main/resources/static/IMG/github/main-page.png" width="450">
+ <img src="src/main/resources/static/IMG/github/ranked-stats-page.png" width="450">
+ <img src="src/main/resources/static/IMG/github/win-rate-page.png" width="450">
+ <img src="src/main/resources/static/IMG/github/draft-predict-page.png" width="450">
 </p>
-
-> 💡 *Update the image paths above to match your actual screenshot filenames.*
 
 ---
 
