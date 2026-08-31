@@ -3,7 +3,6 @@
 A League of Legends analytics platform that collects ranked match data from the Riot API, processes champion draft information, and builds a **statistical draft recommendation system** based on real match patterns.
 
 🔗 [http://194.33.35.224:8083/lol/main](http://194.33.35.224:8083/lol/main)
-📖 [API Documentation (Swagger)](http://194.33.35.224:8083/swagger-ui/index.html)
 
 ---
 
@@ -69,7 +68,7 @@ The core idea is simple: instead of relying on intuition, the system analyzes th
 | **Caching** | In-memory `ConcurrentHashMap` |
 | **Frontend** | Thymeleaf, HTML5, CSS3, JavaScript, Canvas, Fetch API |
 | **External API** | Riot Games API (multi-region) |
-| **Monitoring** | Spring Actuator, Logback |
+| **Monitoring** | Logback |
 | **DevOps** | Docker |
 | **Testing** | JUnit, AssertJ |
 
