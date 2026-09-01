@@ -27,7 +27,7 @@ public class ClientAppMainController {
         model.addAttribute("actualSeason", clientAppSoloqService.getActualSeason());
     }
 
-    //-------------- Page Endpoints --------------
+    //============== Page Endpoints ==============
 
     @GetMapping("/main")
     public String getMainPage(Model model) {

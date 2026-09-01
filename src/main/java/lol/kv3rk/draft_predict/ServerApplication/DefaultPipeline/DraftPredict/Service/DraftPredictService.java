@@ -40,11 +40,11 @@ public class DraftPredictService {
     private final Map<String, List<String>> bestDuoCache = new ConcurrentHashMap<>();
     private final Map<String, List<String>> bestTrioCache = new ConcurrentHashMap<>();
 
-    // Hard occupied - железобетонно занятые позиции
+    // Hard occupied
     private final Set<String> blueSideOccupiedPositions = ConcurrentHashMap.newKeySet();
     private final Set<String> redSideOccupiedPositions = ConcurrentHashMap.newKeySet();
 
-    // Soft occupied - вероятные позиции для флекс-чемпионов
+    // Soft occupied
     private final Set<String> blueSideSoftOccupiedPositions = ConcurrentHashMap.newKeySet();
     private final Set<String> redSideSoftOccupiedPositions = ConcurrentHashMap.newKeySet();
 
@@ -119,13 +119,10 @@ public class DraftPredictService {
         Set<String> allSoftOccupied = new HashSet<>(blueSideSoftOccupiedPositions);
         allSoftOccupied.addAll(redSideSoftOccupiedPositions);
 
-        // Вариант B: генерируем рекомендации для разных сценариев
         Set<String> recommendations = new LinkedHashSet<>();
 
-        // Сценарий 1: базовый (без учёта soft occupied)
         recommendations.addAll(generateBanRecommendations(context, allHardOccupied, redSidePicks));
 
-        // Сценарий 2: для каждой soft-роли генерируем отдельно
         for (String softRole : allSoftOccupied) {
             Set<String> scenarioOccupied = new HashSet<>(allHardOccupied);
             scenarioOccupied.add(softRole);
@@ -147,13 +144,10 @@ public class DraftPredictService {
         Set<String> allSoftOccupied = new HashSet<>(blueSideSoftOccupiedPositions);
         allSoftOccupied.addAll(redSideSoftOccupiedPositions);
 
-        // Вариант B: генерируем рекомендации для разных сценариев
         Set<String> recommendations = new LinkedHashSet<>();
 
-        // Сценарий 1: базовый (без учёта soft occupied)
         recommendations.addAll(generateBanRecommendations(context, allHardOccupied, blueSidePicks));
 
-        // Сценарий 2: для каждой soft-роли генерируем отдельно
         for (String softRole : allSoftOccupied) {
             Set<String> scenarioOccupied = new HashSet<>(allHardOccupied);
             scenarioOccupied.add(softRole);
@@ -169,14 +163,11 @@ public class DraftPredictService {
                                                        List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
 
-        // Вариант B: генерируем рекомендации для разных сценариев
         Set<String> recommendations = new LinkedHashSet<>();
 
-        // Сценарий 1: базовый (без учёта soft occupied)
         recommendations.addAll(generateBlueSidePickRecommendations(context, blueSideOccupiedPositions,
                 blueSidePicks, redSidePicks, blueSideBans, redSideBans));
 
-        // Сценарий 2: для каждой soft-роли генерируем отдельно
         for (String softRole : blueSideSoftOccupiedPositions) {
             Set<String> scenarioOccupied = new HashSet<>(blueSideOccupiedPositions);
             scenarioOccupied.add(softRole);
@@ -193,14 +184,11 @@ public class DraftPredictService {
                                                       List<String> redSidePicks) {
         DraftContext context = prepareDraftContext(blueSideBans, redSideBans, blueSidePicks, redSidePicks);
 
-        // Вариант B: генерируем рекомендации для разных сценариев
         Set<String> recommendations = new LinkedHashSet<>();
 
-        // Сценарий 1: базовый (без учёта soft occupied)
         recommendations.addAll(generateRedSidePickRecommendations(context, redSideOccupiedPositions,
                 blueSidePicks, redSidePicks, blueSideBans, redSideBans));
 
-        // Сценарий 2: для каждой soft-роли генерируем отдельно
         for (String softRole : redSideSoftOccupiedPositions) {
             Set<String> scenarioOccupied = new HashSet<>(redSideOccupiedPositions);
             scenarioOccupied.add(softRole);
@@ -456,7 +444,6 @@ public class DraftPredictService {
             }
         }
 
-        // Уровень 1: железобетонные роли (constraint propagation)
         Set<String> hard = new HashSet<>();
         boolean changed = true;
         while (changed) {
@@ -471,13 +458,11 @@ public class DraftPredictService {
             }
         }
 
-        // Уровень 2: флекс-роли (все свободные роли чемпионов с >1 свободной ролью)
         Set<String> soft = new HashSet<>();
         for (List<String> roles : champRoles.values()) {
             List<String> freeRoles = roles.stream()
                     .filter(role -> !hard.contains(role))
                     .toList();
-            // Если у чемпиона больше 1 свободной роли — это флекс
             if (freeRoles.size() > 1) {
                 soft.addAll(freeRoles);
             }

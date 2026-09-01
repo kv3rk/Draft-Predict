@@ -28,7 +28,7 @@ public class ClientAppDraftController {
         model.addAttribute("actualPatch", clientAppDraftService.getPatchList().getLast());
     }
 
-    //-------------- Page Endpoints --------------
+    //============== Page Endpoints ==============
     @GetMapping("/main")
     public String getMainPage(Model model) {
         log.info("Entered [/draft-predict/main] endpoint");
@@ -36,7 +36,7 @@ public class ClientAppDraftController {
         return "draft-predict/draft-predict";
     }
 
-    //-------------- Info Endpoints --------------
+    //============== Info Endpoints ==============
     @PostMapping("/setup/match/info")
     @ResponseBody
     public ResponseEntity<Map<String, String>> setupMatchInfo(@RequestBody MatchSetupInfoDTO matchSetupInfoDTO) {

@@ -65,7 +65,6 @@ function renderTable(data) {
     tbody.innerHTML = data.map((champ, index) => {
         const name = champ.champion || 'Unknown';
 
-        // Извлекаем значение из Optional (Jackson сериализует Optional как объект)
         let presenceValue;
         if (champ.presence != null && typeof champ.presence === 'object') {
             presenceValue = champ.presence.value != null ? champ.presence.value : null;

@@ -40,7 +40,6 @@ function resetPickedChampions() {
     }
 }
 
-// Экспортируем функции в глобальную область видимости для надежного доступа из других файлов
 window.addPickedChampion = addPickedChampion;
 window.getAllPickedChampions = getAllPickedChampions;
 window.getPickedChampionsBySide = getPickedChampionsBySide;

@@ -26,7 +26,7 @@
     letter-spacing: 0.5px;
 }
 
-/* ─── Champion / Role / Patch Select (единый стиль) ─── */
+/* ─── Champion / Role / Patch Select ─── */
 .champion-select,
 .role-select,
 .patch-select {
@@ -88,7 +88,7 @@
     color: var(--bg-primary);
 }
 
-/* ─── Role Divider (жёлтая вертикальная линия) ─── */
+/* ─── Role Divider ─── */
 .role-divider {
     color: var(--accent-gold);
     font-weight: 700;

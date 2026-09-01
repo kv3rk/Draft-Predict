@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Slf4j
 public class ClientAppProController {
 
-    //-------------- Page Endpoints --------------
+    //============== Page Endpoints ==============
     @GetMapping("/main")
     public String getMainPage() {
         log.info("Entered [/pro-scene/main] endpoint");

@@ -79,7 +79,7 @@
     user-select: none;
 }
 
-/* ─── Patch Select (внутри role-filter) ─── */
+/* ─── Patch Select ─── */
 .patch-select {
     appearance: none;
     -webkit-appearance: none;
@@ -215,7 +215,7 @@
     color: var(--bg-primary);
 }
 
-/* ─── Responsive (обновить существующий медиа-запрос) ─── */
+/* ─── Responsive ─── */
 @media (max-width: 640px) {
     .champion-select {
         width: 100%;

@@ -39,7 +39,7 @@ public class ClientAppSoloqController {
         model.addAttribute("championList", clientAppSoloqService.getChampionList());
     }
 
-    //-------------- Page Endpoints --------------
+    //============== Page Endpoints ==============
 
     @GetMapping("/main")
     public String getMainPage(Model model) {
@@ -115,7 +115,7 @@ public class ClientAppSoloqController {
     }
 
 
-    //-------------- Info Endpoints --------------
+    //============== Info Endpoints ==============
 
 
     @GetMapping("/find/best-duo")
