@@ -1,6 +1,6 @@
 # 🎯 Draft Predictor
 
-A League of Legends analytics platform that collects ranked match data from the Riot API, processes champion draft information, and builds a **statistical draft recommendation system** based on real match patterns.
+A League of Legends analytics platform that collects ranked match data from the Riot API, processes champion draft information, and builds a **statistical champion draft recommendation system** based on real match patterns.
 
 🔗 [http://194.33.35.224:8083/lol/main](http://194.33.35.224:8083/lol/main)
 
@@ -14,12 +14,23 @@ The core idea is simple: instead of relying on intuition, the system analyzes th
 
 ---
 
+## 📸 Screenshots
+
+<p align="center">
+ <img src="src/main/resources/static/IMG/github/main-page.png" width="450">
+ <img src="src/main/resources/static/IMG/github/ranked-stats-page.png" width="450">
+ <img src="src/main/resources/static/IMG/github/win-rate-page.png" width="450">
+ <img src="src/main/resources/static/IMG/github/draft-predict-page.png" width="450">
+</p>
+
+---
+
 ## ✨ Features
 
 ### 📊 Data Collection Pipeline
 *   **Automated Ingestion:** Scheduled daily collection of SoloQ ranked matches via the Riot API using Spring `@Scheduled` — runs hands-free.
 *   **Multi-stage Pipeline:** Separate stages for PUUID gathering, match ID discovery, match info extraction, and persistence (`GatherPUUID` → `GatherMatchIDs` → `GatherMatchInfo` → `SaveMatchInfo`).
-*   **Regional Routing:** Dedicated `WebClient` configurations for different Riot regions (EUW, NA, KR, EUNE, ASIA, AMERICAS, SEA).
+*   **Regional Routing:** Dedicated `WebClient` configurations for different Riot regions (EUROPE, ASIA, AMERICAS, SEA).
 *   **Timeline Extraction:** Extended match parameters including gold/XP graphs, power spikes, and early/mid/late game transitions.
 
 ### 🧠 Statistical Recommendation Engine
@@ -32,7 +43,7 @@ The core idea is simple: instead of relying on intuition, the system analyzes th
 ### 🗄️ Database & Analytics
 *   **Native SQL Queries:** Complex analytical queries for pick rates, win rates, synergy, and flexibility metrics.
 *   **Materialized Views:** Precomputed statistical aggregates (`flex_stats`, `flex_agg`, `flex_avg`) with scheduled refresh for fast reads.
-*   **Strategic Indexing:** Targeted indexes on frequently queried columns (`champion`, `position`, `match_id`, `patch`) to optimize analytical workloads.
+*   **Database Indexes:** Indexes on frequently queried columns (`champion`, `position`, `match_id`, `patch`) to improve query performance.
 *   **Versioned Schema:** All database migrations managed via **Flyway** — no `ddl-auto` in production.
 
 ### 🎨 Interactive Frontend
@@ -43,12 +54,11 @@ The core idea is simple: instead of relying on intuition, the system analyzes th
 
 ### ⚙️ Background Processing & Monitoring
 *   **Scheduled Jobs:** Automated data collection, materialized view refresh, and cache updates.
-*   **Spring Actuator:** Health checks and application metrics exposure.
-*   **Structured Logging:** Logback-based logging configuration.
+*   **Logging:** Logback-based application logging.
 
 ## 🏗️ How It Works
 1.  **Scheduled Ingestion:** A Spring `@Scheduled` job triggers the daily pipeline, which walks through the Riot API to collect fresh SoloQ match data.
-2.  **Non-blocking HTTP:** `WebClient` performs asynchronous requests to fetch match and timeline data with proper regional routing.
+2.  **HTTP Requests:** `WebClient` is used to communicate with the Riot API and handle regional routing.
 3.  **Persistence & Migration:** Parsed data is stored in PostgreSQL within Spring-managed transactions (`@Transactional`). Schema evolution is handled by Flyway.
 4.  **Analytical Aggregation:** Native SQL queries and materialized views compute statistics (win rates, synergy, counter-picks, flexibility).
 5.  **Recommendation Engine:** The `DraftPredictService` applies constraint propagation and statistical scoring to produce draft suggestions.
@@ -61,7 +71,7 @@ The core idea is simple: instead of relying on intuition, the system analyzes th
 | Layer | Technology |
 | --- | --- |
 | **Backend** | Java 21, Spring Boot, Spring MVC, Spring Data JPA |
-| **HTTP Client** | Spring WebClient (non-blocking) |
+| **HTTP Client** | Spring WebClient |
 | **Database** | PostgreSQL (native SQL, materialized views, indexes) |
 | **Migrations** | Flyway |
 | **Scheduling** | Spring `@Scheduled` |
@@ -86,19 +96,8 @@ The core idea is simple: instead of relying on intuition, the system analyzes th
 *   **Pro Match Data Collection** — extend the pipeline to gather data from professional League of Legends matches (LCK, LEC, LPL, LCS, etc.).
 *   **Hybrid Recommendations** — combine SoloQ and pro-scene statistics to produce more meta-aware draft suggestions.
 *   **ML-based Enhancement** — introduce machine learning models on top of the existing statistical foundation to refine recommendations beyond pure aggregation.
-*   **Distributed Caching** — replace the in-memory cache with Redis/Caffeine for production-grade TTL, eviction, and multi-instance support.
+*   **Caching Improvements** — replace the current in-memory cache with Caffeine for TTL and eviction; consider Redis for shared caching in multi-instance deployments.
 *   **CI/CD Pipeline** — GitHub Actions for automated testing, building, and Docker image deployment.
-
----
-
-## 📸 Screenshots
-
-<p align="center">
- <img src="src/main/resources/static/IMG/github/main-page.png" width="450">
- <img src="src/main/resources/static/IMG/github/ranked-stats-page.png" width="450">
- <img src="src/main/resources/static/IMG/github/win-rate-page.png" width="450">
- <img src="src/main/resources/static/IMG/github/draft-predict-page.png" width="450">
-</p>
 
 ---
 
