@@ -110,7 +110,7 @@ cd draft-predict
 ```
 ### 2. Configure application properties
 ```
-src/main/resources/application.properties
+src/main/resources/application.yml
 ```
 ### 3. Run the application
 ```
