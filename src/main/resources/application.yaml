@@ -2,7 +2,7 @@ spring:
   application:
     name: draft-predict
   profiles:
-    active: prod
+    active: dev
   main:
     banner-mode: off
     allow-circular-references: off
@@ -10,9 +10,14 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-
 api:
   key: ${API_KEY}
+  google_drive:
+    key: AIzaSyDi6F3psEWCc2o_XJ0eK3O761CLVRs4ZhI
+    destination_folder_id: 1qrxwmjPAA0BaU_Qpe-sZ_8tHszp-t9Ul
+    refresh_token: 1//04YC10829Mr0RCgYIARAAGAQSNwF-L9Ir5DLifgCrljzlRfketI7ofSi7qb2ap6ilHP0oieX7CDJbNzfOfjQwBWTC_3JIEDwY4I8
+    client_id: 783928691404-ff4n2e3bm23r4ima7119l1hb0r3571kc.apps.googleusercontent.com
+    client_secret: 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
   request:
     delay: ${API_REQUEST_DELAY}
   queue:

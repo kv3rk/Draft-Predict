@@ -1,5 +1,7 @@
 package lol.kv3rk.draft_predict.ServerApplication.InvocationSystem;
 
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.ProSceneGatherInfo.Service.GatherFileMetadata;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.ProSceneGatherInfo.Service.GoogleDriveFileReader;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Component.ChampionIdDB;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Service.GatherMatchInfo;
 import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Service.SoloQDbRequestsService;
@@ -16,34 +18,39 @@ public class DevScheduledInvocationSystem {
     private final GatherMatchInfo gatherMatchInfo;
     private final ChampionIdDB championIdDB;
     private final SoloQDbRequestsService soloQDbRequestsService;
+    private final GoogleDriveFileReader googleDriveFileReader;
 
     public DevScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
                                         ChampionIdDB championIdDB,
-                                        SoloQDbRequestsService soloQDbRequestsService) {
+                                        SoloQDbRequestsService soloQDbRequestsService,
+                                        GoogleDriveFileReader googleDriveFileReader) {
 
         this.gatherMatchInfo = gatherMatchInfo;
         this.championIdDB = championIdDB;
         this.soloQDbRequestsService = soloQDbRequestsService;
+        this.googleDriveFileReader = googleDriveFileReader;
     }
 
-    @Scheduled(initialDelay = Long.MAX_VALUE, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
     public void everyDayRoutine() throws InterruptedException {
 
-        //------------ Initial EUW refresh ---------------
-        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-        championIdDB.populateChampionAndIdsDB();
-        gatherMatchInfo.getEUWMatchInfo();
-
-        //------------  After EUW refresh ---------------
-        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-        gatherMatchInfo.getNAMatchInfo();
-
-        //------------  After NA refresh ---------------
-        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-        gatherMatchInfo.getKRMatchInfo();
-
-        //------------  After KR refresh ---------------
-        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-        gatherMatchInfo.getEUNEMatchInfo();
+        googleDriveFileReader.downloadProSceneFile();
+//
+//        //------------ Initial EUW refresh ---------------
+//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+//        championIdDB.populateChampionAndIdsDB();
+//        gatherMatchInfo.getEUWMatchInfo();
+//
+//        //------------  After EUW refresh ---------------
+//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+//        gatherMatchInfo.getNAMatchInfo();
+//
+//        //------------  After NA refresh ---------------
+//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+//        gatherMatchInfo.getKRMatchInfo();
+//
+//        //------------  After KR refresh ---------------
+//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+//        gatherMatchInfo.getEUNEMatchInfo();
     }
 }

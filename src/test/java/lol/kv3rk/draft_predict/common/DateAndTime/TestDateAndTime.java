@@ -6,11 +6,8 @@ import org.springframework.boot.test.context.TestComponent;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.ITERATOR;
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
 
 @TestComponent
 public class TestDateAndTime {
@@ -34,6 +31,13 @@ public class TestDateAndTime {
         long todayEndTime = today.toEpochSecond(ZoneOffset.UTC);
 
         assertThat(todayEndTime).isEqualTo(1785542400);
+
+    }
+
+    @Test
+    public void interviewTask() throws InterruptedException {
+
+
 
     }
 
