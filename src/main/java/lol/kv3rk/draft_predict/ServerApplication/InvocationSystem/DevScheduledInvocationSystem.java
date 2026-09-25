@@ -1,7 +1,6 @@
 package lol.kv3rk.draft_predict.ServerApplication.InvocationSystem;
 
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.ProSceneGatherInfo.Service.GatherFileMetadata;
-import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.ProSceneGatherInfo.Service.GoogleDriveFileReader;
+import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.ProSceneGatherInfo.Service.SaveProMatchData;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Component.ChampionIdDB;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Service.GatherMatchInfo;
 import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Service.SoloQDbRequestsService;
@@ -9,6 +8,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @EnableScheduling
 @Component
@@ -18,23 +19,24 @@ public class DevScheduledInvocationSystem {
     private final GatherMatchInfo gatherMatchInfo;
     private final ChampionIdDB championIdDB;
     private final SoloQDbRequestsService soloQDbRequestsService;
-    private final GoogleDriveFileReader googleDriveFileReader;
+    private final SaveProMatchData saveProMatchData;
 
     public DevScheduledInvocationSystem(GatherMatchInfo gatherMatchInfo,
                                         ChampionIdDB championIdDB,
                                         SoloQDbRequestsService soloQDbRequestsService,
-                                        GoogleDriveFileReader googleDriveFileReader) {
+                                        SaveProMatchData saveProMatchData
+    ) {
 
         this.gatherMatchInfo = gatherMatchInfo;
         this.championIdDB = championIdDB;
         this.soloQDbRequestsService = soloQDbRequestsService;
-        this.googleDriveFileReader = googleDriveFileReader;
+        this.saveProMatchData = saveProMatchData;
     }
 
     @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
-    public void everyDayRoutine() throws InterruptedException {
+    public void everyDayRoutine() throws InterruptedException, IOException {
 
-        googleDriveFileReader.downloadProSceneFile();
+        saveProMatchData.saveData();
 //
 //        //------------ Initial EUW refresh ---------------
 //        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();

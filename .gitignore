@@ -12,6 +12,7 @@ build/
 *.ipr
 *.iws
 *.Identifier
+ProSceneFiles/
 
 # VS Code
 .vscode/
