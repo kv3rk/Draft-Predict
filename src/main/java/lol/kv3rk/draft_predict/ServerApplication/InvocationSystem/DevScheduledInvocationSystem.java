@@ -5,6 +5,7 @@ import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.Solo
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.SoloqGatherInfo.Service.GatherMatchInfo;
 import lol.kv3rk.draft_predict.ServerApplication.SoloqRanked.SoloqDbRequests.Service.SoloQDbRequestsService;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -33,26 +34,32 @@ public class DevScheduledInvocationSystem {
         this.saveProMatchData = saveProMatchData;
     }
 
-    @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = Long.MAX_VALUE, fixedDelay = Long.MAX_VALUE)
     public void everyDayRoutine() throws InterruptedException, IOException {
 
-        saveProMatchData.saveData();
-//
-//        //------------ Initial EUW refresh ---------------
-//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-//        championIdDB.populateChampionAndIdsDB();
-//        gatherMatchInfo.getEUWMatchInfo();
-//
-//        //------------  After EUW refresh ---------------
-//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-//        gatherMatchInfo.getNAMatchInfo();
-//
-//        //------------  After NA refresh ---------------
-//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-//        gatherMatchInfo.getKRMatchInfo();
-//
-//        //------------  After KR refresh ---------------
-//        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
-//        gatherMatchInfo.getEUNEMatchInfo();
+
+        //------------ Initial EUW refresh ---------------
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+        championIdDB.populateChampionAndIdsDB();
+        gatherMatchInfo.getEUWMatchInfo();
+
+        //------------  After EUW refresh ---------------
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+        gatherMatchInfo.getNAMatchInfo();
+
+        //------------  After NA refresh ---------------
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+        gatherMatchInfo.getKRMatchInfo();
+
+        //------------  After KR refresh ---------------
+        soloQDbRequestsService.refreshMaterializedViewRankedFlexibility();
+        gatherMatchInfo.getEUNEMatchInfo();
     }
+
+    @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
+    public void proMatchEveryDayRoutine() throws IOException {
+
+        saveProMatchData.saveData();
+    }
+
 }

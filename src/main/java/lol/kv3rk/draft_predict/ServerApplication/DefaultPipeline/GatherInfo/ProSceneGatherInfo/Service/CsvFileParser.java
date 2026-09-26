@@ -2,7 +2,7 @@ package lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.Pro
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
-import jakarta.annotation.PreDestroy;
+import lol.kv3rk.draft_predict.ServerApplication.GeneralInfo.Repository.GeneralInfoRepository;
 import lol.kv3rk.draft_predict.ServerApplication.DefaultPipeline.GatherInfo.ProSceneGatherInfo.DTO.OracleElexirDTO.OracleElexir;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,84 +14,73 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class CsvFileParser {
 
     private final GoogleDriveFileReader googleDriveFileReader;
+    private final GeneralInfoRepository generalInfoRepository;
     private Path cachedCSVFilePath;
 
-    public CsvFileParser(GoogleDriveFileReader googleDriveFileReader) {
+    public CsvFileParser(GoogleDriveFileReader googleDriveFileReader,
+                         GeneralInfoRepository generalInfoRepository) {
         this.googleDriveFileReader = googleDriveFileReader;
+        this.generalInfoRepository = generalInfoRepository;
     }
 
     public List<OracleElexir> readCSVFile() throws IOException {
+
+        int skipLines = getParsedLinesFromDb();
+        log.info("Skipping lines: {}", skipLines);
+
         cachedCSVFilePath = googleDriveFileReader.downloadProSceneFile();
-        System.out.println("Downloaded to: " + cachedCSVFilePath);
+        log.info("Downloaded to: {}", cachedCSVFilePath);
 
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(cachedCSVFilePath.toFile()), StandardCharsets.UTF_8)) {
 
             CsvToBean<OracleElexir> csvToBean = new CsvToBeanBuilder<OracleElexir>(reader)
                     .withType(OracleElexir.class)
-                    .withSkipLines(108721)
+                    .withSkipLines(skipLines)
                     .withThrowExceptions(false)
                     .build();
 
             List<OracleElexir> beans = csvToBean.parse()
                     .stream()
-                    .filter(e->e.getDate().equals(LocalDate.now().minusDays(1)))
+                    .filter(e -> e.getDate().equals(LocalDate.now().minusDays(1)))
                     .toList();
 
-
-            System.out.println("Successfully parsed: " + beans.size());
+            log.info("Successfully parsed: {}", beans.size());
             csvToBean.getCapturedExceptions().forEach(ex ->
-                    System.err.println("Parse error line " + ex.getLineNumber() + ": " + ex.getMessage())
+                    log.warn("Parse error line {}: {}", ex.getLineNumber(), ex.getMessage())
             );
 
-//            beans.forEach(bean -> {
-//                StringBuilder stringBuilder = new StringBuilder();
-//
-//                stringBuilder.append(bean.getGameId()).append(" | ")
-//                        .append(bean.getGameId()).append(" | ")
-//                        .append(bean.getLeague()).append(" | ")
-//                        .append(bean.getDate()).append(" | ")
-//                        .append(bean.getPatch()).append(" | ")
-//                        .append(bean.getSide()).append(" | ")
-//                        .append(bean.getPosition()).append(" | ")
-//                        .append(bean.getPlayerName()).append(" | ")
-//                        .append(bean.getTeamName()).append(" | ")
-//                        .append(bean.getFirstPick()).append(" | ")
-//                        .append(bean.getChampion()).append(" | ")
-//                        .append(bean.getBan1()).append(" | ")
-//                        .append(bean.getBan2()).append(" | ")
-//                        .append(bean.getBan3()).append(" | ")
-//                        .append(bean.getBan4()).append(" | ")
-//                        .append(bean.getBan5()).append(" | ")
-//                        .append(bean.getPick1()).append(" | ")
-//                        .append(bean.getPick2()).append(" | ")
-//                        .append(bean.getPick3()).append(" | ")
-//                        .append(bean.getPick4()).append(" | ")
-//                        .append(bean.getPick5()).append(" | ")
-//                        .append(bean.getResult()).append(" | ");
-//
-//                System.out.println(stringBuilder);
-//            });
+            int lastParsedLine = skipLines + beans.size();
+            log.info("Last parsed line: {}", lastParsedLine);
 
-            int lastParsedLine = 108721 + beans.size();
-            System.out.println("Last parsed line: " + lastParsedLine);
+            updateParsedLinesInDb(beans.size());
 
             return beans;
         }
     }
 
-    @PreDestroy
-    private void removeCSVFile() throws IOException {
+    private int getParsedLinesFromDb() {
+        return generalInfoRepository.getParsedLines();
+    }
+
+    private void updateParsedLinesInDb(int addedLines) {
+        generalInfoRepository.updateParsedLines(addedLines);
+        log.info("Updated parsed_lines by: {}", addedLines);
+    }
+
+    public Map<String, Path> getProSceneFileMetadata() throws IOException {
         if (cachedCSVFilePath != null && Files.exists(cachedCSVFilePath)) {
-            Files.delete(cachedCSVFilePath);
-            log.info("CSV file removed: {}", cachedCSVFilePath);
+            return new HashMap<>(Map.of(googleDriveFileReader.getCopiedFileId(), cachedCSVFilePath));
         }
+        return null;
     }
 }

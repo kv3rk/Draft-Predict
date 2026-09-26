@@ -24,6 +24,7 @@ public class GoogleDriveFileReader {
     private String key;
 
     private final String downloadPath = "ProSceneFiles/Actual_season/proscene.csv";
+    private String copiedFileId;
 
     private final GatherFileMetadata gatherFileMetadata;
     private final WebClient proSceneGetFile;
@@ -36,6 +37,7 @@ public class GoogleDriveFileReader {
 
     public Path downloadProSceneFile() {
         String fileId = gatherFileMetadata.getActualFileMetadata();
+        copiedFileId = fileId;
         Path destination = Paths.get(downloadPath);
 
         return downloadFileToDisk(fileId, destination)
@@ -100,5 +102,9 @@ public class GoogleDriveFileReader {
             DataBufferUtils.release(chunk);
             return Mono.error(e);
         }
+    }
+
+    public String getCopiedFileId() {
+        return copiedFileId;
     }
 }
