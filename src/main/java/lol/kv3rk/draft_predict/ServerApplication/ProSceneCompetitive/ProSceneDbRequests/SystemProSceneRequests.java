@@ -18,5 +18,5 @@ public interface SystemProSceneRequests extends JpaRepository<ProMatchEntity, St
                     from pro_match pm;
                     """
     )
-    Optional<Integer> getAmountOfMatches();
+    Optional<Long> getAmountOfMatches();
 }

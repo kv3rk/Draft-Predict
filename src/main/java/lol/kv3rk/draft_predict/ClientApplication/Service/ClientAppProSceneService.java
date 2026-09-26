@@ -16,11 +16,11 @@ public class ClientAppProSceneService {
         this.systemProSceneRequests = systemProSceneRequests;
     }
 
-    public Integer getAmountOfMatches() {
+    public Long getAmountOfMatches() {
 
-        Optional<Integer> amountMatches = systemProSceneRequests.getAmountOfMatches();
+        Optional<Long> amountMatches = systemProSceneRequests.getAmountOfMatches();
 
-        return amountMatches.orElse(0);
+        return amountMatches.orElse(0L);
 
     }
 }
