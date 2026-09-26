@@ -13,6 +13,7 @@ build/
 *.iws
 *.Identifier
 ProSceneFiles/
+logs/
 
 # VS Code
 .vscode/
