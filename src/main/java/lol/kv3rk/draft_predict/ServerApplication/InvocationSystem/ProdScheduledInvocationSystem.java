@@ -52,11 +52,11 @@ public class ProdScheduledInvocationSystem {
         gatherMatchInfo.getEUNEMatchInfo();
     }
 
-    @Scheduled(initialDelay = 1, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(cron = "0 0 5 1/1 * *", zone = "UTC")
     public void proMatchEveryDayRoutine() throws IOException {
 
         saveProMatchData.saveData();
     }
 
-    //cron = "0 0 5 1/1 * *", zone = "UTC"
+    //initialDelay = 1, fixedDelay = Long.MAX_VALUE
 }
