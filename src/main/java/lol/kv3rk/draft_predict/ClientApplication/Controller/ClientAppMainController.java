@@ -1,5 +1,6 @@
 package lol.kv3rk.draft_predict.ClientApplication.Controller;
 
+import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppProSceneService;
 import lol.kv3rk.draft_predict.ClientApplication.Service.ClientAppSoloqService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -13,13 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ClientAppMainController {
 
     private final ClientAppSoloqService clientAppSoloqService;
+    private final ClientAppProSceneService clientAppProSceneService;
 
-    public ClientAppMainController(ClientAppSoloqService clientAppSoloqService) {
+    public ClientAppMainController(ClientAppSoloqService clientAppSoloqService,
+                                   ClientAppProSceneService clientAppProSceneService) {
         this.clientAppSoloqService = clientAppSoloqService;
+        this.clientAppProSceneService = clientAppProSceneService;
     }
 
     private void addCommonAttributes(Model model) {
         model.addAttribute("amountOfMatches", clientAppSoloqService.countMatches());
+        model.addAttribute("amountOfProMatches", clientAppProSceneService.getAmountOfMatches());
         model.addAttribute("actualPatch", clientAppSoloqService.actualPatch());
         model.addAttribute("servers", String.join(", ", clientAppSoloqService.getRiotServerName()));
         model.addAttribute("tiers", String.join(", ", clientAppSoloqService.getTierParameters()));
