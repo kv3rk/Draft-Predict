@@ -30,7 +30,7 @@ public class GoogleDriveFileReader {
     private final WebClient proSceneGetFile;
 
     public GoogleDriveFileReader(GatherFileMetadata gatherFileMetadata,
-                                 @Qualifier(value = "proSceneGetFile") WebClient proSceneGetFile) {
+                                 @Qualifier(value = "proSceneGetAndDeleteFile") WebClient proSceneGetFile) {
         this.gatherFileMetadata = gatherFileMetadata;
         this.proSceneGetFile = proSceneGetFile;
     }

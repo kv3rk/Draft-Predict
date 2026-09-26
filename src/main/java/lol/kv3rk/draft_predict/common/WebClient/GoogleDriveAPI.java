@@ -46,7 +46,7 @@ public class GoogleDriveAPI {
     }
 
     @Bean
-    public WebClient proSceneGetFile(WebClient.Builder builder) {
+    public WebClient proSceneGetAndDeleteFile(WebClient.Builder builder) {
         return builder
                 .baseUrl("https://www.googleapis.com/drive/v3/files")
                 .filter(oauth2Filter())
