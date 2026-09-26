@@ -20,8 +20,8 @@ public class ProTeamEntity {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(nullable = false, name = "matchId", referencedColumnName = "matchId")
-    private ProMatchEntity matchId;
+    @JoinColumn(nullable = false, name = "game_id", referencedColumnName = "game_id")
+    private ProMatchEntity gameId;
 
     @Column(nullable = false)
     private String league;

@@ -1,23 +1,23 @@
 create table pro_match
 (
-    match_id   varchar(25) not null,
+    game_id    varchar(25) not null,
     league     varchar(10) not null,
     patch      varchar(10) not null,
     match_date date        not null,
-    CONSTRAINT pk_pro_match PRIMARY KEY (match_id)
+    CONSTRAINT pk_pro_match PRIMARY KEY (game_id)
 );
 
 create table pro_team
 (
     id         UUID        not null,
-    match_id   varchar(25) not null,
+    game_id    varchar(25) not null,
     league     varchar(10) not null,
     team_name  varchar(50) not null,
     side       varchar(10) not null,
     first_pick boolean     not null,
     result     boolean     not null,
     constraint pk_pro_team primary key (id),
-    constraint fk_pro_team_to_pro_match foreign key (match_id) references pro_match (match_id)
+    constraint fk_pro_team_to_pro_match foreign key (game_id) references pro_match (game_id)
 );
 
 create table pro_ban
@@ -51,5 +51,10 @@ create table pro_pick
 
 create table general_info
 (
-    parsed_lines int default 109009
+    id           UUID not null,
+    parsed_lines int  not null,
+    constraint pk_general_info primary key (id)
 );
+
+insert into general_info
+values ('0b208d76-3479-488b-b336-3aa23927cdb6', 109009);

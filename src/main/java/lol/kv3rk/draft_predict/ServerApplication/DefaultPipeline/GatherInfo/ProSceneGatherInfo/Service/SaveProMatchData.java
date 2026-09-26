@@ -60,95 +60,78 @@ public class SaveProMatchData {
     public void saveData() throws IOException {
         List<OracleElexir> oracleElexirList = csvFileParser.readCSVFile();
 
-        Set<OracleElexirMatchInfo> matchInfo = saveMatchData(oracleElexirList);
-        Set<OracleElexirTeamInfo> teamInfo = saveTeamData(oracleElexirList, matchInfo);
-        saveBanData(oracleElexirList, teamInfo);
-        savePickData(oracleElexirList, teamInfo);
+        saveMatchData(oracleElexirList);
+        saveTeamData(oracleElexirList);
+        saveBanData(oracleElexirList);
+        savePickData(oracleElexirList);
 
         log.info("Data saved successfully");
-
         removeProMatchFiles.removeAllProSceneFiles(csvFileParser.getProSceneFileMetadata());
-
     }
 
-    private Set<OracleElexirMatchInfo> saveMatchData(List<OracleElexir> oracleElexirList) {
-        Set<OracleElexirMatchInfo> matchInfo = new LinkedHashSet<>(
-                oracleElexirList.stream()
-                        .map(e -> new OracleElexirMatchInfo(
-                                e.getGameId(), e.getLeague(), e.getDate(), e.getPatch()))
-                        .filter(dto -> proSceneLeagues.contains(dto.league()))
-                        .filter(dto -> dto.date().equals(LocalDate.now().minusDays(1)))
-                        .collect(Collectors.toList())
-        );
-
-        List<ProMatchEntity> entities = matchInfo.stream()
-                .map(dto -> ProMatchEntity.builder()
-                        .gameId(dto.gameId())
-                        .league(dto.league())
-                        .date(dto.date())
-                        .patch(dto.patch())
-                        .build())
-                .collect(Collectors.toList());
-
-        proMatchRepository.saveAll(entities);
-        log.info("Saved {} matches", entities.size());
-
-        return matchInfo;
-    }
-
-    private Set<OracleElexirTeamInfo> saveTeamData(List<OracleElexir> oracleElexirList,
-                                                   Set<OracleElexirMatchInfo> matchInfo) {
-        Set<String> gameIds = new HashSet<>(matchInfo.stream()
-                .map(OracleElexirMatchInfo::gameId).collect(Collectors.toList()));
-
-        Set<OracleElexirTeamInfo> teamInfo = new LinkedHashSet<>(
-                oracleElexirList.stream()
-                        .map(e -> new OracleElexirTeamInfo(
-                                e.getGameId(), e.getTeamName(), e.getSide(),
-                                e.getFirstPick(), e.getResult()))
-                        .filter(dto -> gameIds.contains(dto.gameId()))
-                        .collect(Collectors.toList())
-        );
-
-        List<ProTeamEntity> entities = teamInfo.stream()
-                .map(dto -> {
-                    ProMatchEntity match = proMatchRepository.findById(dto.gameId())
-                            .orElseThrow(() -> new RuntimeException("Match not found: " + dto.gameId()));
-
-                    return ProTeamEntity.builder()
-                            .matchId(match)
-                            .league(match.getLeague()) // или dto.league() если есть в DTO
-                            .teamName(dto.teamName())
-                            .side(dto.side())
-                            .firstPick("1".equals(dto.firstPick())) // или Boolean.parseBoolean
-                            .result("1".equals(dto.result()))
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        proTeamRepository.saveAll(entities);
-        log.info("Saved {} teams", entities.size());
-
-        return teamInfo;
-    }
-
-    private void saveBanData(List<OracleElexir> oracleElexirList,
-                             Set<OracleElexirTeamInfo> teamInfo) {
-        Set<String> teamNames = teamInfo.stream()
-                .map(OracleElexirTeamInfo::teamName)
+    private void saveMatchData(List<OracleElexir> oracleElexirList) {
+        Set<OracleElexirMatchInfo> matchInfo = oracleElexirList.stream()
+                .map(e -> new OracleElexirMatchInfo(
+                        e.getGameId(), e.getLeague(), e.getDate(), e.getPatch()))
+                .filter(dto -> proSceneLeagues.contains(dto.league()))
+                .filter(dto -> dto.date().equals(LocalDate.now().minusDays(1)))
                 .collect(Collectors.toSet());
 
-        List<ProBanEntity> entities = oracleElexirList.stream()
-                .filter(e -> teamNames.contains(e.getTeamName()))
-                .filter(e -> "team".equals(e.getPosition())) // только team строки имеют баны? Проверь логику
-                .map(e -> {
-                    ProTeamEntity team = proTeamRepository
-                            .findByMatchIdAndTeamName(
-                                    proMatchRepository.findById(e.getGameId()).orElseThrow(),
-                                    e.getTeamName())
-                            .orElseThrow(() -> new RuntimeException("Team not found"));
+        matchInfo.forEach(dto -> {
+            ProMatchEntity entity = ProMatchEntity.builder()
+                    .gameId(dto.gameId())
+                    .league(dto.league())
+                    .date(dto.date())
+                    .patch(dto.patch())
+                    .build();
+            proMatchRepository.save(entity);
+        });
 
-                    return ProBanEntity.builder()
+        log.info("Saved {} matches", matchInfo.size());
+    }
+
+    private void saveTeamData(List<OracleElexir> oracleElexirList) {
+
+        Set<OracleElexirTeamInfo> teamInfo = oracleElexirList.stream()
+                .filter(e -> !"team".equals(e.getPosition()))  // только игроки, не team
+                .map(e -> new OracleElexirTeamInfo(
+                        e.getGameId(), e.getLeague(), e.getTeamName(),
+                        e.getSide(), e.getFirstPick(), e.getResult()))
+                .filter(dto -> proSceneLeagues.contains(dto.league()))
+                .collect(Collectors.toSet());
+
+        teamInfo.forEach(dto -> {
+            ProMatchEntity match = proMatchRepository.findByGameId(dto.gameId())
+                    .orElseThrow(() -> new RuntimeException("Match not found: " + dto.gameId()));
+
+            ProTeamEntity entity = ProTeamEntity.builder()
+                    .gameId(match)
+                    .league(dto.league())
+                    .teamName(dto.teamName())
+                    .side(dto.side())
+                    .firstPick("1".equals(dto.firstPick()))
+                    .result("1".equals(dto.result()))
+                    .build();
+            proTeamRepository.save(entity);
+        });
+
+        log.info("Saved {} teams", teamInfo.size());
+    }
+
+    private void saveBanData(List<OracleElexir> oracleElexirList) {
+
+        oracleElexirList.stream()
+                .filter(e -> "team".equals(e.getPosition()))
+                .filter(e -> proSceneLeagues.contains(e.getLeague()))
+                .forEach(e -> {
+                    ProMatchEntity match = proMatchRepository.findByGameId(e.getGameId())
+                            .orElseThrow(() -> new RuntimeException("Match not found: " + e.getGameId()));
+
+                    ProTeamEntity team = proTeamRepository
+                            .findByGameIdAndTeamName(match, e.getTeamName())
+                            .orElseThrow(() -> new RuntimeException("Team not found: " + e.getTeamName()));
+
+                    ProBanEntity entity = ProBanEntity.builder()
                             .teamId(team)
                             .ban1(e.getBan1())
                             .ban2(e.getBan2())
@@ -156,36 +139,31 @@ public class SaveProMatchData {
                             .ban4(e.getBan4())
                             .ban5(e.getBan5())
                             .build();
-                })
-                .collect(Collectors.toList());
+                    proBanRepository.save(entity);
+                });
 
-        proBanRepository.saveAll(entities);
-        log.info("Saved {} bans", entities.size());
+        log.info("Saved bans");
     }
 
-    private void savePickData(List<OracleElexir> oracleElexirList,
-                              Set<OracleElexirTeamInfo> teamInfo) {
+    private void savePickData(List<OracleElexir> oracleElexirList) {
         collectTeamPicks(oracleElexirList);
 
-        Set<String> teamNames = teamInfo.stream()
-                .map(OracleElexirTeamInfo::teamName)
-                .collect(Collectors.toSet());
-
-        List<ProPickEntity> entities = oracleElexirList.stream()
+        oracleElexirList.stream()
                 .filter(e -> !"team".equals(e.getPosition()))
-                .filter(e -> teamNames.contains(e.getTeamName()))
-                .map(e -> {
+                .filter(e -> proSceneLeagues.contains(e.getLeague()))
+                .forEach(e -> {
                     String key = e.getGameId() + "|" + e.getTeamName();
                     List<String> picks = teamPicksMap.getOrDefault(key, List.of());
                     int pickOrder = picks.indexOf(e.getChampion()) + 1;
 
-                    ProTeamEntity team = proTeamRepository
-                            .findByMatchIdAndTeamName(
-                                    proMatchRepository.findById(e.getGameId()).orElseThrow(),
-                                    e.getTeamName())
-                            .orElseThrow(() -> new RuntimeException("Team not found"));
+                    ProMatchEntity match = proMatchRepository.findByGameId(e.getGameId())
+                            .orElseThrow(() -> new RuntimeException("Match not found: " + e.getGameId()));
 
-                    return ProPickEntity.builder()
+                    ProTeamEntity team = proTeamRepository
+                            .findByGameIdAndTeamName(match, e.getTeamName())
+                            .orElseThrow(() -> new RuntimeException("Team not found: " + e.getTeamName()));
+
+                    ProPickEntity entity = ProPickEntity.builder()
                             .teamId(team)
                             .champion(e.getChampion())
                             .position(e.getPosition())
@@ -196,11 +174,10 @@ public class SaveProMatchData {
                             .xpDiffAt15(parseIntSafe(e.getXpDiffAt15()))
                             .csDiffAt15(parseIntSafe(e.getCsDiffAt15()))
                             .build();
-                })
-                .collect(Collectors.toList());
+                    proPickRepository.save(entity);
+                });
 
-        proPickRepository.saveAll(entities);
-        log.info("Saved {} picks", entities.size());
+        log.info("Saved picks");
     }
 
     private void collectTeamPicks(List<OracleElexir> oracleElexirList) {

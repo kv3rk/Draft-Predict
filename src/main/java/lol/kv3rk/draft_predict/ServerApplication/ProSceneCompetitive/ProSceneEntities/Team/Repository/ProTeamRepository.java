@@ -8,5 +8,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProTeamRepository extends JpaRepository<ProTeamEntity, UUID> {
-    Optional<ProTeamEntity> findByMatchIdAndTeamName(ProMatchEntity matchId, String teamName);
+    Optional<ProTeamEntity> findByGameIdAndTeamName(ProMatchEntity gameId, String teamName);
 }

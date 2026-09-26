@@ -19,6 +19,7 @@ import java.time.LocalDate;
 @Builder
 public class ProMatchEntity {
     @Id
+    @Column(name = "game_id")
     private String gameId;
 
     @Column(nullable = false)
