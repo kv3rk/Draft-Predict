@@ -2,7 +2,7 @@ spring:
   application:
     name: draft-predict
   profiles:
-    active: dev
+    active: prod
   main:
     banner-mode: off
     allow-circular-references: off
