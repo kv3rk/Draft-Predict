@@ -2,40 +2,72 @@
 .pro-scene-main {
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 60vh;
     animation: fadeSlideUp 0.8s var(--transition-base) both;
 }
 
-/* ─── Development Card ─── */
-.development-card {
-    text-align: center;
-    max-width: 500px;
+/* ─── Pro Scene Grid ─── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
     width: 100%;
-    padding: 48px 32px;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-.development-card .card-icon {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 16px;
+#proPickRateCard {
+    animation-delay: 0.15s;
 }
 
-.development-card .card-icon svg {
-    width: 32px;
-    height: 32px;
+/* ─── Card Link ─── */
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
-.development-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 12px;
-    letter-spacing: -0.3px;
+.card-link .stats-card {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    padding: 20px;
 }
 
-.development-subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
+.card-link .stats-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: var(--shadow-md), 0 0 60px rgba(201, 169, 110, 0.15);
+    cursor: pointer;
+}
+
+.card-link .card-header {
+    margin-bottom: 0;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        max-width: 520px;
+    }
+
+    .stats-card {
+        padding: 22px;
+    }
+
+    .card-link .stats-card {
+        min-height: 140px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-card {
+        padding: 18px;
+        border-radius: var(--radius-md);
+    }
+
+    .card-link .stats-card {
+        min-height: 120px;
+    }
 }

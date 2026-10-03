@@ -1,0 +1,55 @@
+/* ─── Position Badge ─── */
+.position-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    background: rgba(167, 139, 250, 0.15);
+    color: #a78bfa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ─── Count Badge ─── */
+.count-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    background: var(--accent-pick-dim);
+    color: var(--accent-pick);
+}
+
+/* ─── Column Widths ─── */
+.col-position {
+    width: 100px;
+}
+
+.col-count {
+    width: 80px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 480px) {
+    .col-position {
+        width: 80px;
+    }
+
+    .col-count {
+        width: 60px;
+    }
+
+    .position-badge {
+        padding: 3px 8px;
+        font-size: 0.75rem;
+    }
+
+    .count-badge {
+        padding: 3px 8px;
+        font-size: 0.75rem;
+    }
+}

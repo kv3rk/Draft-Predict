@@ -76,18 +76,33 @@
     gap: 12px;
 }
 
+/* ─── Champion Avatar (logo in circle) ─── */
 .champ-avatar {
+    position: relative;
     width: 36px;
     height: 36px;
+    min-width: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2a3550, #1a2340);
+    overflow: hidden;
+    background: rgba(15, 20, 35, 0.8);
+    border: 1px solid var(--border-card, rgba(255,255,255,0.08));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
     flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.06);
-    transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+.champ-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+.champ-avatar-fallback {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary, #fff);
+    line-height: 1;
 }
 
 tr:hover .champ-avatar {

@@ -1,4 +1,4 @@
-package lol.kv3rk.draft_predict.ServerApplication.ProSceneCompetitive.ProSceneDbRequests;
+package lol.kv3rk.draft_predict.ServerApplication.ProSceneCompetitive.ProSceneDbRequests.Repository;
 
 import lol.kv3rk.draft_predict.ServerApplication.ProSceneCompetitive.ProSceneEntities.Match.Entity.ProMatchEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

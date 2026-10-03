@@ -176,6 +176,20 @@ body {
     background-clip: text;
 }
 
+.logo-subtext {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+    margin-top: 4px;
+    display: block;
+    transition: color var(--transition-fast);
+}
+
+.logo:hover .logo-subtext {
+    color: var(--text-secondary);
+}
+
 .top-nav {
     display: flex;
     gap: 8px;
@@ -258,6 +272,11 @@ body {
 .win-icon {
     background: var(--accent-win-dim);
     color: var(--accent-win);
+}
+
+.pick-icon {
+    background: rgba(96, 165, 250, 0.15);
+    color: var(--accent-pick);
 }
 
 .ban-icon {

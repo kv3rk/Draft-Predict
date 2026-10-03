@@ -42,25 +42,42 @@
                 </svg>
             </div>
             <span class="logo-text">Draft Predict</span>
+            <span class="logo-subtext">(Go to Previous Page)</span>
         </a>
     </header>
 
+    <!-- Main Dashboard -->
     <main class="pro-scene-main">
-        <div class="development-card stats-card">
-            <div class="card-header" style="justify-content: center;">
-                <div class="card-icon pro-scene-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="development-content">
-                <h2 class="development-title">Under Development</h2>
-                <p class="development-subtitle">This feature is currently being built. Check back soon for professional
-                    match data and draft trends.</p>
-            </div>
+        <div class="stats-grid">
+            <a th:href="@{/pro-scene/pick-rate}" class="card-link">
+                <section class="stats-card" id="proPickRateCard">
+                    <div class="card-header">
+                        <div class="card-icon pick-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 4h4v4M20 4L9 15M9 15l-4 4M9 15l4 4"/>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <h2 class="card-title">Pick Rates</h2>
+                            <p class="card-subtitle">Most picked champions</p>
+                        </div>
+                    </div>
+                </section>
+            </a>
         </div>
     </main>
+
+    <!-- Footer: Pro Matches count -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-line"></div>
+            <p class="footer-text">
+                Statistics collected from
+                <span class="games-count" id="totalGames" th:text="${amountOfProMatches}">none</span>
+                professional matches
+            </p>
+        </div>
+    </footer>
 </div>
 </body>
 </html>

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!--    Title-->
-    <title>Ban Rates | Draft Predict</title>
+    <title>Pro Pick Rates | Draft Predict</title>
 
     <!--    CSS-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,13 +16,10 @@
           rel="stylesheet">
     <link rel="stylesheet" href="/CSS/common.css">
     <link rel="stylesheet" href="/CSS/ranked-soloq/stats-pages/detail-page.css">
-    <link rel="stylesheet" href="/CSS/ranked-soloq/stats-pages/ban-rate.css">
+    <link rel="stylesheet" href="/CSS/pro-scene/stats-pages/pro-pick.css">
 
     <!--    Logo-->
     <link rel="icon" href="/IMG/logo/riot-logo.png">
-
-    <!--    JS-->
-    <script src="/JS/ranked-soloq/ban-rates.js" defer></script>
 
 </head>
 <body>
@@ -34,11 +31,13 @@
 
 <div class="page-wrapper">
     <header class="site-header">
-        <a th:href="@{/ranked-soloq/main}" class="logo" aria-label="Go to homepage">
+        <a th:href="@{/pro-scene/main}" class="logo" aria-label="Go to homepage">
             <div class="logo-mark">
                 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                    <path d="M16 11v10M11 13.5l5-2.5 5 2.5M11 18.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="2"
+                          stroke-linejoin="round"/>
+                    <path d="M16 11v10M11 13.5l5-2.5 5 2.5M11 18.5l5 2.5 5-2.5" stroke="currentColor" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <span class="logo-text">Draft Predict</span>
@@ -47,29 +46,17 @@
     </header>
 
     <main class="dashboard detail-dashboard">
-        <section class="stats-card detail-card" id="banCard">
+        <section class="stats-card detail-card" id="proPickCard">
             <div class="card-header">
-                <div class="card-icon ban-icon">
+                <div class="card-icon pick-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                        <path d="M16 4h4v4M20 4L9 15M9 15l-4 4M9 15l4 4"/>
                     </svg>
                 </div>
                 <div class="card-title-group">
-                    <h2 class="card-title">Ban Rates</h2>
-                    <p class="card-subtitle">Most banned champions</p>
+                    <h2 class="card-title">Pro Pick Rates</h2>
+                    <p class="card-subtitle">Most picked champions on pro scene</p>
                 </div>
-            </div>
-
-            <!-- Patch Filter -->
-            <div class="patch-filter">
-                <div class="filter-group">
-                    <label for="patchSelect">Patch</label>
-                    <select id="patchSelect" class="patch-select">
-                        <option th:each="p : ${patchList}" th:value="${p}" th:text="${p}" th:selected="${p == 'All patches'}"></option>
-                    </select>
-                </div>
-                <button id="searchBtn" class="search-btn" type="button">Search</button>
             </div>
 
             <div class="table-wrapper">
@@ -78,11 +65,13 @@
                     <tr>
                         <th class="col-rank">#</th>
                         <th class="col-champ">Champion</th>
-                        <th class="col-rate">Ban Rate</th>
+                        <th class="col-position">Position</th>
+                        <th class="col-count">Picks</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr th:each="champ, iterStat : ${mostBannedChampions}" th:style="'animation-delay: ' + ${iterStat.index * 0.05} + 's'">
+
+                    <tbody id="proPickTableBody">
+                    <tr th:each="champ, iterStat : ${proPickRateChampions}" th:style="'animation-delay: ' + ${iterStat.index * 0.06} + 's'">
                         <td class="col-rank" th:text="${iterStat.index + 1}">1</td>
                         <td class="col-champ">
                             <div class="champ-cell">
@@ -93,11 +82,15 @@
                                 <span class="champ-name" th:text="${champ.champion}">Champion</span>
                             </div>
                         </td>
-                        <td class="col-rate">
-                            <span class="rate-badge ban" th:text="${#numbers.formatDecimal(champ.banRate, 1, 1)} + '%'">0.0%</span>
+                        <td class="col-position">
+                            <span class="position-badge" th:text="${champ.position}">Role</span>
+                        </td>
+                        <td class="col-count">
+                            <span class="count-badge" th:text="${champ.count}">0</span>
                         </td>
                     </tr>
                     </tbody>
+
                 </table>
             </div>
         </section>
@@ -108,14 +101,8 @@
             <div class="footer-line"></div>
             <p class="footer-text">
                 Statistics collected from
-                <span class="games-count" id="totalGames" th:text="${amountOfMatches}">none</span>
-                ranked games
-            </p>
-            <p class="footer-meta">
-                Patch <span th:text="${actualPatch}">none</span>
-                • Servers (<span th:text="${servers}">EUW, EUNE, KR, NA</span>)
-                • Updated <span th:text="${timeUpdated}">none</span>
-                • Ranks (<span th:text="${tiers}">Master, Grandmaster, Challenger</span>)
+                <span class="games-count" id="totalGames" th:text="${amountOfProMatches}">none</span>
+                professional matches
             </p>
         </div>
     </footer>
